@@ -15,7 +15,7 @@ const Navbar = () => {
   return (
     <div className="flex flex-row justify-between px-10 sticky top-0 z-50 bg-white py-2">
       <div className="flex flex-row items-center gap-x-5 text-3xl">
-        <img className="w-12 h-10" src="./src/assets/logo.png" alt="logo" />
+        <img className="w-12 h-10" src="https://github.com/dkeum/Tutor_website/blob/main/src/assets/logo.png?raw=true" alt="logo" />
         <p className="font-extrabold pt-2">Mathamagic</p>
       </div>
       <div className="flex flex-row gap-x-20 items-center text-xl ">
@@ -25,7 +25,7 @@ const Navbar = () => {
               <NavigationMenuItem>
                 <NavigationMenuTrigger>HOW WE HELP</NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid grid-cols-3 gap-2 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                  <ul className="grid grid-cols-2 gap-2 md:w-[300px] lg:w-[400px] lg:grid-cols-[.75fr_1fr]">
                     <li className="col-span-1">
                       <NavigationMenuLink asChild>
                         <a
@@ -43,12 +43,21 @@ const Navbar = () => {
                       </NavigationMenuLink>
                     </li>
 
-                    <li className=" col-span-2">
-                      <div className="w-[2px] min-h-[80px] h-full bg-black" />
-                    </li>
+                    <li className="flex flex-col items-start gap-y-4">
+                      <div className="">
+                        <p>Response time</p>
+                        <p className='text-slate-800 text-sm'>Response within a day</p>
+                      </div>
 
-                    <li className="col-span-3 col-start-2">
-                     hi
+                      <div className="">
+                        <p>Response time</p>
+                        <p className='text-slate-800 text-sm'>Response within a day</p>
+                      </div>
+
+                      <div className="">
+                        <p>Response time</p>
+                        <p className='text-slate-800 text-sm'>Response within a day</p>
+                      </div>
                     </li>
                   </ul>
                 </NavigationMenuContent>
