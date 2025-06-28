@@ -11,6 +11,22 @@ import {
   NavigationMenuViewport,
 } from "@/components/ui/navigation-menu";
 
+const helpItems = [
+  {
+    title: "Exam Prep",
+    description: "Practice tests, strategies, and review for upcoming exams",
+  },
+  {
+    title: "Personalized Learning",
+    description:
+      "Custom lesson plans tailored to each student's pace and goals",
+  },
+  {
+    title: "Homework Help",
+    description: "Timely support with assignments and projects",
+  },
+];
+
 const Navbar = () => {
   return (
     <div className="flex flex-row justify-between px-10 sticky top-0 z-50 bg-white py-2 ">
@@ -31,46 +47,41 @@ const Navbar = () => {
               <NavigationMenuItem>
                 <NavigationMenuTrigger>HOW WE HELP</NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid grid-cols-2 gap-2 md:w-[300px] lg:w-[400px] lg:grid-cols-[.75fr_1fr]">
+                  <ul className="grid grid-cols-2 gap-2 md:w-[300px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                     <li className="col-span-1">
                       <NavigationMenuLink asChild>
                         <a
                           className="from-muted/50 to-muted flex h-full w-full flex-col justify-end rounded-md bg-linear-to-b p-6 no-underline outline-hidden select-none focus:shadow-md"
                           href="/"
                         >
-                          <div className="mt-4 mb-2 text-lg font-medium">
-                            shadcn/ui
+                          <div className="mt-10 mb-2 text-lg font-medium h-full flex flex-col items-center">
+                            <img
+                              className="mx-auto rounded-full w-15 h-15"
+                              src="/tutor.png"
+                              alt="tutor icons"
+                            />
+                            <div className="flex flex-col gap-y-2">
+                              <p>Our Tutors</p>
+                              <p className="text-muted-foreground text-sm leading-tight">
+                                will help with
+                              </p>
+                            </div>
                           </div>
-                          <p className="text-muted-foreground text-sm leading-tight">
-                            Beautifully designed components built with Tailwind
-                            CSS.
-                          </p>
                         </a>
                       </NavigationMenuLink>
                     </li>
 
                     <li className="flex flex-col items-start gap-y-4">
-                      <div className="">
-                        <p>Response time</p>
-                        <p className="text-slate-800 text-sm">
-                          Response within a day
-                        </p>
-                      </div>
-
-                      <div className="">
-                        <p>Response time</p>
-                        <p className="text-slate-800 text-sm">
-                          Response within a day
-                        </p>
-                      </div>
-
-                      <div className="">
-                        <p>Response time</p>
-                        <p className="text-slate-800 text-sm">
-                          Response within a day
-                        </p>
-                      </div>
+                      {helpItems.map((item, idx) => (
+                        <div key={idx}>
+                          <p className="font-medium">{item.title}</p>
+                          <p className="text-slate-800 text-sm">
+                            {item.description}
+                          </p>
+                        </div>
+                      ))}
                     </li>
+
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
@@ -94,7 +105,6 @@ const Navbar = () => {
           </button>
         </a>
       </div>
-      
     </div>
   );
 };
