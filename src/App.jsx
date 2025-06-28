@@ -5,6 +5,7 @@ function App() {
  // https://tutor-website-amber.vercel.app/
   return (
     <>
+    <title>Mathamagic</title>
     <Homepage/>
 
     </>

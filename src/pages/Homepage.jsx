@@ -130,7 +130,7 @@ const Homepage = () => {
           </p>
 
           <div className="flex flex-col items-center justify-center gap-y-5 mt-10">
-            <img src="src/assets/tutor1.png" alt="tutor image" className="w-22 h-20 rounded-full border" />
+            <img src="https://github.com/dkeum/Tutor_website/blob/main/src/assets/tutor1.png?raw=true" alt="tutor image" className="w-22 h-20 rounded-full border" />
             <p>Daniel Keum, STEM tutor at Mathamagic</p>
           </div>
         </div>
