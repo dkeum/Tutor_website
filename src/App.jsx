@@ -1,15 +1,15 @@
-import './App.css'
-import Homepage from './pages/Homepage'
+import "./App.css";
+import Homepage from "./pages/Homepage";
 
 function App() {
- // https://tutor-website-amber.vercel.app/
+  // https://tutor-website-amber.vercel.app/
   return (
     <>
-    
-    <Homepage/>
-
+      <meta name="keywords" content="High School Math and Physics Tutor" />
+      <meta name="description" content="Get professionaly taught AP Subjects you need" />
+      <Homepage />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
