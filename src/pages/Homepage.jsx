@@ -214,7 +214,10 @@ const Homepage = () => {
 
         <ul className="flex flex-row justify-around gap-x-10 my-10">
           <li>
-            <h4 className="underline font-medium text-lg">Math</h4>
+            <div className="flex flex-row gap-x-3 justify-center underline font-medium text-lg">
+              <p>Math</p>
+              <img className="pb-5" src="/math.png" />
+            </div>
             <p>Math 1-9</p>
             <p>Math 10-12 Foundations</p>
             <p>Precal 11</p>
@@ -226,7 +229,10 @@ const Homepage = () => {
           </li>
 
           <li>
-            <h4 className="underline font-medium text-lg">Physics</h4>
+          <div className="flex flex-row gap-x-3 justify-center underline font-medium text-lg">
+              <p>Physics</p>
+              <img className="pb-5" src="/physics.png" />
+            </div>
             <p>Physics 11 </p>
             <p>Physics 12</p>
             <p>AP Physics 11 </p>
@@ -234,7 +240,10 @@ const Homepage = () => {
           </li>
 
           <li>
-            <h4 className="underline font-medium text-lg">Chemistry</h4>
+          <div className="flex flex-row gap-x-3 justify-center underline font-medium text-lg">
+              <p>Chemistry</p>
+              <img className="pb-5" src="/chemistry.png" />
+            </div>
             <p>Chem 11</p>
             <p>Chem 12</p>
             <p>AP Chem 11</p>
@@ -242,7 +251,10 @@ const Homepage = () => {
           </li>
 
           <li>
-            <h4 className="underline font-medium text-lg">Others</h4>
+          <div className="flex flex-row gap-x-3 justify-center underline font-medium text-lg">
+              <p>Others</p>
+              <img className="pb-5 w-[32px] h-auto" src="/others.png" />
+            </div>
             <p>Science 10 BC</p>
             <p>Introduction to Python</p>
             <p>Calculus I - Derivatives</p>

@@ -31,7 +31,7 @@ const footerSections = [
 
 const Footer = () => {
   return (
-    <div className=" min-h-[380px] w-full ml-20  flex flex-col mt-10">
+    <div className=" min-h-[380px] w-full max-w-[70rem] ml-20  flex flex-col mt-10">
       <div className="grow bg-muted " />
       <footer>
         <div className="max-w-screen-xl mx-auto">

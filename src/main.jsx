@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 
 // Lazy load the pages
 const Contactme = lazy(() => import('./pages/Contactme'));
-const Aboutme = lazy(() => import('./pages/Aboutme'));
+const About = lazy(() => import('./pages/About'));
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -22,7 +22,7 @@ createRoot(document.getElementById('root')).render(
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/contact" element={<Contactme />} />
-          <Route path="/about" element={<Aboutme />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

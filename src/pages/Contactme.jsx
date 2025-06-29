@@ -63,25 +63,41 @@ const Contactme = () => {
           <motion.h1
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            className={cn("pt-10 relative mb-6 max-w-2xl text-left text-4xl leading-normal font-bold tracking-tight text-zinc-700 md:text-7xl dark:text-zinc-100")}
+            className={cn(
+              "pt-10 relative mb-6 max-w-2xl text-left text-4xl leading-normal font-bold tracking-tight text-zinc-700 md:text-7xl dark:text-zinc-100"
+            )}
             layout
           >
             <div className="mt-20 shadow-input mx-auto min-w-xl max-w-2xl max-h-[700px] rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black my-10">
-              <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200">
-                Contact Us
-              </h2>
-              <p className="mt-2 max-w-sm text-sm text-neutral-500 tracking-normal">
-                ➔ Phone Number: 604-440-9543
-              </p>
+              <div className="flex flex-row justify-around">
+                <div className="flex flex-col w-full ">
+                  <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200 tracking-normal">
+                    Contact Us 
+                  </h2>
+                  <p className="mt-2 max-w-sm text-sm text-neutral-500 tracking-normal">
+                    Here's our lead tutor's info: <br/>
+                    ➔ Phone Number: 604-440-9543
+                  </p>
+                </div>
+                <div className="min-w-[100px] flex flex-col">
+                  <img
+                    className="w-15 h-auto rounded-full border-2 ml-2"
+                    src="/smile_tutor.jpeg"
+                  />
+                <p className="text-sm font-normal tracking-normal text-left">Daniel Keum</p>
+                </div>
+              </div>
 
               <div className="my-7 flex items-center max-w-lg">
                 <div className="flex-grow border-t border-neutral-300" />
-                <span className="mx-4 text-sm text-neutral-500 tracking-wide">or</span>
+                <span className="mx-4 text-sm text-neutral-500 tracking-wide">
+                  or
+                </span>
                 <div className="flex-grow border-t border-neutral-300" />
               </div>
 
-              <p className="mt-2 max-w-sm text-sm text-neutral-500 tracking-normal">
-                Directly email us using this form
+              <p className="mt-2 max-w-md text-sm text-neutral-500 tracking-normal">
+                Email us using this form to strategize 1-1 with our lead tutor
               </p>
 
               <form className="my-8 tracking-normal" onSubmit={handleSubmit}>
@@ -157,5 +173,7 @@ const BottomGradient = () => (
 );
 
 const LabelInputContainer = ({ children, className }) => (
-  <div className={cn("flex w-full flex-col space-y-2", className)}>{children}</div>
+  <div className={cn("flex w-full flex-col space-y-2", className)}>
+    {children}
+  </div>
 );
