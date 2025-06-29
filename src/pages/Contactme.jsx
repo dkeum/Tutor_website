@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "../components/ui/text-area";
 
+import axios from "axios";
 // Zod Schema
 const contactSchema = z.object({
   fullName: z.string().min(2, "Full name is required."),
@@ -19,9 +20,13 @@ const Contactme = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSent, setIsSent] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setIsSent(false);
 
     const formData = { fullName, email, message };
 
@@ -37,12 +42,26 @@ const Contactme = () => {
     }
 
     setErrors({});
-    console.log("Form submitted", formData);
+    axios
+      .post("https://mathamagic-backend.vercel.app/", {
+        fullName,
+        email,
+        message,
+      })
+      .then((response) => {
+        console.log("Server response:", response.data);
+      })
+      .catch((error) => {
+        console.error(
+          "Error sending email:",
+          error.response?.data || error.message
+        );
+      });
 
     // Optionally reset
-    setFullName("");
-    setEmail("");
-    setMessage("");
+    // setFullName("");
+    // setEmail("");
+    // setMessage("");
   };
 
   return (
@@ -72,11 +91,11 @@ const Contactme = () => {
               <div className="flex flex-row justify-around">
                 <div className="flex flex-col w-full ">
                   <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200 tracking-normal">
-                    Contact Us 
+                    Contact Us
                   </h2>
                   <p className="mt-2 max-w-sm text-sm text-neutral-500 tracking-normal">
-                    Here's our lead tutor's info: <br/>
-                    ➔ Phone Number: 604-440-9543
+                    Here's our lead tutor's info: <br />➔ Phone Number:
+                    604-440-9543
                   </p>
                 </div>
                 <div className="min-w-[100px] flex flex-col">
@@ -84,7 +103,9 @@ const Contactme = () => {
                     className="w-15 h-auto rounded-full border-2 ml-2"
                     src="/smile_tutor.jpeg"
                   />
-                <p className="text-sm font-normal tracking-normal text-left">Daniel Keum</p>
+                  <p className="text-sm font-normal tracking-normal text-left">
+                    Daniel Keum
+                  </p>
                 </div>
               </div>
 
@@ -149,8 +170,13 @@ const Contactme = () => {
                 <button
                   className="text-sm group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
                   type="submit"
+                  // disabled={isSubmitting || isSent}
                 >
-                  Send Email
+                  {isSent
+                    ? "Sent!"
+                    : isSubmitting
+                    ? "Sending..."
+                    : "Send Email"}
                   <BottomGradient />
                 </button>
               </form>
