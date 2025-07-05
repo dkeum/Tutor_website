@@ -13,3 +13,7 @@ function App() {
 }
 
 export default App;
+
+
+
+// My teacher can't teach so I decided to build my own AI Teacher

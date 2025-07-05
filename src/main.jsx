@@ -9,6 +9,8 @@ import { Loader2 } from "lucide-react";
 const Contactme = lazy(() => import('./pages/Contactme'));
 const About = lazy(() => import('./pages/About'));
 
+const Waitlist = lazy(()=> import ('./pages/Waitlist'))
+
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
     <Loader2 className="animate-spin w-10 h-10 text-gray-600" />
@@ -23,6 +25,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/" element={<App />} />
           <Route path="/contact" element={<Contactme />} />
           <Route path="/about" element={<About />} />
+          <Route path="/Waitlist" element={<Waitlist />} />
         </Routes>
       </Suspense>
     </BrowserRouter>
