@@ -56,7 +56,7 @@ const Waitlist = () => {
   return (
     <div>
       <Navbar Navbar />
-      <div className="mt-10 relative flex h-[80vh] max-h-[700px] w-full  justify-center bg-white dark:bg-black ">
+      <div className="mt-10 relative flex h-[80vh] max-h-[1000px] w-full  justify-center bg-white dark:bg-black ">
         <div
           className={cn(
             "absolute inset-0",
@@ -71,7 +71,7 @@ const Waitlist = () => {
             [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] 
             [-webkit-mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"
         />
-        <section className="flex flex-col pt-20 ml-20 items-center justify-center px-8 w-full h-[500px]">
+        <section className="flex flex-col pt-20 ml-20 mt-50 items-center justify-center px-8 w-full h-[500px]">
           <motion.h1
             initial={{
               opacity: 0,
@@ -96,6 +96,8 @@ const Waitlist = () => {
                 Get early access to your own AI Math and Science tutor
               </p>
             </div>
+            
+            <video src="/PromptScene.mp4" width="600" height="300"  autoPlay="true" muted playsInline loop/>
 
             <div className=" shadow-input min-w-xl max-w-2xl max-h-[700px] rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black">
               <form className="my-8 tracking-normal" onSubmit={handleSubmit}>
