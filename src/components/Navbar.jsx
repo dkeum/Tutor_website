@@ -93,6 +93,14 @@ const Navbar = () => {
                   </a>
                 </NavigationMenuLink>
               </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <a className="font-semibold" href="/freeResources">
+                    FREE RESOURCES
+                  </a>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
         </div>

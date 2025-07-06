@@ -54,9 +54,9 @@ const Waitlist = () => {
   };
 
   return (
-    <div>
+    <div className="flex flex-col gap-y-2">
       <Navbar Navbar />
-      <div className="mt-10 relative flex h-[80vh] max-h-[1000px] w-full  justify-center bg-white dark:bg-black ">
+      <div className="mt-10 relative  flex h-[150vh]    2xl:h-[120vh] w-full  justify-center bg-white dark:bg-black ">
         <div
           className={cn(
             "absolute inset-0",

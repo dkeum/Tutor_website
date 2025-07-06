@@ -10,6 +10,8 @@ const Contactme = lazy(() => import('./pages/Contactme'));
 const About = lazy(() => import('./pages/About'));
 
 const Waitlist = lazy(()=> import ('./pages/Waitlist'))
+const FreeResources = lazy(()=>import('./pages/FreeResources'))
+const Subject = lazy(()=>import('./pages/Subject'))
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -26,6 +28,8 @@ createRoot(document.getElementById('root')).render(
           <Route path="/contact" element={<Contactme />} />
           <Route path="/about" element={<About />} />
           <Route path="/Waitlist" element={<Waitlist />} />
+          <Route path="/freeResources" element={<FreeResources/>} />
+          <Route path="/freeResources/:subject" element={<Subject/>} />
         </Routes>
       </Suspense>
     </BrowserRouter>
