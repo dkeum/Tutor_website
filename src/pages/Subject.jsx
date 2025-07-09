@@ -46,16 +46,84 @@ const subject_links = [
     links: [
       {
         title: "worksheet",
-        link: "/physics_12/Energy/Basic Momentum and Impulse Questions (Level 1).pdf"
+        link: "/physics_12/circular_motion/Circular Motion Questions.pdf"
       },
       {
         title: "answer",
-        link: "/physics_12/Energy/Momentum and Impulse Answer.pdf"
+        link: "/physics_12/circular_motion/Circular Motion Answers.pdf"
       },
       {
         title: "Written solution",
-        link: "/physics_12/Energy/Momentum and Impulse Written Answer.pdf"
+        link: "/physics_12/circular_motion/Circular-Motion-Solutions.pdf"
       }
+    ]
+  }, 
+  {
+    subject: "physics12",
+    topic: "Gravitation",
+    links: [
+      {
+        title: "worksheet",
+        link: "/physics_12/gravitation/Gravitation Questions.pdf"
+      },
+      {
+        title: "answer",
+        link: "/physics_12/gravitation/gravitation answer.pdf"
+      },
+      {
+        title: "Written solution",
+        link: "/physics_12/gravitation/Orbits-Solutions.pdf"
+      }
+    ]
+  }, 
+  {
+    subject: "physics12",
+    topic: "Electrostatic",
+    links: [
+      {
+        title: "worksheet",
+        link: "/physics_12/electrostatic/Electrostatics-Provincial-Exam-Package.pdf"
+      },
+      {
+        title: "answer",
+        link: "/physics_12/electrostatic/Electrostatics-Provincial-Exam-Package-Solutions.pdf"
+      },
+    ]
+  },
+  {
+    subject: "physics12",
+    topic: "Electromagnetism",
+    links: [
+        {
+            title: "notes",
+            link: "/physics_12/electromagnetism/Electromagnetism-Notes.pdf"
+          },
+      {
+        title: "worksheet",
+        link: "/physics_12/electromagnetism/Electromagnetism-Provincial-Exam-Package.pdf"
+      },
+      {
+        title: "answer",
+        link: "/physics_12/electromagnetism/Electromagnetism-Provincial-Exam-Package-Solutions.pdf"
+      },
+    ]
+  },
+  {
+    subject: "physics11",
+    topic: "Kinematics",
+    links: [
+      {
+        title: "worksheet",
+        link: "/physics_11/kinematics/Kinematics Questions.pdf"
+      },
+      {
+        title: "answer",
+        link: "/physics_11/kinematics/Kinematics Solution.pdf"
+      },
+      {
+        title: "notes",
+        link: "/physics_11/kinematics/Uniform-Motion-Solutions.pdf"
+      },
     ]
   },
 ];
@@ -100,7 +168,7 @@ const Subject = () => {
               </h2>
             </div>
 
-            <div className="flex flex-row justify-center gap-x-10">
+            <div className="grid grid-cols-3 justify-center gap-y-10">
               {subject_links
                 .filter((item) => item.subject === subject)
                 .map((item, index) => (
@@ -118,7 +186,7 @@ const Subject = () => {
                             href={linkObj.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-3xl text-blue-600 dark:text-blue-400 hover:underline"
+                            className="text-xl text-blue-600 dark:text-blue-400 hover:underline"
                           >
                             {linkObj.title}
                           </a>
@@ -128,6 +196,11 @@ const Subject = () => {
                   </div>
                 ))}
             </div>
+
+
+
+
+
           </motion.h1>
         </section>
       </div>
