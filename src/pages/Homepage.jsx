@@ -158,7 +158,7 @@ const Homepage = () => {
       </section>
 
       <section className="flex flex-col mt-100 lg:mt-30 xl:ml-20">
-        <h3 className="mt-10  w-full flex justify-start sm:text-xl xl:text-4xl font-extrabold">
+        <h3 className="mt-10  w-full flex justify-center sm:text-xl xl:text-4xl font-extrabold ">
           Previous Student's Testimonials
         </h3>
         <div className=" h-[20rem] rounded-md flex flex-col antialiased bg-white dark:bg-black dark:bg-grid-white/[0.05] items-center justify-center relative overflow-hidden">
@@ -209,7 +209,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      <section className="ml-20 overflow-y-hidden">
+      <section className="xl:ml-20 overflow-y-hidden">
         <h2 className="text-start text-4xl font-extrabold">Services</h2>
 
         <ul className="flex flex-row justify-around gap-x-10 my-10">
@@ -264,7 +264,7 @@ const Homepage = () => {
         </ul>
       </section>
 
-      <section className="ml-20 overflow-y-hidden">
+      <section className="xl:ml-20 overflow-y-hidden">
         <h2 className="text-start text-4xl font-extrabold mb-5">
           Frequently Asked Questions
         </h2>
