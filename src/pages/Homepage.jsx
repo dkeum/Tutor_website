@@ -103,7 +103,7 @@ const Homepage = () => {
             </a>
           </div>
           <DotLottieReact
-            className=" w-[700px] h-auto lg:-mt-20 "
+            className=" w-[700px] h-auto xl:-mt-20 "
             src="https://lottie.host/83b0c885-27f9-499a-9d46-46e495cc7a90/cAM12iHmA3.lottie"
             loop
             autoplay
@@ -119,7 +119,7 @@ const Homepage = () => {
         <h1 className="mt-5">
           After 5-10 Tutoring Sessions, Our Students Typically Experience...
         </h1>
-        <ul className="flex flex-row gap-x-10 text-3xl text-extrabold items-center justify-center my-10 overflow-auto">
+        <ul className="flex flex-row gap-x-10 text-3xl text-extrabold items-center justify-center my-10 overflow-auto min-w-fit">
           <li className="flex flex-col gap-y-2">
             <p className="font-extrabold">+15%</p>
             <p>Average Grade</p>
@@ -157,7 +157,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      <section className="flex flex-col mt-70 lg:mt-30">
+      <section className="flex flex-col mt-100 lg:mt-30">
         <h3 className="mt-10 ml-20 w-full flex justify-start text-4xl font-extrabold">
           Previous Student's Testimonials
         </h3>
