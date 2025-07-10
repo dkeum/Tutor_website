@@ -119,7 +119,7 @@ const Homepage = () => {
         <h1 className="mt-5">
           After 5-10 Tutoring Sessions, Our Students Typically Experience...
         </h1>
-        <ul className="flex flex-row gap-x-10 text-3xl text-extrabold items-center justify-center my-10 overflow-x-scroll min-w-fit">
+        <ul className="flex flex-row gap-x-10  text-extrabold items-center justify-center my-10 overflow-x-auto min-w-fit sm:text-3xl">
           <li className="flex flex-col gap-y-2">
             <p className="font-extrabold">+15%</p>
             <p>Average Grade</p>
@@ -171,7 +171,7 @@ const Homepage = () => {
       </section>
 
       <section className="xl:ml-20 my-30 text-start">
-        <div className="flex flex-row items-center w-full justify-start gap-x-30">
+        <div className="flex flex-row items-center w-full justify-start gap-x-5 xl:gap-x-30">
           <div>
             <p className="text-lg">Act now</p>
             <br />
