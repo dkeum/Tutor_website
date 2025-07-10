@@ -103,7 +103,7 @@ const Homepage = () => {
             </a>
           </div>
           <DotLottieReact
-            className=" w-[700px] h-auto xl:-mt-20 "
+            className=" w-[700px] h-auto 2xl:-mt-20 "
             src="https://lottie.host/83b0c885-27f9-499a-9d46-46e495cc7a90/cAM12iHmA3.lottie"
             loop
             autoplay
@@ -119,7 +119,7 @@ const Homepage = () => {
         <h1 className="mt-5">
           After 5-10 Tutoring Sessions, Our Students Typically Experience...
         </h1>
-        <ul className="flex flex-row gap-x-10 text-3xl text-extrabold items-center justify-center my-10 overflow-auto min-w-fit">
+        <ul className="flex flex-row gap-x-10 text-3xl text-extrabold items-center justify-center my-10 overflow-x-scroll min-w-fit">
           <li className="flex flex-col gap-y-2">
             <p className="font-extrabold">+15%</p>
             <p>Average Grade</p>
@@ -157,11 +157,11 @@ const Homepage = () => {
         </div>
       </section>
 
-      <section className="flex flex-col mt-100 lg:mt-30">
-        <h3 className="mt-10 ml-20 w-full flex justify-start text-4xl font-extrabold">
+      <section className="flex flex-col mt-100 lg:mt-30 xl:ml-20">
+        <h3 className="mt-10  w-full flex justify-start sm:text-xl xl:text-4xl font-extrabold">
           Previous Student's Testimonials
         </h3>
-        <div className="ml-20 h-[20rem] rounded-md flex flex-col antialiased bg-white dark:bg-black dark:bg-grid-white/[0.05] items-center justify-center relative overflow-hidden">
+        <div className=" h-[20rem] rounded-md flex flex-col antialiased bg-white dark:bg-black dark:bg-grid-white/[0.05] items-center justify-center relative overflow-hidden">
           <InfiniteMovingCards
             items={testimonials}
             direction="right"
@@ -170,7 +170,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      <section className="ml-20 my-30 text-start">
+      <section className="xl:ml-20 my-30 text-start">
         <div className="flex flex-row items-center w-full justify-start gap-x-30">
           <div>
             <p className="text-lg">Act now</p>
