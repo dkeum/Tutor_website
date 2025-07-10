@@ -81,7 +81,7 @@ const Homepage = () => {
       </div>
 
       <section className="h-[30rem] mt-30 ml-20">
-        <h1 className="text-4xl font-extrabold w-2/3">
+        <h1 className="sm:text-xl first-letter md:text-4xl font-extrabold w-2/3">
           Finding the right tutor, learning style, and academic support
           shouldn’t be a struggle
         </h1>
@@ -103,7 +103,7 @@ const Homepage = () => {
             </a>
           </div>
           <DotLottieReact
-            className=" w-[700px] h-auto -mt-20"
+            className=" w-[700px] h-auto md:-mt-20 "
             src="https://lottie.host/83b0c885-27f9-499a-9d46-46e495cc7a90/cAM12iHmA3.lottie"
             loop
             autoplay
@@ -112,7 +112,7 @@ const Homepage = () => {
       </section>
       <hr className="w-2/3 max-w-9xl mx-auto my-20" />
 
-      <section className="h-[30rem]">
+      <section className="h-[30rem] sm:mt-50 md:mt-0">
         <header className="text-4xl font-extrabold mx-auto">
           🎖️ The Results
         </header>
@@ -380,3 +380,4 @@ const testimonials = [
     title: "",
   },
 ];
+ 

@@ -30,7 +30,7 @@ const helpItems = [
 const Navbar = () => {
   return (
     <div className="flex flex-row justify-between px-10 sticky top-0 z-50 bg-white py-2 ">
-      <div className="flex flex-row items-center gap-x-5 text-3xl">
+      <div className="flex flex-row items-center gap-x-5 text-3xl ">
         <img
           className="w-12 h-10"
           src="https://github.com/dkeum/Tutor_website/blob/main/src/assets/logo.png?raw=true"
@@ -40,7 +40,7 @@ const Navbar = () => {
           Mathamagic
         </a>
       </div>
-      <div className="flex flex-row gap-x-20 items-center text-xl ">
+      <div className="flex flex-row gap-x-20 items-center text-xl sm:hidden md:visible ">
         <div className="flex flex-row gap-5">
           <NavigationMenu>
             <NavigationMenuList>

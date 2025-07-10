@@ -124,6 +124,26 @@ const subject_links = [
         title: "notes",
         link: "/physics_11/kinematics/Uniform-Motion-Solutions.pdf"
       },
+
+    ]
+  },
+  {
+    subject: "physics11",
+    topic: "Kinematics 2D",
+    links: [
+      {
+        title: "worksheet",
+        link: "/physics_11/kinematics2D/Kinetmatics 2D Questions.pdf"
+      },
+      {
+        title: "answer",
+        link: "/physics_11/kinematics2D/Kinematics 2D Answers.pdf"
+      },
+      {
+        title: "notes",
+        link: "/physics_11/kinematics2D/Projectile-Motion-Launched-at-Angles-Solutions.pdf"
+      },
+
     ]
   },
 ];
