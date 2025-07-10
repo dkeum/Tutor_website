@@ -40,7 +40,7 @@ const Navbar = () => {
           Mathamagic
         </a>
       </div>
-      <div className="flex flex-row gap-x-20 items-center text-xl sm:hidden md:visible ">
+      <div className="flex flex-row gap-x-20 items-center text-xl sm:hidden lg:visible ">
         <div className="flex flex-row gap-5">
           <NavigationMenu>
             <NavigationMenuList>
