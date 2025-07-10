@@ -83,7 +83,7 @@ const Contactme = () => {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             className={cn(
-              "pt-10 relative mb-6 max-w-2xl text-left text-4xl leading-normal font-bold tracking-tight text-zinc-700 md:text-7xl dark:text-zinc-100"
+              "pt-10 relative mb-6 w-fit min-w-sm max-w-2xl text-left text-4xl leading-normal font-bold tracking-tight text-zinc-700 md:text-7xl dark:text-zinc-100"
             )}
             layout
           >
