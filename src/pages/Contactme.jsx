@@ -87,7 +87,7 @@ const Contactme = () => {
             )}
             layout
           >
-            <div className="mt-20 shadow-input mx-auto min-w-xl max-w-2xl max-h-[700px] rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black my-10">
+            <div className="mt-20 shadow-input mx-auto  max-w-2xl max-h-[700px] rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black my-10">
               <div className="flex flex-row justify-around">
                 <div className="flex flex-col w-full ">
                   <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200 tracking-normal">
