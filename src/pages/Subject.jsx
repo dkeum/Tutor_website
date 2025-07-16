@@ -143,7 +143,76 @@ const subject_links = [
         title: "notes",
         link: "/physics_11/kinematics2D/Projectile-Motion-Launched-at-Angles-Solutions.pdf"
       },
+      
 
+    ]
+  },
+  {
+    subject: "physics11",
+    topic: "Dynamic I",
+    links: [
+      {
+        title: "worksheet",
+        link: "/physics_11/dynamics/Dynamic Questions.pdf"
+      },
+      {
+        title: "answer",
+        link: "/physics_11/dynamics/dynamic Answer.pdf"
+      },
+      {
+        title: "notes",
+        link: "/physics_11/dynamics/Friction-Solutions.pdf"
+      },
+      
+
+    ]
+  },
+  {
+    subject: "physics11",
+    topic: "Dynamic II",
+    links: [
+      {
+        title: "worksheet",
+        link: "/physics_11/dynamics II/Dynamics II Questions.pdf"
+      },
+      {
+        title: "answer",
+        link: "/physics_11/dynamics II/Dynamics II answers.pdf"
+      },
+      {
+        title: "notes",
+        link: "/physics_11/dynamics II/Friction-Solutions.pdf"
+      },
+      
+
+    ]
+  },
+  {
+    subject: "physics11",
+    topic: "Energy",
+    links: [
+      {
+        title: "worksheet",
+        link: "/physics_11/energy/Energy-Provincial-Exam-Package.pdf"
+      },
+      {
+        title: "answer",
+        link: "/physics_11/energy/Energy-Provincial-Exam-Package-Solutions.pdf"
+      },
+    ]
+  },
+  {
+    subject: "physics11",
+    topic: "Circuits",
+    links: [
+      {
+        title: "worksheet",
+        link: "/physics_11/circuits/Circuits-Provincial-Exam-Package.pdf"
+      },
+      {
+        title: "answer",
+        link: "/physics_11/circuits/Circuits-Provincial-Exam-Package-Solutions.pdf"
+      },
     ]
   },
 ];

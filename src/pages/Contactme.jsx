@@ -56,8 +56,10 @@ const Contactme = () => {
           "Error sending email:",
           error.response?.data || error.message
         );
-      });
 
+        console.log("Error detected")
+      });
+      setIsSent(true);
     // Optionally reset
     // setFullName("");
     // setEmail("");
@@ -170,7 +172,7 @@ const Contactme = () => {
                 <button
                   className="text-sm group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
                   type="submit"
-                  // disabled={isSubmitting || isSent}
+                  disabled={isSent}
                 >
                   {isSent
                     ? "Sent!"
