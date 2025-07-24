@@ -12,6 +12,8 @@ const About = lazy(() => import('./pages/About'));
 const Waitlist = lazy(()=> import ('./pages/Waitlist'))
 const FreeResources = lazy(()=>import('./pages/FreeResources'))
 const Subject = lazy(()=>import('./pages/Subject'))
+const ShowPersonalData = lazy(()=>import('./pages/ShowPersonalData'))
+const SurveyPersonalDetail = lazy(()=>import('./pages/SurveyPersonalDetails'))
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -30,6 +32,9 @@ createRoot(document.getElementById('root')).render(
           <Route path="/Waitlist" element={<Waitlist />} />
           <Route path="/freeResources" element={<FreeResources/>} />
           <Route path="/freeResources/:subject" element={<Subject/>} />
+          <Route path="/showpersonaldata" element={<ShowPersonalData/>} />
+          <Route path="/surveypersonaldetail" element={<SurveyPersonalDetail/>} />
+
         </Routes>
       </Suspense>
     </BrowserRouter>
