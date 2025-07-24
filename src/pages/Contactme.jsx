@@ -42,6 +42,8 @@ const Contactme = () => {
     }
 
     setErrors({});
+
+  
     axios
       .post("https://mathamagic-backend.vercel.app/email", {
         fullName,
