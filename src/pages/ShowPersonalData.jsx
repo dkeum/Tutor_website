@@ -10,7 +10,9 @@ const ShowPersonalData = () => {
 
     useEffect(()=>{
       // const response =  axios.get(
-      //   process.env.ENVIRONMENT ==="DEVELOPMENT" ?"http://localhost:3000/getuserinfo" : "https://mathamagic-backend.vercel.app/getuserinfo",
+      //   import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+      // ? "http://localhost:3000/signup"
+      // : "https://mathamagic-backend.vercel.app/signup",
         
       //   {
       //     withCredentials: true, // ⬅️ very important!

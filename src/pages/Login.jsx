@@ -24,6 +24,11 @@ const LoginSignup = () => {
 
   const navigate = useNavigate();
 
+  console.log(
+    import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+      ? "http://localhost:3000/signup"
+      : "https://mathamagic-backend.vercel.app/signup"
+  );
   const handleSubmit = async (e) => {
     e.preventDefault();
     setResponseMessage(""); // Reset message on new submit
@@ -41,7 +46,7 @@ const LoginSignup = () => {
     try {
       if (isLogin) {
         const response = await axios.post(
-          process.env.ENVIRONMENT === "DEVELOPMENT"
+          import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
             ? "http://localhost:3000/login"
             : "https://mathamagic-backend.vercel.app/login",
           {
@@ -56,7 +61,7 @@ const LoginSignup = () => {
         navigate("/showpersonaldata"); // ← redirect
       } else {
         const response = await axios.post(
-          process.env.ENVIRONMENT === "DEVELOPMENT"
+          import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
             ? "http://localhost:3000/signup"
             : "https://mathamagic-backend.vercel.app/signup",
           {
