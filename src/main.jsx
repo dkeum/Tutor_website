@@ -14,6 +14,7 @@ const FreeResources = lazy(()=>import('./pages/FreeResources'))
 const Subject = lazy(()=>import('./pages/Subject'))
 const ShowPersonalData = lazy(()=>import('./pages/ShowPersonalData'))
 const SurveyPersonalDetail = lazy(()=>import('./pages/SurveyPersonalDetails'))
+const Login = lazy(()=>import('./pages/Login'))
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -34,6 +35,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/freeResources/:subject" element={<Subject/>} />
           <Route path="/showpersonaldata" element={<ShowPersonalData/>} />
           <Route path="/surveypersonaldetail" element={<SurveyPersonalDetail/>} />
+          <Route path="/login" element={<Login/>} />
 
         </Routes>
       </Suspense>

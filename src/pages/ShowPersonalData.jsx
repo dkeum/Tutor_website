@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 
 // Show a bento grid from acternity https://ui.aceternity.com/components/bento-grid
@@ -7,6 +7,20 @@ import React from 'react'
 
 const ShowPersonalData = () => {
 
+
+    useEffect(()=>{
+      // const response =  axios.get(
+      //   process.env.ENVIRONMENT ==="DEVELOPMENT" ?"http://localhost:3000/getuserinfo" : "https://mathamagic-backend.vercel.app/getuserinfo",
+        
+      //   {
+      //     withCredentials: true, // ⬅️ very important!
+      //   }
+      // );
+
+      // store all the data in states
+      // populate the graph data
+
+    },[])
     // modal that says if there's no class selected then pick a class based on profile
     // 
 
