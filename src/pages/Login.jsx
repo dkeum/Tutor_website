@@ -15,6 +15,9 @@ import { Button } from "@/components/ui/button";
 import Navbar from "../components/Navbar";
 import BackgroundWrapper from "../components/BackgroundWrapper";
 
+import { useDispatch } from "react-redux";
+import { initializeState } from "../features/auth/personDetails";
+
 const LoginSignup = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
@@ -23,12 +26,8 @@ const LoginSignup = () => {
   const [responseMessage, setResponseMessage] = useState(""); // 👈 New state for API message
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  console.log(
-    import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-      ? "http://localhost:3000/signup"
-      : "https://mathamagic-backend.vercel.app/signup"
-  );
   const handleSubmit = async (e) => {
     e.preventDefault();
     setResponseMessage(""); // Reset message on new submit
@@ -57,8 +56,14 @@ const LoginSignup = () => {
             withCredentials: true, // ⬅️ very important!
           }
         );
+        // console.log(response)
+        dispatch(initializeState({ data: response.data.student , email}));
 
-        navigate("/showpersonaldata"); // ← redirect
+        if (response.data.student.name === "") {
+          navigate("/surveypersonaldetail");
+        } else {
+          navigate("/showpersonaldata"); // ← redirect
+        }
       } else {
         const response = await axios.post(
           import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"

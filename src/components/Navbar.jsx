@@ -10,6 +10,7 @@ import {
   NavigationMenuTrigger,
   NavigationMenuViewport,
 } from "@/components/ui/navigation-menu";
+import { Button } from "../components/ui/moving-border";
 
 const helpItems = [
   {
@@ -81,7 +82,6 @@ const Navbar = () => {
                         </div>
                       ))}
                     </li>
-
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
@@ -99,6 +99,12 @@ const Navbar = () => {
                   <a className="font-semibold" href="/freeResources">
                     FREE RESOURCES
                   </a>
+                </NavigationMenuLink> 
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <a className="font-semibold text-lg tracking-normal" href="/login">Login/Signup</a>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
