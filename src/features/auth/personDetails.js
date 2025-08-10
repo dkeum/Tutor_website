@@ -13,6 +13,7 @@ export const personDetailSlice = createSlice({
     progressArray: [],
     completionProgress: 0,
     current_grade: 0,
+    timeGoals: 0,
     marks_section: [],
   },
   reducers: {
@@ -39,6 +40,7 @@ export const personDetailSlice = createSlice({
       state.completionProgress = action.payload.completion_progress;
       state.current_grade = action.payload.current_grade;
       state.progressArray = action.payload.progressArray;
+      state.timeGoals = action.payload.timeCommitment
     },
   },
 });

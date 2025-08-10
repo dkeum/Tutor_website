@@ -54,7 +54,7 @@ const ShowPersonalData = () => {
         );
 
         // console.log('response worked')
-        console.log(response);
+        // console.log(response);
 
         dispatch(setProfileInfo(response?.data));
       } catch (error) {

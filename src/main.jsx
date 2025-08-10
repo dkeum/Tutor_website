@@ -19,6 +19,8 @@ const ShowPersonalData = lazy(() => import("./pages/ShowPersonalData"));
 const SurveyPersonalDetail = lazy(() =>
   import("./pages/SurveyPersonalDetails")
 );
+const SolveProblems = lazy(() => import("./pages/SolveProblems"));
+
 const Login = lazy(() => import("./pages/Login"));
 
 const Loader = () => (
@@ -29,25 +31,27 @@ const Loader = () => (
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <Provider store={store}>
-      <BrowserRouter>
-        <Suspense fallback={<Loader />}>
-          <Routes>
-            <Route path="/" element={<App />} />
-            <Route path="/contact" element={<Contactme />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/Waitlist" element={<Waitlist />} />
-            <Route path="/freeResources" element={<FreeResources />} />
-            <Route path="/freeResources/:subject" element={<Subject />} />
-            <Route path="/showpersonaldata" element={<ShowPersonalData />} />
-            <Route
-              path="/surveypersonaldetail"
-              element={<SurveyPersonalDetail />}
-            />
-            <Route path="/login" element={<Login />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </Provider>
+ 
+      <Provider store={store}>
+        <BrowserRouter>
+          <Suspense fallback={<Loader />}>
+            <Routes>
+              <Route path="/" element={<App />} />
+              <Route path="/contact" element={<Contactme />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/Waitlist" element={<Waitlist />} />
+              <Route path="/freeResources" element={<FreeResources />} />
+              <Route path="/freeResources/:subject" element={<Subject />} />
+              <Route path="/showpersonaldata" element={<ShowPersonalData />} />
+              <Route
+                path="/surveypersonaldetail"
+                element={<SurveyPersonalDetail />}
+              />
+              <Route path="/question/:topic" element={<SolveProblems />} />
+              <Route path="/login" element={<Login />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </Provider>
   </StrictMode>
 );

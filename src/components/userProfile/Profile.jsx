@@ -4,11 +4,11 @@ import { useSelector } from "react-redux";
 
 const Profile = () => {
   const completionProgress =
-    useSelector((state) => state.personDetail.completionProgress) || 50;
+    useSelector((state) => state.personDetail.completionProgress);
   const current_grade =
     useSelector((state) => state.personDetail.current_grade) || 90;
 
-  const goal_commitment = 30;
+  const goal_commitment =  useSelector((state) => state.personDetail.timeGoals) || 90;
 
   return (
     <div className="w-full h-full grid grid-cols-2 gap-1">

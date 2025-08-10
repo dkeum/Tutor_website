@@ -6,11 +6,14 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
 import axios from "axios";
 
 const NavbarLoggedIn = () => {
   const startTimeRef = useRef(null);
   const email = useSelector((state) => state.personDetail.email);
+  const navigate = useNavigate(); // now you can use navigate()
 
   useEffect(() => {
     // Store start time when user lands
@@ -37,11 +40,18 @@ const NavbarLoggedIn = () => {
 
   const sendSessionData = async (start, end) => {
     try {
-      await axios.post("/save-session", {
-        email: email,
-        startTime: start.toISOString(),
-        endTime: end.toISOString(),
-      });
+      await axios.post(
+        import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+          ? "http://localhost:3000/save-session"
+          : "https://mathamagic-backend.vercel.app/save-session",
+        {
+          email: email,
+          startTime: start.toISOString(),
+          endTime: end.toISOString(),
+          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // e.g. "America/Vancouver"
+        },
+        { withCredentials: true }
+      );
     } catch (err) {
       console.error("Error sending session data:", err);
     }
@@ -50,11 +60,16 @@ const NavbarLoggedIn = () => {
   const handleLogout = async () => {
     const endTime = new Date();
     try {
+      console.log("Logging out..."); // Debug
       // 1) Save the session
-      await sendSessionData(startTimeRef.current, endTime);
+      const response = await sendSessionData(startTimeRef.current, endTime);
+
+      if (response.error) {
+        navigate("/login");
+      }
 
       // 2) Log out
-      await axios.post(
+      const response2 = await axios.post(
         import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
           ? "http://localhost:3000/logout"
           : "https://mathamagic-backend.vercel.app/logout",
@@ -62,11 +77,12 @@ const NavbarLoggedIn = () => {
         { withCredentials: true }
       );
 
+      console.log("Logout success, navigating...");
       // 3) Redirect
-      window.location.href = "/logout";
+      navigate("/login");
     } catch (err) {
       console.error("Error during logout:", err);
-      window.location.href = "/logout"; // still redirect even if API fails
+      navigate("/login");
     }
   };
 
@@ -85,24 +101,32 @@ const NavbarLoggedIn = () => {
       <div className="hidden sm:flex flex-row gap-x-20 items-center text-xl">
         <NavigationMenu>
           <NavigationMenuList>
-          <NavigationMenuItem>
+            <NavigationMenuItem>
               <NavigationMenuLink asChild>
                 <a className="font-semibold" href="/about">
-                   Book Tutor
+                  Book Tutor
                 </a>
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
-                <a className="font-semibold" href="/about">
+                <button className="font-semibold" onClick={()=>{navigate("/showpersonaldata")}}>
+                Profile
+                </button>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <button className="font-semibold" onClick={()=>{navigate("/classes")}}>
                   Classes
-                </a>
+                </button>
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
                 <a className="font-semibold" href="/freeResources">
-                  FREE RESOURCES
+                  Free Resources
                 </a>
               </NavigationMenuLink>
             </NavigationMenuItem>
