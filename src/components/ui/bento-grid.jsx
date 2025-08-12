@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-
+import { useNavigate } from "react-router-dom";
 export const BentoGrid = ({ className, children }) => {
   return (
     <div
@@ -18,10 +18,19 @@ export const BentoGridItem = ({
   title,
   description,
   header,
+  path,
   //   icon
 }) => {
+  const navigate = useNavigate();
+
   return (
     <div
+      onClick={() => {
+        console.log("Clicked!", path);
+        if (path) {
+          navigate(path);
+        }
+      }}
       className={cn(
         `group/bento shadow-input row-span-1 ${
           title !== "" ? "flex flex-col justify-between" : ""

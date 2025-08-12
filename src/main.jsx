@@ -23,6 +23,8 @@ const SolveProblems = lazy(() => import("./pages/SolveProblems"));
 
 const Login = lazy(() => import("./pages/Login"));
 
+const TrackImprovement = lazy(() => import("./components/userProfile/TrackImprovement"));
+
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
     <Loader2 className="animate-spin w-10 h-10 text-gray-600" />
@@ -49,6 +51,7 @@ createRoot(document.getElementById("root")).render(
               />
               <Route path="/question/:topic" element={<SolveProblems />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/user/track-improvement" element={<TrackImprovement  />} />
             </Routes>
           </Suspense>
         </BrowserRouter>

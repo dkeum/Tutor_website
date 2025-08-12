@@ -14,10 +14,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-
 import { useSelector, useDispatch } from "react-redux";
 import { setName } from "../features/auth/personDetails";
 import axios from "axios"; // ✅ Make sure this is at the top
+
+import { useNavigate } from "react-router-dom";
 
 import { BentoGrid, BentoGridItem } from "../components/ui/bento-grid";
 
@@ -26,7 +27,7 @@ import LoginActivity from "../components/userProfile/LoginActivity";
 import Profile from "../components/userProfile/Profile";
 import UserInfo from "../components/userProfile/UserInfo";
 import NavbarLoggedIn from "../components/NavbarLoggedIn";
-import Topics from "../components/userProfile/Topics"
+import Topics from "../components/userProfile/Topics";
 
 // Show a bento grid from acternity https://ui.aceternity.com/components/bento-grid
 
@@ -34,7 +35,7 @@ const ShowPersonalData = () => {
   const name = useSelector((state) => state.personDetail.name);
   const email = useSelector((state) => state.personDetail.email);
   const [open, setOpen] = useState(false);
-
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -52,9 +53,6 @@ const ShowPersonalData = () => {
             withCredentials: true, // ⬅️ very important!
           }
         );
-
-        // console.log('response worked')
-        // console.log(response);
 
         dispatch(setProfileInfo(response?.data));
       } catch (error) {
@@ -88,6 +86,8 @@ const ShowPersonalData = () => {
             description={item.description}
             header={item.header}
             className={i === 0 || i === 2 ? "md:col-span-2" : ""}
+            path={item.path} // just pass it, even if undefined
+            style={{ cursor: item.path ? "pointer" : "default" }}
           />
         ))}
       </BentoGrid>
@@ -112,10 +112,9 @@ const items = [
     header: <UserInfo />,
   },
   {
-    title:
-      "",
+    title: "",
     description: "",
-    header: <Topics/>,
+    header: <Topics />,
   },
   {
     title: "Current Progress",
@@ -126,6 +125,7 @@ const items = [
     title: "Track Improvement",
     description: "Bar graph of commitment per week and grade improvement",
     header: <Skeleton />,
+    path: "/user/track-improvement",
   },
   {
     title: "Mistakes",

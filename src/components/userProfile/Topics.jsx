@@ -55,7 +55,22 @@ const Topics = () => {
                               <span className="text-sm">
                                 {section.section_name}
                               </span>
-                              <span>{section.progress}%</span>
+                              <span
+                                className={
+                                  section?.latest_grade != null
+                                    ? section.latest_grade < 50
+                                      ? "text-red-500"
+                                      : section.latest_grade < 75
+                                      ? "text-yellow-500"
+                                      : "text-green-500"
+                                    : "text-gray-500"
+                                }
+                              >
+                                {section?.latest_grade != null
+                                  ? Math.round(section.latest_grade)
+                                  : 0}
+                                %
+                              </span>
                             </button>
                           ))}
                         </div>

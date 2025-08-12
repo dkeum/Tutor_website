@@ -6,9 +6,8 @@ const Profile = () => {
   const completionProgress =
     useSelector((state) => state.personDetail.completionProgress);
   const current_grade =
-    useSelector((state) => state.personDetail.current_grade) || 90;
-
-  const goal_commitment =  useSelector((state) => state.personDetail.timeGoals) || 90;
+    useSelector((state) => state.personDetail.current_grade);
+  const goal_commitment =  useSelector((state) => state.personDetail.timeGoals);
 
   return (
     <div className="w-full h-full grid grid-cols-2 gap-1">
