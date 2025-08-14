@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 
 import { useSelector, useDispatch } from "react-redux";
 import { setName } from "../features/auth/personDetails";
+import { setQuestions } from "../features/auth/personDetails";
 import axios from "axios"; // ✅ Make sure this is at the top
 
 import { useNavigate } from "react-router-dom";
@@ -28,6 +29,9 @@ import Profile from "../components/userProfile/Profile";
 import UserInfo from "../components/userProfile/UserInfo";
 import NavbarLoggedIn from "../components/NavbarLoggedIn";
 import Topics from "../components/userProfile/Topics";
+
+import bookEngineering from "../assets/book-engineering-svgrepo-com.svg";
+import correct_mistakes from  "../assets/correct_mistake_logo.png";
 
 // Show a bento grid from acternity https://ui.aceternity.com/components/bento-grid
 
@@ -59,6 +63,27 @@ const ShowPersonalData = () => {
         console.error("Error fetching profile:", error);
       }
     };
+
+    const getQuestions_Data = async () => {
+      const response = await axios.get(
+        import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+          ? `http://localhost:3000/questions/get-questions`
+          : `https://mathamagic-backend.vercel.app/questions/get-questions`,
+        { withCredentials: true }
+      );
+
+      // console.log("get question data");
+      // console.log(response.data);
+
+      const my_data = response.data?.mark_section;
+      dispatch(setQuestions(my_data));
+      // console.log(my_data)
+
+      // For the graph, keep only date & grade
+      // setData(my_data);
+    };
+
+    getQuestions_Data();
 
     fetchProfile();
   }, [name, email]);
@@ -95,9 +120,7 @@ const ShowPersonalData = () => {
 
 export default ShowPersonalData;
 
-const Skeleton = () => (
-  <div className="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100"></div>
-);
+
 const items = [
   {
     title: "Login Activity",
@@ -124,36 +147,54 @@ const items = [
     description: "Bar graph of commitment per week and grade improvement",
     header: (
       <div className="w-full h-40 relative flex items-end  border-l border-b border-gray-400 px-4">
-      {/* Bar 1 */}
-      <div className="flex-1 mx-2 relative">
-        <div className="w-full h-32 bg-gradient-to-t from-blue-500 to-blue-300 origin-bottom animate-bar"></div>
-        <div className="absolute bottom-0 w-full text-center text-xl font-bold">A</div>
+        {/* Bar 1 */}
+        <div className="flex-1 mx-2 relative">
+          <div className="w-full h-32 bg-gradient-to-t from-blue-500 to-blue-300 origin-bottom animate-bar"></div>
+          <div className="absolute bottom-0 w-full text-center text-xl font-bold">
+            A
+          </div>
+        </div>
+
+        {/* Bar 2 */}
+        <div className="flex-1 mx-2 relative">
+          <div
+            className="w-full h-24 bg-gradient-to-t from-yellow-400 to-yellow-200 origin-bottom animate-bar"
+            style={{ animationDelay: "1s" }}
+          ></div>
+          <div className="absolute bottom-0 w-full text-center text-xl font-bold">
+            B
+          </div>
+        </div>
+
+        {/* Bar 3 */}
+        <div className="flex-1 mx-2 relative">
+          <div
+            className="w-full h-28 bg-gradient-to-t from-red-500 to-red-300 origin-bottom animate-bar"
+            style={{ animationDelay: "2s" }}
+          ></div>
+          <div className="absolute bottom-0 w-full text-center font-bold text-xl">
+            C
+          </div>
+        </div>
       </div>
-    
-      {/* Bar 2 */}
-      <div className="flex-1 mx-2 relative">
-        <div className="w-full h-24 bg-gradient-to-t from-yellow-400 to-yellow-200 origin-bottom animate-bar" style={{ animationDelay: "1s" }}></div>
-        <div className="absolute bottom-0 w-full text-center text-xl font-bold">B</div>
-      </div>
-    
-      {/* Bar 3 */}
-      <div className="flex-1 mx-2 relative">
-        <div className="w-full h-28 bg-gradient-to-t from-red-500 to-red-300 origin-bottom animate-bar" style={{ animationDelay: "2s" }}></div>
-        <div className="absolute bottom-0 w-full text-center font-bold text-xl">C</div>
-      </div>
-    </div>
     ),
     path: "/user/track-improvement",
   },
   {
-    title: "Mistakes",
+    title: "Correct Your Mistakes",
     description: "Experience the thrill of bringing ideas to life.",
-    header: <Skeleton />,
+    header: (
+      <div className="flex h-full justify-center items-center gap-4 text-5xl font-bold">
+       <img src={correct_mistakes} className="max-h-[150px]"/>
+      </div>
+    ),
+    path: "/user/mistakes",
   },
   {
-    title: "Shows completed work (History)",
+    title: "Setting",
     description: "Embark on exciting journeys and thrilling discoveries.",
-    header: <Skeleton />,
+    header: <img src={bookEngineering} alt="Book Engineering" className=" mx-auto my-auto max-h-[150px]" />,
+    path: "/user/history",
   },
 ];
 

@@ -33,7 +33,7 @@ const TopicMastery = () => {
     });
 
     // Step 2: Set up dimensions
-    const width = 700;
+    const width = 600;
     const height = 400;
     const margin = { top: 40, right: 30, bottom: 80, left: 50 };
 

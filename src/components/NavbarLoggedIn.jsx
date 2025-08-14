@@ -116,13 +116,13 @@ const NavbarLoggedIn = () => {
               </NavigationMenuLink>
             </NavigationMenuItem>
 
-            <NavigationMenuItem>
+            {/* <NavigationMenuItem>
               <NavigationMenuLink asChild>
                 <button className="font-semibold" onClick={()=>{navigate("/classes")}}>
                   Classes
                 </button>
               </NavigationMenuLink>
-            </NavigationMenuItem>
+            </NavigationMenuItem> */}
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
                 <a className="font-semibold" href="/freeResources">
