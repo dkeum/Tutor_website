@@ -60,7 +60,7 @@ const NavbarLoggedIn = () => {
   const handleLogout = async () => {
     const endTime = new Date();
     try {
-      console.log("Logging out..."); // Debug
+      // console.log("Logging out..."); // Debug
       // 1) Save the session
       const response = await sendSessionData(startTimeRef.current, endTime);
 
@@ -77,11 +77,11 @@ const NavbarLoggedIn = () => {
         { withCredentials: true }
       );
 
-      console.log("Logout success, navigating...");
+      // console.log("Logout success, navigating...");
       // 3) Redirect
       navigate("/login");
     } catch (err) {
-      console.error("Error during logout:", err);
+      // console.error("Error during logout:", err);
       navigate("/login");
     }
   };

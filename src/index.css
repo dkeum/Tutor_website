@@ -143,3 +143,21 @@
     @apply bg-background text-foreground;
   }
 }
+
+.scale-y-0 {
+  transform: scaleY(0);
+}
+
+.animate-bar {
+  transform-origin: bottom;
+  animation: grow 1.5s forwards;
+}
+
+@keyframes grow {
+  0% {
+    transform: scaleY(0);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}

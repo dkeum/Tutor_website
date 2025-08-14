@@ -7,7 +7,7 @@ const TrackingDottedGraph = ({ data, width, filterType }) => {
   useEffect(() => {
     if (!data || !width) return;
 
-    const height = 500;
+    const height = 450;
     const marginTop = 20;
     const marginRight = 30;
     const marginBottom = 50;

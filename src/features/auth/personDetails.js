@@ -14,7 +14,8 @@ export const personDetailSlice = createSlice({
     completionProgress: 0,
     current_grade: 0,
     timeGoals: 0,
-    marks_section: [],
+    actual_time_goal: 0,
+    3: [],
   },
   reducers: {
     initializeState: (state, action) => {
@@ -36,16 +37,25 @@ export const personDetailSlice = createSlice({
     },
 
     setProfileInfo: (state, action) => {
+
+      // console.log(action.payload)
       state.loginInfo = action.payload.github_activity;
       state.completionProgress = action.payload.completion_progress;
       state.current_grade = action.payload.current_grade;
       state.progressArray = action.payload.progressArray;
       state.timeGoals = action.payload.timeCommitment
+      state.actual_time_goal = action.payload.actual_time_commitment
     },
+
+    setQuestions: (state,action) => {
+      // console.log(action.payload)
+      state.marks_section = action.payload || [];
+    },
+
   },
 });
 
 // Action creators
-export const { initializeState, setName, setProfileInfo } = personDetailSlice.actions;
+export const { initializeState, setName, setProfileInfo , setQuestions} = personDetailSlice.actions;
 
 export default personDetailSlice.reducer;

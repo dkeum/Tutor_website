@@ -26,7 +26,7 @@ export const BentoGridItem = ({
   return (
     <div
       onClick={() => {
-        console.log("Clicked!", path);
+        // console.log("Clicked!", path);
         if (path) {
           navigate(path);
         }

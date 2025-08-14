@@ -68,8 +68,6 @@ const ShowPersonalData = () => {
 
   // a circle graph showing the completed progress on topic/ class
 
-  // a Line graph showing the progress on a topic over time
-
   // suggested topics and questions to solve for improvement
 
   const data = [{}];
@@ -124,7 +122,27 @@ const items = [
   {
     title: "Track Improvement",
     description: "Bar graph of commitment per week and grade improvement",
-    header: <Skeleton />,
+    header: (
+      <div className="w-full h-40 relative flex items-end  border-l border-b border-gray-400 px-4">
+      {/* Bar 1 */}
+      <div className="flex-1 mx-2 relative">
+        <div className="w-full h-32 bg-gradient-to-t from-blue-500 to-blue-300 origin-bottom animate-bar"></div>
+        <div className="absolute bottom-0 w-full text-center text-xl font-bold">A</div>
+      </div>
+    
+      {/* Bar 2 */}
+      <div className="flex-1 mx-2 relative">
+        <div className="w-full h-24 bg-gradient-to-t from-yellow-400 to-yellow-200 origin-bottom animate-bar" style={{ animationDelay: "1s" }}></div>
+        <div className="absolute bottom-0 w-full text-center text-xl font-bold">B</div>
+      </div>
+    
+      {/* Bar 3 */}
+      <div className="flex-1 mx-2 relative">
+        <div className="w-full h-28 bg-gradient-to-t from-red-500 to-red-300 origin-bottom animate-bar" style={{ animationDelay: "2s" }}></div>
+        <div className="absolute bottom-0 w-full text-center font-bold text-xl">C</div>
+      </div>
+    </div>
+    ),
     path: "/user/track-improvement",
   },
   {
