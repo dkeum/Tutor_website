@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
+import Dog from "../components/AI/Dog";
 
 addStyles();
 
@@ -120,31 +121,34 @@ const SolveProblems = () => {
   const handleNextOrSubmit = async () => {
     const correctAnswer = currentQuestion?.answers?.[0]?.answer || "";
     const isCorrect = normalizeLatex(latex) === normalizeLatex(correctAnswer);
-  
+
     const newAnswer = {
       questionId: currentQuestion.id,
       answer: latex,
       timeTaken: secondsElapsed,
       isCorrect,
     };
-  
+
     const updatedAnswers = [...recordedAnswers, newAnswer];
-    const updatedResults = [...answerResults, { questionId: currentQuestion.id, isCorrect }];
-  
+    const updatedResults = [
+      ...answerResults,
+      { questionId: currentQuestion.id, isCorrect },
+    ];
+
     setRecordedAnswers(updatedAnswers);
     setAnswerResults(updatedResults);
-  
+
     setLatex("");
     setSecondsElapsed(0);
-  
+
     if (isLastQuestion) {
       // Calculate grade
       const total = updatedResults.length;
-      const correctCount = updatedResults.filter(r => r.isCorrect).length;
+      const correctCount = updatedResults.filter((r) => r.isCorrect).length;
       const grade = ((correctCount / total) * 100).toFixed(2); // percent with 2 decimal places
-  
+
       // console.log("Grade:", grade, "%");
-  
+
       // Send to backend
       await axios.post(
         import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
@@ -160,13 +164,12 @@ const SolveProblems = () => {
           withCredentials: true,
         }
       );
-  
+
       setShowResults(true);
     } else if (api) {
       api.scrollNext();
     }
   };
-  
 
   return (
     <div>
@@ -270,9 +273,11 @@ const SolveProblems = () => {
           </div>
         )}
 
-        <div className="grid grid-rows-3 gap-4">
+        <div className="grid grid-rows-3 gap-4 " >
           <TimerBox secondsElapsed={secondsElapsed} />
-          <div className="border rounded-lg row-span-2">Section 3: AI</div>
+          <div className="border rounded-lg row-span-2">
+            <Dog />
+          </div>
         </div>
       </div>
     </div>
