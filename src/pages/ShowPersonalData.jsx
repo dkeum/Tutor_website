@@ -32,6 +32,9 @@ import Topics from "../components/userProfile/Topics";
 
 import bookEngineering from "../assets/book-engineering-svgrepo-com.svg";
 import correct_mistakes from  "../assets/correct_mistake_logo.png";
+import homework_icon from "../assets/book-mark-book-svgrepo-com.svg"
+import exam_icon from "../assets/exam-svgrepo-com.svg"
+import donate_icon from "../assets/donate-svgrepo-com.svg"
 
 // Show a bento grid from acternity https://ui.aceternity.com/components/bento-grid
 
@@ -191,10 +194,28 @@ const items = [
     path: "/user/mistakes",
   },
   {
+    title: "Homework Help",
+    description: "Embark on exciting journeys and thrilling discoveries.",
+    header: <img src={homework_icon} alt="Book Engineering" className=" mx-auto my-auto max-h-[150px]" />,
+    path: "/homework-help",
+  },
+  {
+    title: "Final Exam Prep",
+    description: "Embark on exciting journeys and thrilling discoveries.",
+    header: <img src={exam_icon} alt="Book Engineering" className=" mx-auto my-auto max-h-[150px]" />,
+    path: "/final-exam-prep",
+  },
+  {
     title: "Setting",
     description: "Embark on exciting journeys and thrilling discoveries.",
     header: <img src={bookEngineering} alt="Book Engineering" className=" mx-auto my-auto max-h-[150px]" />,
-    path: "/user/history",
+    path: "/user/setting",
+  },
+  {
+    title: "Donate",
+    description: "Embark on exciting journeys and thrilling discoveries.",
+    header: <img src={donate_icon} alt="Book Engineering" className=" mx-auto my-auto max-h-[150px]" />,
+    path: "/donate",
   },
 ];
 

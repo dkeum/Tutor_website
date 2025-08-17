@@ -30,6 +30,11 @@ const History = lazy(() => import("./components/userProfile/History"));
 const Mistakes = lazy(()=>  import("./components/userProfile/Mistakes"))
 
 const Test = lazy(()=>  import("./pages/Test"))
+
+const HomeworkHelp = lazy(()=>  import("./pages/HomeworkHelp"))
+const Donate = lazy(()=>  import("./pages/Donate"))
+const FinalExamPrep = lazy(()=>  import("./pages/FinalExamPrep"))
+
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
     <Loader2 className="animate-spin w-10 h-10 text-gray-600" />
@@ -57,9 +62,12 @@ createRoot(document.getElementById("root")).render(
               <Route path="/question/:topic" element={<SolveProblems />} />
               <Route path="/login" element={<Login />} />
               <Route path="/user/track-improvement" element={<TrackImprovement  />} />
-              <Route path="/user/history" element={<History />} />
+              <Route path="/user/setting" element={<History />} />
               <Route path="/user/mistakes" element={<Mistakes />} />
               <Route path="/random/test" element={<Test />} />
+              <Route path="/homework-help" element={<HomeworkHelp />} />
+              <Route path="/donate" element={<Donate />} />
+              <Route path="/final-exam-prep" element={<FinalExamPrep />} />
             </Routes>
           </Suspense>
         </BrowserRouter>
