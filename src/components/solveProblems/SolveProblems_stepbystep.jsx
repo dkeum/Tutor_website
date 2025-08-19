@@ -3,6 +3,8 @@ import { Button } from "../ui/button";
 import { useDispatch } from "react-redux";
 import { setDogDetails } from "../../features/dog/dogSlice";
 
+//https://docs.puter.com/FS/upload/
+
 const SolveProblems_stepbystep = ({
   dogRef,
   handlePlayAudio,

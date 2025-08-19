@@ -7,11 +7,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const UserInfo = () => {
   const name = useSelector((state) => state.personDetail.name);
   const grade = useSelector((state) => state.personDetail.grade);
+  const profile_picture = useSelector((state) => state.personDetail.profile_pic);
+
   return (
     <div className="flex flex-col items-center gap-2">
       <Avatar className="w-[130px] h-auto">
         <AvatarImage
-          src="https://github.com/shadcn.png"
+          src={profile_picture}
           alt="@shadcn"
         />
         <AvatarFallback>CN</AvatarFallback>

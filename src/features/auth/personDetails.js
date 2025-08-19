@@ -8,6 +8,7 @@ export const personDetailSlice = createSlice({
     grade: "",
     email: "",
     isSubscribed: false, // ✅ add isSubscribed
+    profile_pic:"https://github.com/shadcn.png",
 
     loginInfo: [], // e.g., GitHub info
     progressArray: [],
@@ -45,6 +46,8 @@ export const personDetailSlice = createSlice({
       state.progressArray = action.payload.progressArray;
       state.timeGoals = action.payload.timeCommitment
       state.actual_time_goal = action.payload.actual_time_commitment
+
+      state.profile_pic = action.payload?.profile_picture
     },
 
     setQuestions: (state,action) => {
