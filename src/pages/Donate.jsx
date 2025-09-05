@@ -79,8 +79,8 @@ const Donate = () => {
                   "Giving has never been easier"
                 </h3>
                 <p className="text-muted-foreground">
-                  "The donation platform is user-friendly and the tax benefits
-                  make it a no-brainer. I'm glad my contribution is making a
+                  "The donation platform is user-friendly and it's a
+                   no-brainer. I'm glad my contribution is making a
                   tangible impact."
                 </p>
                 <p className="text-muted-foreground">- Michael, Donor</p>

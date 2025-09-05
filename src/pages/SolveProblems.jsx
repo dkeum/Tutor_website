@@ -30,6 +30,8 @@ import SolveProblems_stepbystep from "../components/solveProblems/SolveProblems_
 import useDog from "../hook/useDog";
 import DogPortal from "../components/AI/DogPortal";
 
+import Desmos from "desmos";
+
 addStyles();
 
 function TimerBox({ secondsElapsed }) {
@@ -79,6 +81,7 @@ const SolveProblems = () => {
   const [answerResults, setAnswerResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showDesmos, setShowDesmos] = useState(false);
 
   const {
     canvasRef: mountRef,
@@ -123,6 +126,44 @@ const SolveProblems = () => {
   const currentQuestion = questions[currentIndex] || {};
   const currentFormula = currentQuestion.formula || "No formula available.";
   const currentHint = currentQuestion.hint || "No hint available.";
+
+  // useEffect(() => {
+  //   if (!currentQuestion?.question) return;
+
+  //   const askAI = async () => {
+  //     try {
+  //       const initilize_message = [
+  //         {
+  //           role: "system",
+  //           content:
+  //             "You are a helpful math assistant. You will define if I need to use Desmos graph or not",
+  //         },
+  //         {
+  //           role: "system",
+  //           content: `You must answer in this format:\nYes or No\nI don't want any text before or after that.`,
+  //         },
+  //         {
+  //           role: "user",
+  //           content: `Here is the question: ${currentQuestion.question}`,
+  //         },
+  //       ];
+
+  //       const resp = await puter.ai.chat(initilize_message, {
+  //         model: "gpt-5",
+  //       });
+
+  //       console.log("This is the answer", resp?.message?.content?.trim());
+
+  //       const aiAnswer = resp?.message?.content?.trim();
+  //       // setShowDesmos(aiAnswer === "Yes"); // ✅ only show if "Yes"
+  //       setShowDesmos(true); // ✅ only show if "Yes"
+  //     } catch (err) {
+  //       console.error("AI check for Desmos failed:", err);
+  //     }
+  //   };
+
+  //   askAI();
+  // }, []);
 
   const handleNextOrSubmit = async () => {
     const correctAnswer = currentQuestion?.answers?.[0]?.answer || "";
@@ -217,6 +258,39 @@ const SolveProblems = () => {
     }
   };
 
+  // ✅ Render Desmos inside React
+  const DesmosGraph = ({ expression }) => {
+    const graphRef = React.useRef(null);
+    const calculatorRef = React.useRef(null);
+
+    useEffect(() => {
+      if (graphRef.current && !calculatorRef.current) {
+        // ✅ initialize once
+        calculatorRef.current = Desmos.GraphingCalculator(graphRef.current, {
+          expressions: true,
+        });
+      }
+    }, []);
+
+    useEffect(() => {
+      if (calculatorRef.current && expression) {
+        // ✅ update graph instead of refreshing
+        calculatorRef.current.setExpression({
+          id: "graph1",
+          latex: expression,
+        });
+      }
+    }, [expression]);
+
+    return (
+      <div
+        className="mx-auto"
+        ref={graphRef}
+        style={{ width: "90%", height: "300px" }}
+      />
+    );
+  };
+
   return (
     <div>
       <NavbarLoggedIn />
@@ -295,9 +369,28 @@ const SolveProblems = () => {
                   {questions.map((q, index) => (
                     <CarouselItem key={index}>
                       <div className="border rounded-lg p-4 w-[95%] mx-auto bg-white shadow flex-grow">
-                        <h2 className="mb-2 flex-grow">
+                        <h2 className="mb-2 flex-grow text-left">
                           <b>Question {index + 1}:</b> {q.question}
                         </h2>
+                        <div>
+                          {q?.image_url && (
+                            <img
+                              src={`${q.image_url}`}
+                              className="max-h-[300px]"
+                            />
+                          )}
+                          {/* ✅ Conditionally show Desmos if AI says Yes */}
+                          {/* {showDesmos && (
+                            <div className="mt-4 border rounded-lg p-2 overflow-hidden min-h-[300px]">
+                              <h3 className="mb-2 font-bold">Desmos Graph</h3>
+                              <DesmosGraph
+                                expression={
+                                  currentQuestion?.graphLatex || "y=x^2"
+                                }
+                              />
+                            </div>
+                          )} */}
+                        </div>
                       </div>
                     </CarouselItem>
                   ))}

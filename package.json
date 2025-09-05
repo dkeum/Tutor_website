@@ -36,6 +36,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "d3": "^7.9.0",
+    "desmos": "^1.5.4",
     "embla-carousel-react": "^8.6.0",
     "jest-environment-jsdom": "^30.0.4",
     "lucide-react": "^0.525.0",

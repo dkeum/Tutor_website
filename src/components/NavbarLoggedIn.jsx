@@ -18,25 +18,27 @@ const NavbarLoggedIn = () => {
   useEffect(() => {
     // Store start time when user lands
     startTimeRef.current = new Date();
-
+  
     const handleUnload = () => {
       const endTime = new Date();
       sendSessionData(startTimeRef.current, endTime);
     };
-
-    window.addEventListener("beforeunload", handleUnload);
-
-    document.addEventListener("visibilitychange", () => {
+  
+    // ✅ use the same function reference for add/remove
+    const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden") {
         handleUnload();
       }
-    });
-
+    };
+  
+    window.addEventListener("beforeunload", handleUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+  
     return () => {
       window.removeEventListener("beforeunload", handleUnload);
-      document.removeEventListener("visibilitychange", handleUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, []);
+  }, []); // ✅ runs only once
 
   const sendSessionData = async (start, end) => {
     try {

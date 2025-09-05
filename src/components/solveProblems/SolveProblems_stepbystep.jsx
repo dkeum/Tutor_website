@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { useDispatch } from "react-redux";
 import { setDogDetails } from "../../features/dog/dogSlice";
@@ -13,7 +13,7 @@ const SolveProblems_stepbystep = ({
   setIsDialogOpen,
   muted,
   toggleMute,
-  divRef
+  divRef,
 }) => {
   const [steps, setSteps] = useState([""]);
 
@@ -44,11 +44,29 @@ const SolveProblems_stepbystep = ({
                 if the answer is correct to question provided then the dog animation is rollover,
                 Explanation: <explain> \n`,
     },
-    {
-      role: "system",
-      content: `Here is the question: ${question.question}`,
-    },
   ]);
+
+  useEffect(() => {
+    if (!question) return;
+  
+    if (question.image_url) {
+      setMessages(prev => [
+        ...prev,
+        {
+          role: "user",
+          content: [
+            { type: "text", text: question.question },
+            { type: "image_url", image_url: { url: question.image_url } },
+          ],
+        },
+      ]);
+    } else {
+      setMessages(prev => [
+        ...prev,
+        { role: "user", content: `Here is the question: ${question.question}` },
+      ]);
+    }
+  }, [question]);
 
   const handleStepChange = (index, value) => {
     const next = [...steps];
@@ -156,9 +174,15 @@ const SolveProblems_stepbystep = ({
       <div className="flex-1 p-4 w-full border flex flex-row justify-between my-2 overflow-hidden">
         {/* Steps */}
         <div className="flex-1 flex flex-col gap-3 overflow-scroll overflow-x-hidden pb-20 pr-3">
-          <div className="border rounded-md min-h-[70px] flex justify-between px-3">
+          <div className="border rounded-md min-h-[70px] flex px-3 text-left">
             <b>Question:</b>&nbsp; {question?.question}
           </div>
+          {question?.image_url && (
+            <div className="border rounded-md min-h-[200px] max-h-[250px] flex px-3 text-left overflow-hidden">
+              <img src={question.image_url} className="min-h-[200px] max-h-[250px]" />
+            </div>
+          )}
+
           {steps.map((step, index) => {
             const status = stepStatus[index];
             const isChecking = loadingStep === index;

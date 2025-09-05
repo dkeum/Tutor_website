@@ -150,6 +150,7 @@ const Mistakes = () => {
                     <h2 className="mb-2 flex-grow">
                       <b>Question {index + 1}:</b> {q.question}
                     </h2>
+                    {q?.image_url && <img src={`${q.image_url}`} className="max-h-[300px]"/>}
                   </div>
                 </CarouselItem>
               ))}
