@@ -259,13 +259,13 @@ const Subject = () => {
               </h2>
             </div>
 
-            <div className="grid grid-cols-3 justify-center gap-y-10">
+            <div className="grid grid-cols-3 justify-center gap-y-10 gap-x-50">
               {subject_links
                 .filter((item) => item.subject === subject)
                 .map((item, index) => (
                   <div
                     key={index}
-                    className="bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-2xl shadow-md p-6 min-w-[300px]"
+                    className="bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-2xl shadow-md p-6 w-[230px] max-w-[300px]"
                   >
                     <h3 className="text-2xl font-semibold dark:text-white text-black">
                       {item.topic}

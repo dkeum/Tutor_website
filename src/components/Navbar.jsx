@@ -46,7 +46,7 @@ const Navbar = () => {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger>HOW WE HELP</NavigationMenuTrigger>
+                <NavigationMenuTrigger>How we help</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid grid-cols-2 gap-2 md:w-[300px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                     <li className="col-span-1">
@@ -89,7 +89,7 @@ const Navbar = () => {
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <a className="font-semibold" href="/about">
-                    ABOUT
+                    About
                   </a>
                 </NavigationMenuLink>
               </NavigationMenuItem>
@@ -97,7 +97,7 @@ const Navbar = () => {
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <a className="font-semibold" href="/freeResources">
-                    FREE RESOURCES
+                    Free resources
                   </a>
                 </NavigationMenuLink> 
               </NavigationMenuItem>
