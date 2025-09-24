@@ -2,6 +2,7 @@ import React from "react";
 import NavbarLoggedIn from "../components/NavbarLoggedIn";
 import { Link } from "react-router-dom"; // Assuming you're using react-router
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import BackgroundWrapper from "../components/BackgroundWrapper"
 
 const Donate = () => {
   return (
@@ -11,6 +12,7 @@ const Donate = () => {
       {/* Main content */}
       <main className="flex-1">
         {/* Hero Section */}
+        <BackgroundWrapper>
         <section className="w-full py-10 md:py-16 lg:py-20">
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-[1fr_300px] lg:gap-12 xl:grid-cols-[1fr_600px]">
@@ -49,6 +51,7 @@ const Donate = () => {
             </div>
           </div>
         </section>
+        </BackgroundWrapper>
 
         {/* Testimonials */}
         <section className="w-full py-10 md:py-16 lg:py-20 ">

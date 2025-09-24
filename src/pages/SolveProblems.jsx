@@ -444,10 +444,16 @@ const SolveProblems = () => {
           <TimerBox secondsElapsed={secondsElapsed} />
           <div
             id="dog-sidebar"
-            className="border rounded-lg row-span-2 relative"
+            className="border rounded-lg row-span-2 relative flex flex-col-reverse justify-center"
           >
-            <div className="absolute bottom-3 font-bold text-xl left-[40%]">
-              AI Assistant
+            <div className="flex flex-col items-center -mt-15 mb-10 gap-y-5">
+              <div className=" font-bold text-xl">AI Assistant</div>
+              <Button
+                onClick={() => setIsDialogOpen(true)} // ✅ this opens the dialog
+                className=" max-w-[100px] bg-white text-black border border-slate-200 hover:bg-slate-100 cursor-pointer"
+              >
+                Ask for Help
+              </Button>
             </div>
           </div>
         </div>

@@ -3,8 +3,6 @@ import { Button } from "../ui/button";
 import { useDispatch } from "react-redux";
 import { setDogDetails } from "../../features/dog/dogSlice";
 
-//https://docs.puter.com/FS/upload/
-
 const SolveProblems_stepbystep = ({
   dogRef,
   handlePlayAudio,
@@ -48,9 +46,9 @@ const SolveProblems_stepbystep = ({
 
   useEffect(() => {
     if (!question) return;
-  
+
     if (question.image_url) {
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
         {
           role: "user",
@@ -61,7 +59,7 @@ const SolveProblems_stepbystep = ({
         },
       ]);
     } else {
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
         { role: "user", content: `Here is the question: ${question.question}` },
       ]);
@@ -119,7 +117,9 @@ const SolveProblems_stepbystep = ({
 
       // store per-step status
       setStepStatus((prev) => ({ ...prev, [index]: normalized }));
+
       if (normalized === "no") {
+        // mark error
         setErrorSteps((prev) => {
           const nextSet = new Set(prev).add(index);
           setPulseSteps((prevPulse) => new Set(prevPulse).add(index)); // start pulse
@@ -133,6 +133,13 @@ const SolveProblems_stepbystep = ({
             });
           }, 3000);
 
+          return nextSet;
+        });
+      } else {
+        // ✅ clear error if step now passes
+        setErrorSteps((prev) => {
+          const nextSet = new Set(prev);
+          nextSet.delete(index);
           return nextSet;
         });
       }
@@ -179,7 +186,10 @@ const SolveProblems_stepbystep = ({
           </div>
           {question?.image_url && (
             <div className="border rounded-md min-h-[200px] max-h-[250px] flex px-3 text-left overflow-hidden">
-              <img src={question.image_url} className="min-h-[200px] max-h-[250px]" />
+              <img
+                src={question.image_url}
+                className="min-h-[200px] max-h-[250px]"
+              />
             </div>
           )}
 
@@ -199,7 +209,7 @@ const SolveProblems_stepbystep = ({
                     ? isPulsing
                       ? "border-red-500 animate-pulse"
                       : "border-red-500"
-                    : isYes
+                    : isYes || isCorrect
                     ? "border-green-500"
                     : "border-gray-300"
                 }`}
@@ -212,9 +222,7 @@ const SolveProblems_stepbystep = ({
                   disabled={isYes || isCorrect}
                 />
                 <Button
-                  onClick={() => {
-                    checkStep(index);
-                  }}
+                  onClick={() => checkStep(index)}
                   disabled={isChecking || isYes || isCorrect}
                   className="ml-2"
                 >
@@ -224,6 +232,8 @@ const SolveProblems_stepbystep = ({
                     ? "✓ Good"
                     : isCorrect
                     ? "✓ Final"
+                    : isError
+                    ? "Try again"
                     : "Check"}
                 </Button>
               </div>
@@ -251,7 +261,6 @@ const SolveProblems_stepbystep = ({
 
         {/* Dog + AI Response */}
         <div className="flex flex-col justify-around mt-10 ml-4 w-1/3 relative">
-          {/* {divRef && <div ref={divRef}  className="w-full h-64 border rounded-lg"/>} */}
           <div
             id="dog-dialog"
             className="h-40 w-full border rounded-lg flex justify-center items-center"
