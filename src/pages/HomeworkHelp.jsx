@@ -69,7 +69,7 @@ const HomeworkHelp = () => {
               headers: { "Content-Type": "multipart/form-data" },
             }
           );
-
+            console.log(response.data?.githubUrls)
           setFileURL(response.data?.githubUrls);
           console.log("PDF uploaded:", response.data);
         } catch (error) {
