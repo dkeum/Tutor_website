@@ -38,19 +38,9 @@ const TrackingDottedGraph = ({ data, width, filterType }) => {
 
     function toUTCDateKey(date) {
       if (unit === "day") {
-        return (
-          date.getUTCFullYear() +
-          "-" +
-          String(date.getUTCMonth() + 1).padStart(2, "0") +
-          "-" +
-          String(date.getUTCDate()).padStart(2, "0")
-        );
+        return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
       } else {
-        return (
-          date.getUTCFullYear() +
-          "-" +
-          String(date.getUTCMonth() + 1).padStart(2, "0")
-        );
+        return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
       }
     }
 
@@ -59,11 +49,8 @@ const TrackingDottedGraph = ({ data, width, filterType }) => {
       let current = new Date(start);
       while (current <= end) {
         range.push(new Date(current));
-        if (unit === "day") {
-          current.setUTCDate(current.getUTCDate() + 1);
-        } else if (unit === "month") {
-          current.setUTCMonth(current.getUTCMonth() + 1);
-        }
+        if (unit === "day") current.setUTCDate(current.getUTCDate() + 1);
+        else current.setUTCMonth(current.getUTCMonth() + 1);
       }
       return range;
     }
@@ -72,11 +59,8 @@ const TrackingDottedGraph = ({ data, width, filterType }) => {
 
     const dataMap = {};
     data.forEach((d) => {
-      const dateObj = new Date(d.date);
-      const key = toUTCDateKey(dateObj);
-      if (!dataMap[key]) {
-        dataMap[key] = [];
-      }
+      const key = toUTCDateKey(new Date(d.date));
+      if (!dataMap[key]) dataMap[key] = [];
       const numericGrade = parseFloat(d.grade);
       dataMap[key].push(isNaN(numericGrade) ? 0 : numericGrade);
     });
@@ -88,7 +72,7 @@ const TrackingDottedGraph = ({ data, width, filterType }) => {
       return { date, value: avg };
     });
 
-    // --- Drawing and animation starts here ---
+    // --- SVG setup ---
     const svg = d3
       .select(svgRef.current)
       .attr("width", width)
@@ -98,6 +82,28 @@ const TrackingDottedGraph = ({ data, width, filterType }) => {
 
     svg.selectAll("*").remove();
 
+    // --- Gradient definition ---
+    const defs = svg.append("defs");
+
+    const gradient = defs
+      .append("linearGradient")
+      .attr("id", "area-gradient")
+      .attr("x1", "0%")
+      .attr("y1", "0%")
+      .attr("x2", "0%")
+      .attr("y2", "100%");
+
+    gradient.append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", "#5D3FD3")
+      .attr("stop-opacity", 0.6);
+
+    gradient.append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", "#5D3FD3")
+      .attr("stop-opacity", 0);
+
+    // --- Scales ---
     const x = d3
       .scaleUtc()
       .domain(d3.extent(parsedData, (d) => d.date))
@@ -114,67 +120,48 @@ const TrackingDottedGraph = ({ data, width, filterType }) => {
       .domain([0, 50, 100])
       .range(["red", "yellow", "green"]);
 
-    let xAxis;
-    if (filterType === "year") {
-      xAxis = d3
-        .axisBottom(x)
-        .ticks(d3.timeMonth.every(1))
-        .tickFormat(d3.timeFormat("%b"));
-    } else {
-      xAxis = d3
-        .axisBottom(x)
-        .ticks(d3.timeDay.every(1))
-        .tickFormat(d3.timeFormat("%d"));
-    }
+    // --- Axes ---
+    const xAxis =
+      filterType === "year"
+        ? d3.axisBottom(x).ticks(d3.timeMonth.every(1)).tickFormat(d3.timeFormat("%b"))
+        : d3.axisBottom(x).ticks(d3.timeDay.every(1)).tickFormat(d3.timeFormat("%d"));
 
-    svg
-      .append("g")
+    svg.append("g")
       .attr("transform", `translate(0,${height - marginBottom})`)
-      .call(xAxis)
-      .call((g) => g.select(".domain").attr("stroke", "black"));
+      .call(xAxis);
 
-    let xAxisLabel;
-    if (filterType === "year") {
-      xAxisLabel = "Months";
-    } else if (parsedData.length) {
-      const formatMonthDay = d3.timeFormat("%b %d");
-      const first = formatMonthDay(parsedData[0].date);
-      const last = formatMonthDay(parsedData[parsedData.length - 1].date);
-      xAxisLabel = `${first} - ${last}`;
-    } else {
-      xAxisLabel = "";
-    }
-
-    svg
-      .append("text")
-      .attr("text-anchor", "middle")
-      .attr("x", width / 2)
-      .attr("y", height - 10)
-      .style("font-size", "14px")
-      .text(xAxisLabel);
-
-    svg
-      .append("g")
+    svg.append("g")
       .attr("transform", `translate(${marginLeft},0)`)
-      .call(d3.axisLeft(y).ticks(5))
-      .call((g) => g.select(".domain").attr("stroke", "black"));
+      .call(d3.axisLeft(y).ticks(5));
 
-    svg
-      .append("text")
-      .attr("text-anchor", "middle")
-      .attr("transform", `rotate(-90)`)
-      .attr("x", -(height / 2))
-      .attr("y", 15)
-      .style("font-size", "14px")
-      .text(filterType === "year" ? "Average Grade per Month (%)" : "Average Grade per Day (%)");
+    // --- Area generator ---
+    const area = d3
+      .area()
+      .x((d) => x(d.date))
+      .y0(y(0))
+      .y1((d) => y(d.value))
+      .curve(d3.curveMonotoneX);
 
+    // --- Draw shaded area FIRST ---
+    const areaPath = svg
+      .append("path")
+      .datum(parsedData)
+      .attr("fill", "url(#area-gradient)")
+      .attr("d", area)
+      .attr("opacity", 0);
+
+    areaPath
+      .transition()
+      .duration(800)
+      .attr("opacity", 1);
+
+    // --- Line generator ---
     const line = d3
       .line()
       .x((d) => x(d.date))
       .y((d) => y(d.value))
       .curve(d3.curveMonotoneX);
 
-    // Append path and prepare for animation
     const path = svg
       .append("path")
       .datum(parsedData)
@@ -183,35 +170,33 @@ const TrackingDottedGraph = ({ data, width, filterType }) => {
       .attr("stroke-width", 2)
       .attr("d", line);
 
-    // Animate the line drawing using stroke-dasharray trick
     const totalLength = path.node().getTotalLength();
+
     path
       .attr("stroke-dasharray", totalLength)
       .attr("stroke-dashoffset", totalLength)
       .transition()
-      .duration(1000 + parsedData.length * 150) // duration depends on number of dots
+      .duration(1000 + parsedData.length * 150)
       .ease(d3.easeLinear)
       .attr("stroke-dashoffset", 0);
 
-    // Append dots with initial radius 0
+    // --- Dots ---
     const dots = svg
       .append("g")
-      .attr("stroke", "#000")
-      .attr("stroke-opacity", 0.3)
       .selectAll("circle")
       .data(parsedData)
       .join("circle")
       .attr("cx", (d) => x(d.date))
       .attr("cy", (d) => y(d.value))
-      .attr("r", 0) // start invisible
+      .attr("r", 0)
       .attr("fill", (d) => color(d.value));
 
-    // Animate dots one by one
     dots
       .transition()
-      .delay((d, i) => 800 + i * 150) // slightly after line starts drawing
+      .delay((d, i) => 800 + i * 150)
       .duration(300)
       .attr("r", 5);
+
   }, [data, width, filterType]);
 
   return <svg ref={svgRef}></svg>;

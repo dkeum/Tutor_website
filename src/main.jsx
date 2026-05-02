@@ -8,6 +8,10 @@ import { Loader2 } from "lucide-react";
 import store from "./app/store";
 import { Provider } from "react-redux";
 
+import ProtectedRoute from "./components/ProtectRoute.jsx";
+import { AuthProvider } from "./hook/useAuthSession.jsx";
+
+
 // Lazy load the pages
 const Contactme = lazy(() => import("./pages/Contactme"));
 const About = lazy(() => import("./pages/About"));
@@ -27,13 +31,13 @@ const TrackImprovement = lazy(() => import("./components/userProfile/TrackImprov
 
 const History = lazy(() => import("./components/userProfile/History"));
 
-const Mistakes = lazy(()=>  import("./components/userProfile/Mistakes"))
+const Mistakes = lazy(() => import("./components/userProfile/Mistakes"))
 
-const Test = lazy(()=>  import("./pages/Test"))
+const Test = lazy(() => import("./pages/Test"))
 
-const HomeworkHelp = lazy(()=>  import("./pages/HomeworkHelp"))
-const Donate = lazy(()=>  import("./pages/Donate"))
-const FinalExamPrep = lazy(()=>  import("./pages/FinalExamPrep"))
+const HomeworkHelp = lazy(() => import("./pages/HomeworkHelp"))
+const Donate = lazy(() => import("./pages/Donate"))
+const FinalExamPrep = lazy(() => import("./pages/FinalExamPrep"))
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -43,8 +47,9 @@ const Loader = () => (
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
- 
-      <Provider store={store}>
+
+    <Provider store={store}>
+      <AuthProvider>
         <BrowserRouter>
           <Suspense fallback={<Loader />}>
             <Routes>
@@ -54,23 +59,49 @@ createRoot(document.getElementById("root")).render(
               <Route path="/Waitlist" element={<Waitlist />} />
               <Route path="/freeResources" element={<FreeResources />} />
               <Route path="/freeResources/:subject" element={<Subject />} />
-              <Route path="/showpersonaldata" element={<ShowPersonalData />} />
+              <Route path="/showpersonaldata" element={
+                <ProtectedRoute>
+                  <ShowPersonalData />
+                </ProtectedRoute>
+              } />
               <Route
                 path="/surveypersonaldetail"
                 element={<SurveyPersonalDetail />}
               />
-              <Route path="/question/:topic" element={<SolveProblems />} />
+              <Route path="/question/:topic" element={
+                <ProtectedRoute>
+
+                  <SolveProblems />
+                </ProtectedRoute>
+              } />
               <Route path="/login" element={<Login />} />
-              <Route path="/user/track-improvement" element={<TrackImprovement  />} />
-              <Route path="/user/setting" element={<History />} />
-              <Route path="/user/mistakes" element={<Mistakes />} />
-              <Route path="/random/test" element={<Test />} />
+              <Route path="/user/track-improvement" element={
+                <ProtectedRoute>
+                  <TrackImprovement />
+                </ProtectedRoute>
+              } />
+              <Route path="/user/setting" element={
+                <ProtectedRoute>
+                  <History />
+                </ProtectedRoute>
+              } />
+              <Route path="/user/mistakes" element={
+                <ProtectedRoute>
+                  <Mistakes />
+                </ProtectedRoute>
+              } />
+              <Route path="/random/test" element={<ProtectedRoute>
+                <Test />
+              </ProtectedRoute>} />
               <Route path="/homework-help" element={<HomeworkHelp />} />
               <Route path="/donate" element={<Donate />} />
-              <Route path="/final-exam-prep" element={<FinalExamPrep />} />
+              <Route path="/final-exam-prep" element={<ProtectedRoute>
+                <FinalExamPrep />
+              </ProtectedRoute>} />
             </Routes>
           </Suspense>
         </BrowserRouter>
-      </Provider>
+      </AuthProvider>
+    </Provider>
   </StrictMode>
 );

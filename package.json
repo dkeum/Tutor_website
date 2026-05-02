@@ -47,6 +47,7 @@
     "mathquill4quill": "^2.4.0",
     "motion": "^12.23.12",
     "pdfjs-dist": "^5.3.93",
+    "radix-ui": "^1.4.3",
     "react": "^19.1.0",
     "react-activity-calendar": "^2.7.13",
     "react-dom": "^19.1.0",

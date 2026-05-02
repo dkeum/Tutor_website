@@ -17,6 +17,7 @@ import BackgroundWrapper from "../components/BackgroundWrapper";
 
 import { useDispatch } from "react-redux";
 import { initializeState } from "../features/auth/personDetails";
+import { supabase } from "../db/supabaseclient";
 
 const LoginSignup = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -57,7 +58,13 @@ const LoginSignup = () => {
           }
         );
         // console.log(response)
-        dispatch(initializeState({ data: response.data.student , email}));
+
+        await supabase.auth.setSession({
+          access_token: response.data.access_token,
+          refresh_token: response.data.refresh_token,
+        })
+
+        dispatch(initializeState({ data: response.data.student, email }));
 
         if (response.data.student.name === "") {
           navigate("/surveypersonaldetail");
