@@ -1,345 +1,354 @@
 import React, { useRef, useEffect } from "react";
 import * as d3 from "d3";
-import { useSelector } from "react-redux";
 
-
-const temp_progressArray = [
-  {
-    topic_name: "Rational Numbers",
-    sections: [
-      { progress: 0, section_id: 3, section_name: "What are Rational Numbers" },
-      { progress: 0, section_id: 5, section_name: "Subtracting Rational Numbers" },
-      { progress: 1, best_grade: 100, latest_grade: "50.00", section_id: 6, section_name: "Multiplying Rational Numbers" },
-      { progress: 0, section_id: 7, section_name: "Dividing Rational Numbers" },
-      { progress: 0, section_id: 4, section_name: "Adding Rational Numbers" },
-      { progress: 0, section_id: 8, section_name: "Combined Operations with Rational Numbers" }
-    ]
-  },
-  {
-    topic_name: "Exponent and Power",
-    sections: [
-      { progress: 1, best_grade: 80, latest_grade: "60.00", section_id: 9, section_name: "Laws of Exponents" },
-      { progress: 0, section_id: 10, section_name: "Exponential Form" },
-      { progress: 0, section_id: 11, section_name: "Negative Exponents" },
-      { progress: 0, section_id: 12, section_name: "Powers of 10" }
-    ]
-  },
-  {
-    topic_name: "Polynomials",
-    sections: [
-      { progress: 0, section_id: 13, section_name: "Introduction to Polynomials" },
-      { progress: 0, section_id: 14, section_name: "Types of Polynomials" },
-      { progress: 1, best_grade: 90, latest_grade: "90.00", section_id: 15, section_name: "Addition of Polynomials" },
-      { progress: 0, section_id: 16, section_name: "Subtraction of Polynomials" },
-      { progress: 0, section_id: 17, section_name: "Multiplication of Polynomials" },
-      { progress: 0, section_id: 18, section_name: "Division of Polynomials" }
-    ]
-  }
-];
-const temp_mark_sections = [
-  {
-    date: "2025-08-10T09:15:24.000Z",
-    grade: "66.67",
-    topic: "Rational Numbers",
-    recordedAnswers: [
-      { answer: "5", isCorrect: true, timeTaken: 12, questionId: 101 },
-      { answer: "3/4", isCorrect: false, timeTaken: 18, questionId: 102 },
-      { answer: "7", isCorrect: true, timeTaken: 9, questionId: 103 },
-    ],
-  },
-  {
-    date: "2025-08-11T11:05:42.000Z",
-    grade: "33.33",
-    topic: "Rational Numbers",
-    recordedAnswers: [
-      { answer: "2/5", isCorrect: false, timeTaken: 15, questionId: 104 },
-      { answer: "4", isCorrect: true, timeTaken: 7, questionId: 105 },
-      { answer: "", isCorrect: false, timeTaken: 20, questionId: 106 },
-    ],
-  },
-  {
-    date: "2025-08-12T14:27:10.000Z",
-    grade: "100.00",
-    topic: "Exponent and Power",
-    recordedAnswers: [
-      { answer: "x^2", isCorrect: true, timeTaken: 10, questionId: 201 },
-      { answer: "x^-3", isCorrect: true, timeTaken: 14, questionId: 202 },
-    ],
-  },
-  {
-    date: "2025-08-13T16:40:55.000Z",
-    grade: "0.00",
-    topic: "Polynomials",
-    recordedAnswers: [
-      { answer: "x^2 + y^2", isCorrect: false, timeTaken: 30, questionId: 301 },
-      { answer: "2x + 3", isCorrect: false, timeTaken: 22, questionId: 302 },
-    ],
-  },
-  {
-    date: "2025-08-14T19:05:37.000Z",
-    grade: "50.00",
-    topic: "Polynomials",
-    recordedAnswers: [
-      { answer: "x^3", isCorrect: true, timeTaken: 11, questionId: 303 },
-      { answer: "x^2 - 4", isCorrect: false, timeTaken: 25, questionId: 304 },
-    ],
-  },
+// Sample mock tracking dataset representing raw student activity timestamps and hours logged
+const hours_mock_data = [
+  { date: "2025-08-01T10:00:00Z", hours: 1.2 },
+  { date: "2025-08-02T10:00:00Z", hours: 0.5 },
+  { date: "2025-08-04T10:00:00Z", hours: 2.1 },
+  { date: "2025-08-07T10:00:00Z", hours: 1.8 },
+  { date: "2025-08-10T10:00:00Z", hours: 0.8 },
+  { date: "2025-08-12T10:00:00Z", hours: 1.5 },
+  { date: "2025-09-01T10:00:00Z", hours: 1.0 },
+  { date: "2025-09-03T10:00:00Z", hours: 2.5 },
+  { date: "2025-09-05T10:00:00Z", hours: 0.4 },
+  { date: "2025-09-08T10:00:00Z", hours: 3.0 },
+  { date: "2025-09-11T10:00:00Z", hours: 1.2 },
+  { date: "2025-09-14T10:00:00Z", hours: 0.9 },
 ];
 
-
-const TrackingLoggedInActivity_Progress = ({ filterType }) => {
+const TrackingLoggedInActivtiy_Progress = ({ width, filterType }) => {
+  const containerRef = useRef();
   const svgRef = useRef();
-  const progressArray = useSelector((state) => state.personDetail.progressArray) || temp_progressArray;
-  const mark_sections = useSelector((state) => state.personDetail.marks_section) ||temp_mark_sections;
-  const timeGoals = useSelector((state) => state.personDetail.actual_time_goal) || 3;
+  const tooltipRef = useRef();
 
-  // console.log(progressArray)
-
-  console.log(mark_sections)
+  // Baseline constant: Student goal is 5 hours per week
+  const WEEKLY_GOAL_HOURS = 5.0;
 
   useEffect(() => {
-    if (!progressArray || !mark_sections) return;
-  
-    const totalSections = progressArray.reduce((acc, topic) => acc + topic.sections.length, 0);
-    const seenSections = new Set();
-  
-    // --- Determine latest and earliest dates based on filterType ---
-    const latestDateInData = mark_sections.length
-      ? new Date(d3.max(mark_sections, (d) => new Date(d.date)))
-      : new Date();
-  
-    let startDate, endDate, timeUnit = "day";
-  
+    if (!width) return;
+
+    const height = 420;
+    const marginTop = 30;
+    const marginRight = 20;
+    const marginBottom = 65;
+    const marginLeft = 60;
+
+    // Use latest mock tracking date anchor point
+    const latestDateInData = new Date(d3.max(hours_mock_data, (d) => new Date(d.date)) || "2025-09-14T10:00:00Z");
+
+    let start, end;
+    let axisContextLabel = "Study Hours Goal Tracker";
+    let targetGoalValue = WEEKLY_GOAL_HOURS; // Dynamic metric threshold line value
+
+    // ─── DYNAMIC METRIC INTERVAL CONFIGURATION ──────────────────────────
     if (filterType === "week") {
-      endDate = new Date(latestDateInData);
-      startDate = new Date(latestDateInData);
-      startDate.setDate(endDate.getDate() - 6);
+      end = new Date(latestDateInData);
+      start = new Date(latestDateInData);
+      start.setDate(end.getDate() - 6);
+      axisContextLabel = "Hours Logged This Week";
+      // Daily target metric calculation baseline (5 hours / 7 days)
+      targetGoalValue = WEEKLY_GOAL_HOURS / 7;
     } else if (filterType === "month") {
-      startDate = new Date(latestDateInData.getFullYear(), latestDateInData.getMonth(), 1);
-      endDate = new Date(latestDateInData.getFullYear(), latestDateInData.getMonth() + 1, 0);
+      // Look back exactly 4 weeks to match a cleanly parsed 28-day study graph window
+      end = new Date(latestDateInData);
+      start = new Date(latestDateInData);
+      start.setDate(end.getDate() - 27);
+      axisContextLabel = "Weekly Commitment Tracker (Past Month)";
+      targetGoalValue = WEEKLY_GOAL_HOURS; 
     } else if (filterType === "year") {
-      startDate = new Date(latestDateInData.getFullYear(), 0, 1);
-      endDate = new Date(latestDateInData.getFullYear(), 11, 31);
-      timeUnit = "month";
+      start = new Date(latestDateInData.getFullYear(), 0, 1);
+      end = new Date(latestDateInData.getFullYear(), 11, 31);
+      axisContextLabel = "Monthly Commitment Tracker (This Year)";
+      // Monthly target scaling calculation (52 weeks / 12 months * 5 hours)
+      targetGoalValue = (52 / 12) * WEEKLY_GOAL_HOURS;
     }
-  
-    // Helper to generate date key
-    const toUTCDateKey = (date) => {
-      if (timeUnit === "day") {
+
+    const utcStart = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()));
+    const utcEnd = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate()));
+
+    // ─── AGGREGATION ENGINE PARSING ─────────────────────────────────────
+    function getGroupKey(date) {
+      if (filterType === "week") {
         return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
+      } else if (filterType === "month") {
+        // Segment into 4 distinct calendar blocks index strings
+        const diffTime = Math.abs(date - utcStart);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const weekIndex = Math.min(Math.floor(diffDays / 7), 3);
+        return `Week ${weekIndex + 1}`;
       } else {
         return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
       }
-    };
-  
-    // Generate range of dates
-    const generateDateRange = (start, end, unit) => {
-      const range = [];
-      let current = new Date(start);
-      while (current <= end) {
-        range.push(new Date(current));
-        if (unit === "day") current.setUTCDate(current.getUTCDate() + 1);
-        else current.setUTCMonth(current.getUTCMonth() + 1);
-      }
-      return range;
-    };
-  
-    const allDates = generateDateRange(startDate, endDate, timeUnit);
-  
-    // Group marks by date
-    const grouped = d3.group(
-      mark_sections,
-      (d) => toUTCDateKey(new Date(d.date))
-    );
-  
-    let cumulativeTimeSpent = 0;
-  
-    const progressTimeline = allDates.map((day) => {
-      const dayKey = toUTCDateKey(day);
-      const entries = grouped.get(dayKey) || [];
-  
-      entries.forEach((entry) => seenSections.add(entry.section_name || "Rational Numbers"));
-  
-      entries.forEach((entry) => {
-        entry.recordedAnswers?.forEach((ans) => {
-          cumulativeTimeSpent += ans.timeTaken || 0;
-        });
-      });
-  
-      return {
-        date: day,
-        progress: (seenSections.size / totalSections) * 100,
-        hours: cumulativeTimeSpent / 3600,
-        timeGoal: timeGoals
-      };
-    });
-  
-    // --- D3 rendering ---
-    const width = 600;
-    const height = 420;
-    const margin = { top: 75, right: 60, bottom: 70, left: 60 };
-  
-    const svg = d3.select(svgRef.current)
-      .attr("width", width)
-      .attr("height", height);
-    svg.selectAll("*").remove();
-  
-    // Clip path
-    svg.append("defs")
-      .append("clipPath")
-      .attr("id", "clip")
-      .append("rect")
-      .attr("x", margin.left)
-      .attr("y", margin.top)
-      .attr("width", width - margin.left - margin.right)
-      .attr("height", height - margin.top - margin.bottom);
-  
-    // Scales
-    const x = d3.scaleTime()
-      .domain([startDate, endDate])
-      .range([margin.left, width - margin.right]);
-  
-    const yLeft = d3.scaleLinear()
-      .domain([0, 100]).nice()
-      .range([height - margin.bottom, margin.top]);
-  
-    const maxHours = Math.max(d3.max(progressTimeline, (d) => d.hours), timeGoals || 0);
-    const yRight = d3.scaleLinear()
-      .domain([0, maxHours * 1.3]).nice()
-      .range([height - margin.bottom, margin.top]);
-  
-    // Lines
-    const lineProgress = d3.line()
-      .x((d) => x(d.date))
-      .y((d) => yLeft(d.progress));
-  
-    const lineHours = d3.line()
-      .x((d) => x(d.date))
-      .y((d) => yRight(d.hours));
-  
-    // Axes
-    const xAxis = timeUnit === "month"
-      ? d3.axisBottom(x).ticks(d3.timeMonth.every(1)).tickFormat(d3.timeFormat("%b"))
-      : d3.axisBottom(x).ticks(d3.timeDay.every(1)).tickFormat(d3.timeFormat("%d"));
-  
-    svg.append("g")
-      .attr("transform", `translate(0,${height - margin.bottom})`)
-      .call(xAxis)
-      .call((g) => g.select(".domain").attr("stroke", "black"));
-  
-    svg.append("g")
-      .attr("transform", `translate(${margin.left},0)`)
-      .call(d3.axisLeft(yLeft).ticks(5))
-      .call((g) => g.select(".domain").attr("stroke", "black"));
-  
-    svg.append("g")
-      .attr("transform", `translate(${width - margin.right},0)`)
-      .call(d3.axisRight(yRight).ticks(5))
-      .call((g) => g.select(".domain").attr("stroke", "black"));
-  
-    // Axis labels
-    svg.append("text")
-      .attr("x", -height / 2)
-      .attr("y", 20)
-      .attr("transform", "rotate(-90)")
-      .attr("text-anchor", "middle")
-      .attr("font-size", "14px")
-      .text("Completion Progress (%)");
-  
-    svg.append("text")
-      .attr("x", height / 2)
-      .attr("y", width - 10)
-      .attr("transform", `rotate(90, ${width - 10}, 0)`)
-      .attr("text-anchor", "middle")
-      .attr("font-size", "14px")
-      .text("Hours");
-  
-    const monthName = d3.timeFormat("%B")(startDate);
-    svg.append("text")
-      .attr("x", margin.left + (width - margin.left - margin.right) / 2)
-      .attr("y", height - 15)
-      .attr("text-anchor", "middle")
-      .attr("font-size", "14px")
-      .text(timeUnit === "month" ? "Months" : `Days in ${monthName}`);
-  
-    // Animate lines
-    const drawLine = (path, duration = 1500) => {
-      const totalLength = path.node().getTotalLength();
-      path
-        .attr("stroke-dasharray", totalLength)
-        .attr("stroke-dashoffset", totalLength)
-        .transition()
-        .duration(duration)
-        .ease(d3.easeLinear)
-        .attr("stroke-dashoffset", 0);
-    };
-  
-    const progressPath = svg.append("path")
-      .datum(progressTimeline)
-      .attr("fill", "none")
-      .attr("stroke", "#2196F3")
-      .attr("stroke-width", 2)
-      .attr("d", lineProgress)
-      .attr("clip-path", "url(#clip)");
-    drawLine(progressPath, 2000);
-  
-    const hoursPath = svg.append("path")
-      .datum(progressTimeline)
-      .attr("fill", "none")
-      .attr("stroke", "#FF9800")
-      .attr("stroke-width", 2)
-      .attr("d", lineHours)
-      .attr("clip-path", "url(#clip)");
-    drawLine(hoursPath, 2000);
-  
-    // Time goal line
-    svg.append("line")
-      .attr("x1", margin.left)
-      .attr("x2", width - margin.right)
-      .attr("y1", yRight(timeGoals))
-      .attr("y2", yRight(timeGoals))
-      .attr("stroke", "#4CAF50")
-      .attr("stroke-dasharray", "4 4")
-      .attr("stroke-width", 2)
-      .attr("clip-path", "url(#clip)")
-      .attr("opacity", 0)
-      .transition()
-      .duration(2000)
-      .attr("opacity", 1);
-  
-    // Legend (unchanged)
-    const legendData = [
-      { label: "Progress (%)", color: "#2196F3", type: "line" },
-      { label: "Hours logged", color: "#FF9800", type: "line" },
-      { label: "Time goal", color: "#4CAF50", type: "dashed" }
-    ];
-  
-    const legend = svg.append("g")
-      .attr("transform", `translate(${width - margin.right - 80}, ${margin.top-70})`);
-  
-    legendData.forEach((item, i) => {
-      const legendRow = legend.append("g")
-        .attr("transform", `translate(0, ${i * 20})`);
-      legendRow.append("line")
-        .attr("x1", 0)
-        .attr("x2", 20)
-        .attr("y1", 8)
-        .attr("y2", 8)
-        .attr("stroke", item.color)
-        .attr("stroke-width", 2)
-        .attr("stroke-dasharray", item.type === "dashed" ? "4 4" : null);
-      legendRow.append("text")
-        .attr("x", 30)
-        .attr("y", 12)
-        .attr("fill", "#333")
-        .attr("font-size", "12px")
-        .text(item.label);
-    });
-  
-  }, [progressArray, mark_sections, timeGoals, filterType]);
-  
+    }
 
-  return <svg ref={svgRef}></svg>;
+    // Generate intervals for structural mapping
+    let dateIntervals = [];
+    if (filterType === "week") {
+      let curr = new Date(utcStart);
+      while (curr <= utcEnd) {
+        dateIntervals.push({ date: new Date(curr), label: d3.timeFormat("%d")(curr), key: getGroupKey(curr) });
+        curr.setUTCDate(curr.getUTCDate() + 1);
+      }
+    } else if (filterType === "month") {
+      // Establish 4 structural weekly increments nodes
+      for (let i = 0; i < 4; i++) {
+        const d = new Date(utcStart);
+        d.setUTCDate(d.getUTCDate() + (i * 7));
+        dateIntervals.push({ date: d, label: `Wk ${i + 1}`, key: `Week ${i + 1}` });
+      }
+    } else {
+      for (let m = 0; m < 12; m++) {
+        const d = new Date(Date.UTC(utcStart.getUTCFullYear(), m, 1));
+        dateIntervals.push({ date: d, label: d3.timeFormat("%b")(d), key: `${d.getUTCFullYear()}-${String(m + 1).padStart(2, "0")}` });
+      }
+    }
+
+    // Initialize mapping hash table
+    const aggregateMap = {};
+    dateIntervals.forEach(node => { aggregateMap[node.key] = 0; });
+
+    // Populate actual tracking values from mock data store
+    hours_mock_data.forEach(d => {
+      const targetDate = new Date(d.date);
+      if (targetDate >= start && targetDate <= end) {
+        const key = getGroupKey(targetDate);
+        if (aggregateMap[key] !== undefined) {
+          aggregateMap[key] += d.hours;
+        }
+      }
+    });
+
+    const parsedData = dateIntervals.map(node => ({
+      date: node.date,
+      displayLabel: node.label,
+      value: aggregateMap[node.key]
+    }));
+
+    // ─── DYNAMIC SCALE DOMAIN CALCULATION ───────────────────────────────
+    // Read max value and verify against goal line threshold to protect rendering caps
+    const maxLoggedValue = d3.max(parsedData, d => d.value) || 0;
+    const yMaxDomain = Math.max(maxLoggedValue, targetGoalValue) * 1.25;
+
+    // --- SVG Base Shell Engine Configuration ---
+    const svg = d3
+      .select(svgRef.current)
+      .attr("width", width)
+      .attr("height", height)
+      .attr("viewBox", [0, 0, width, height])
+      .attr("style", "max-width: 100%; height: auto;");
+
+    svg.selectAll("*").remove();
+
+    // --- Indigo Gradient Base Mapping Definitions ---
+    const defs = svg.append("defs");
+    const gradient = defs
+      .append("linearGradient")
+      .attr("id", "hours-area-gradient")
+      .attr("x1", "0%")
+      .attr("y1", "0%")
+      .attr("x2", "0%")
+      .attr("y2", "100%");
+
+    gradient.append("stop").attr("offset", "0%").attr("stop-color", "#6366F1").attr("stop-opacity", 0.4);
+    gradient.append("stop").attr("offset", "100%").attr("stop-color", "#6366F1").attr("stop-opacity", 0);
+
+    // --- Axis Linear Scale Transformations ---
+    const x = d3
+      .scalePoint()
+      .domain(parsedData.map(d => d.displayLabel))
+      .range([marginLeft, width - marginRight]);
+
+    const y = d3
+      .scaleLinear()
+      .domain([0, yMaxDomain])
+      .nice()
+      .range([height - marginBottom, marginTop]);
+
+    // --- X Axis Generation Rendering Layout ---
+    const xAxis = d3.axisBottom(x);
+    const xAxisGroup = svg.append("g")
+      .attr("transform", `translate(0,${height - marginBottom})`)
+      .call(xAxis)
+      .attr("color", "#E2E8F0")
+      .selectAll("text")
+      .attr("fill", "#718096")
+      .style("font-weight", "500")
+      .style("font-size", "11px");
+
+    // Append day tags if looking at weekly metrics
+    if (filterType === "week") {
+      svg.selectAll(".tick").each(function(_, index) {
+        const targetNode = parsedData[index];
+        if (targetNode) {
+          d3.select(this)
+            .append("text")
+            .attr("fill", "#718096")
+            .attr("y", 26)
+            .attr("x", 0)
+            .attr("dy", "0.71em")
+            .style("font-size", "11px")
+            .style("opacity", 0.7)
+            .text(d3.timeFormat("%a")(targetNode.date));
+        }
+      });
+    }
+
+    // Context Section Marker Title
+    svg.append("text")
+      .attr("text-anchor", "middle")
+      .attr("x", marginLeft + (width - marginLeft - marginRight) / 2)
+      .attr("y", height - 8)
+      .attr("fill", "#718096")
+      .style("font-size", "13px")
+      .style("font-weight", "600")
+      .text(axisContextLabel);
+
+    // --- Y Axis Rendering Engine Configuration ---
+    svg.append("g")
+      .attr("transform", `translate(${marginLeft},0)`)
+      .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d.toFixed(1)}h`))
+      .attr("color", "#E2E8F0")
+      .selectAll("text")
+      .attr("fill", "#718096")
+      .style("font-weight", "500");
+
+    // Y Axis Title Label Token
+    svg.append("text")
+      .attr("text-anchor", "start")
+      .attr("x", marginLeft - 50)
+      .attr("y", marginTop - 15)
+      .attr("fill", "#4A5568")
+      .style("font-size", "14px")
+      .style("font-weight", "600")
+      .text("Time (Hours)");
+
+    // ─── GOAL LINE GENERATION ENGINE ────────────────────────────────────
+    // Render horizontal baseline reference rule tracking standard performance parameters
+    svg.append("line")
+      .attr("x1", marginLeft)
+      .attr("y1", y(targetGoalValue))
+      .attr("x2", width - marginRight)
+      .attr("y2", y(targetGoalValue))
+      .attr("stroke", "#94A3B8")
+      .attr("stroke-width", 2)
+      .attr("stroke-dasharray", "5,5");
+
+    // ─── VISUAL DATA LINE ENGINE CHARTS ─────────────────────────────────
+    const area = d3
+      .area()
+      .x(d => x(d.displayLabel))
+      .y0(y(0))
+      .y1(d => y(d.value))
+      .curve(d3.curveMonotoneX);
+
+    svg.append("path")
+      .datum(parsedData)
+      .attr("fill", "url(#hours-area-gradient)")
+      .attr("d", area);
+
+    const line = d3
+      .line()
+      .x(d => x(d.displayLabel))
+      .y(d => y(d.value))
+      .curve(d3.curveMonotoneX);
+
+    svg.append("path")
+      .datum(parsedData)
+      .attr("fill", "none")
+      .attr("stroke", "#6366F1")
+      .attr("stroke-width", 4)
+      .attr("d", line);
+
+    // --- Interactive Hover Handling Tooltips Engine ---
+    const tooltip = d3.select(tooltipRef.current);
+    const dateTitleFormatter = filterType === "year" ? d3.timeFormat("%B %Y") : d3.timeFormat("%A, %b %d");
+
+    const dots = svg
+      .append("g")
+      .selectAll("circle")
+      .data(parsedData)
+      .join("circle")
+      .attr("cx", d => x(d.displayLabel))
+      .attr("cy", d => y(d.value))
+      .attr("r", 6)
+      .attr("fill", "#ffffff")
+      .attr("stroke", "#6366F1")
+      .attr("stroke-width", 2.5)
+      .style("cursor", "pointer");
+
+    dots
+      .on("mouseover", function (event, d) {
+        d3.select(this)
+          .transition()
+          .duration(150)
+          .attr("r", 8)
+          .attr("stroke-width", 3.5);
+
+        const containerBounds = containerRef.current.getBoundingClientRect();
+        const mouseX = event.clientX - containerBounds.left;
+        const mouseY = event.clientY - containerBounds.top;
+
+        // Formulate relative contextual text strings based on temporal metrics context
+        let dateHeaderString = dateTitleFormatter(d.date);
+        if (filterType === "month") {
+          dateHeaderString = d.displayLabel;
+        }
+
+        tooltip
+          .style("opacity", 1)
+          .style("left", `${mouseX}px`)
+          .style("top", `${mouseY - 55}px`)
+          .html(`
+            <div style="font-weight: 600; margin-bottom: 2px; white-space: nowrap;">${dateHeaderString}</div>
+            <div style="color: #6366F1; font-weight: bold;">Logged: ${d.value.toFixed(2)} hrs</div>
+            <div style="color: #475569; font-size: 11px; margin-top: 2px;">Target: ${targetGoalValue.toFixed(2)} hrs</div>
+          `);
+      })
+      .on("mousemove", function (event) {
+        const containerBounds = containerRef.current.getBoundingClientRect();
+        const mouseX = event.clientX - containerBounds.left;
+        const mouseY = event.clientY - containerBounds.top;
+
+        tooltip
+          .style("left", `${mouseX}px`)
+          .style("top", `${mouseY - 55}px`);
+      })
+      .on("mouseleave", function () {
+        d3.select(this)
+          .transition()
+          .duration(150)
+          .attr("r", 6)
+          .attr("stroke-width", 2.5);
+
+        tooltip.style("opacity", 0);
+      });
+
+  }, [width, filterType]);
+
+  return (
+    <div ref={containerRef} style={{ position: "relative", width: "100%" }}>
+      <svg ref={svgRef}></svg>
+      <div
+        ref={tooltipRef}
+        style={{
+          position: "absolute",
+          opacity: 0,
+          pointerEvents: "none",
+          backgroundColor: "rgba(255, 255, 255, 0.96)",
+          border: "1px solid #E2E8F0",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+          borderRadius: "8px",
+          padding: "8px 12px",
+          fontSize: "14px",
+          color: "#1A202C",
+          transform: "translateX(-50%)",
+          transition: "opacity 0.15s ease, left 0.05s linear, top 0.05s linear",
+          zIndex: 100,
+        }}
+      ></div>
+    </div>
+  );
 };
 
-export default TrackingLoggedInActivity_Progress;
+export default TrackingLoggedInActivtiy_Progress;

@@ -29,7 +29,7 @@ const Login = lazy(() => import("./pages/Login"));
 
 const TrackImprovement = lazy(() => import("./components/userProfile/TrackImprovement"));
 
-const History = lazy(() => import("./components/userProfile/History"));
+const Settings = lazy(() => import("./components/userProfile/Settings"));
 
 const Mistakes = lazy(() => import("./components/userProfile/Mistakes"))
 
@@ -38,6 +38,14 @@ const Test = lazy(() => import("./pages/Test"))
 const HomeworkHelp = lazy(() => import("./pages/HomeworkHelp"))
 const Donate = lazy(() => import("./pages/Donate"))
 const FinalExamPrep = lazy(() => import("./pages/FinalExamPrep"))
+
+const Pricing = lazy(() => import("./pages/Pricing"))
+
+const Lessons = lazy(() => import("./pages/Lessons"))
+
+const Tutors = lazy(() => import("./pages/Tutors"))
+
+const PracticeTopics = lazy(() => import("./pages/PracticeTopics"))
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -59,6 +67,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="/Waitlist" element={<Waitlist />} />
               <Route path="/freeResources" element={<FreeResources />} />
               <Route path="/freeResources/:subject" element={<Subject />} />
+              <Route path="/pricing" element={<Pricing />} />
               <Route path="/showpersonaldata" element={
                 <ProtectedRoute>
                   <ShowPersonalData />
@@ -75,17 +84,17 @@ createRoot(document.getElementById("root")).render(
                 </ProtectedRoute>
               } />
               <Route path="/login" element={<Login />} />
-              <Route path="/user/track-improvement" element={
+              <Route path="/track-improvement" element={
                 <ProtectedRoute>
                   <TrackImprovement />
                 </ProtectedRoute>
               } />
-              <Route path="/user/setting" element={
+              <Route path="/settings" element={
                 <ProtectedRoute>
-                  <History />
+                  <Settings />
                 </ProtectedRoute>
               } />
-              <Route path="/user/mistakes" element={
+              <Route path="/correct-mistakes" element={
                 <ProtectedRoute>
                   <Mistakes />
                 </ProtectedRoute>
@@ -93,6 +102,9 @@ createRoot(document.getElementById("root")).render(
               <Route path="/random/test" element={<ProtectedRoute>
                 <Test />
               </ProtectedRoute>} />
+              <Route path="/lessons" element={<Lessons />} />
+              <Route path="/tutors" element={<Tutors />} />
+              <Route path="/practice-topics" element={<PracticeTopics />} />
               <Route path="/homework-help" element={<HomeworkHelp />} />
               <Route path="/donate" element={<Donate />} />
               <Route path="/final-exam-prep" element={<ProtectedRoute>

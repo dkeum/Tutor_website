@@ -1,22 +1,16 @@
-import React, { useEffect, useRef } from "react";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
 import axios from "axios";
 
 const NavbarLoggedIn = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
   const startTimeRef = useRef(null);
   const email = useSelector((state) => state.personDetail.email);
-  const navigate = useNavigate(); // now you can use navigate()
+  const navigate = useNavigate();
 
+  // --- Session Tracking Lifecycle ---
   useEffect(() => {
-    // Store start time when user lands
     startTimeRef.current = new Date();
   
     const handleUnload = () => {
@@ -24,7 +18,6 @@ const NavbarLoggedIn = () => {
       sendSessionData(startTimeRef.current, endTime);
     };
   
-    // ✅ use the same function reference for add/remove
     const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden") {
         handleUnload();
@@ -38,7 +31,7 @@ const NavbarLoggedIn = () => {
       window.removeEventListener("beforeunload", handleUnload);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, []); // ✅ runs only once
+  }, []);
 
   const sendSessionData = async (start, end) => {
     try {
@@ -50,7 +43,7 @@ const NavbarLoggedIn = () => {
           email: email,
           startTime: start.toISOString(),
           endTime: end.toISOString(),
-          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // e.g. "America/Vancouver"
+          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         },
         { withCredentials: true }
       );
@@ -62,16 +55,9 @@ const NavbarLoggedIn = () => {
   const handleLogout = async () => {
     const endTime = new Date();
     try {
-      // console.log("Logging out..."); // Debug
-      // 1) Save the session
-      const response = await sendSessionData(startTimeRef.current, endTime);
+      await sendSessionData(startTimeRef.current, endTime);
 
-      if (response.error) {
-        navigate("/login");
-      }
-
-      // 2) Log out
-      const response2 = await axios.post(
+      await axios.post(
         import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
           ? "http://localhost:3000/logout"
           : "https://mathamagic-backend.vercel.app/logout",
@@ -79,72 +65,103 @@ const NavbarLoggedIn = () => {
         { withCredentials: true }
       );
 
-      // console.log("Logout success, navigating...");
-      // 3) Redirect
       navigate("/login");
     } catch (err) {
-      // console.error("Error during logout:", err);
       navigate("/login");
     }
   };
 
   return (
-    <div className="flex flex-row justify-between px-10 sticky top-0 z-50 bg-white py-2">
-      <div className="flex flex-row items-center gap-x-5 text-3xl">
-        <img
-          className="w-12 h-10"
-          src="https://github.com/dkeum/Tutor_website/blob/main/src/assets/logo.png?raw=true"
-          alt="logo"
-        />
-        <a href="/" className="font-extrabold pt-2">
-          Mathamagic
-        </a>
-      </div>
-      <div className="hidden sm:flex flex-row gap-x-20 items-center text-xl">
-        <NavigationMenu>
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <a className="font-semibold" href="/about">
-                  Book Tutor
-                </a>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <button className="font-semibold" onClick={()=>{navigate("/showpersonaldata")}}>
-                Profile
-                </button>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
+    <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm w-full">
+      <div className="flex flex-row justify-between items-center px-6 md:px-10 py-2">
+        
+        {/* Logo Element Block */}
+        <div className="flex flex-row items-center gap-x-3 text-2xl md:text-3xl">
+          <img className="w-10 h-8 md:w-12 md:h-10" src="/mathamagic_m_blue_star.svg" alt="logo" />
+          <a href="/" className="font-bold -ml-[25px] mt-[1px]">athamagic</a>
+        </div>
 
-            {/* <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <button className="font-semibold" onClick={()=>{navigate("/classes")}}>
-                  Classes
-                </button>
-              </NavigationMenuLink>
-            </NavigationMenuItem> */}
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <a className="font-semibold" href="/freeResources">
-                  Free Resources
-                </a>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+        {/* Desktop Interface Action Options */}
+        <div className="hidden md:flex flex-row gap-x-10 items-center text-xl">
+          <a href="/about" className="text-base font-semibold text-gray-700 hover:text-indigo-600 transition-colors">
+            About
+          </a>
+          <a href="/freeResources" className="text-base font-semibold text-gray-700 hover:text-indigo-600 transition-colors">
+            Free Resources
+          </a>
+          
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="p-[3px] relative text-base w-[130px] cursor-pointer font-medium"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
+            <div className="px-3 py-1.5 bg-black rounded-[10px] relative group transition duration-200 text-white hover:bg-transparent text-center">
+              <span className="font-extrabold">➜</span> Logout
+            </div>
+          </button>
+        </div>
 
+        {/* Mobile Action Dropdown Trigger Button */}
         <button
-          onClick={handleLogout}
-          className="p-[3px] relative text-xl w-[150px] cursor-pointer font-medium"
+          className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
+          onClick={() => setMenuOpen((prev) => !prev)}
+          aria-label="Toggle menu"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-          <div className="px-2 py-2 bg-black rounded-[10px] relative group transition duration-200 text-white hover:bg-transparent">
-            <span className="font-extrabold">➜</span> Logout
-          </div>
+          {menuOpen ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
         </button>
       </div>
+
+      {/* Mobile Menu Content Pane */}
+      {menuOpen && (
+        <div className="md:hidden border-t border-gray-100 bg-white px-6 py-4 flex flex-col gap-4 shadow-lg">
+          <a
+            href="/about"
+            className="text-lg font-semibold text-gray-800 hover:text-indigo-600 transition-colors py-1"
+            onClick={() => setMenuOpen(false)}
+          >
+            About
+          </a>
+          <a
+            href="/freeResources"
+            className="text-lg font-semibold text-gray-800 hover:text-indigo-600 transition-colors py-1"
+            onClick={() => setMenuOpen(false)}
+          >
+            Free Resources
+          </a>
+          <button
+            className="text-lg font-semibold text-gray-800 hover:text-indigo-600 transition-colors py-1 text-left w-full cursor-pointer"
+            onClick={() => {
+              setMenuOpen(false);
+              navigate("/showpersonaldata");
+            }}
+          >
+            Profile
+          </button>
+          
+          {/* Mobile Specific User Logoff Action Element */}
+          <button 
+            onClick={() => {
+              setMenuOpen(false);
+              handleLogout();
+            }}
+            className="p-[3px] relative text-base w-full cursor-pointer font-medium mt-1"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
+            <div className="px-4 py-2 bg-black rounded-[10px] relative transition duration-200 text-white hover:bg-transparent text-center">
+              <span className="font-extrabold">➜</span> Logout
+            </div>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

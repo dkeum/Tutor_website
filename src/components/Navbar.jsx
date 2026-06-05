@@ -8,6 +8,8 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
+import { Button } from "@/components/ui/button";
+
 const helpItems = [
   {
     title: "Exam Prep",
@@ -32,7 +34,7 @@ const Navbar = () => {
         {/* Logo */}
         <div className="flex flex-row items-center gap-x-3 text-2xl md:text-3xl">
           <img className="w-10 h-8 md:w-12 md:h-10" src="/mathamagic_m_blue_star.svg" alt="logo" />
-          <a href="/" className="font-extrabold pt-1">Mathamagic</a>
+          <a href="/" className="font-bold -ml-6 ">athamagic</a>
         </div>
 
         {/* Desktop nav */}
@@ -92,12 +94,23 @@ const Navbar = () => {
           </NavigationMenu>
 
           <a href="/contact">
-            <button className="p-[3px] relative text-xl w-[150px] cursor-pointer font-medium">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-              <div className="px-2 py-2 bg-black rounded-[10px] relative group transition duration-200 text-white hover:bg-transparent">
-                <span className="font-extrabold">➜</span> Let's Chat
-              </div>
-            </button>
+            <Button
+              className="
+              px-7 py-3
+              text-base font-bold
+              bg-[#1a4fd6] text-white
+              rounded-[10px]
+              shadow-[0_2px_12px_rgba(26,79,214,0.18)]
+              hover:bg-[#1540b8] hover:shadow-[0_4px_18px_rgba(26,79,214,0.28)] hover:-translate-y-px
+              active:translate-y-px
+              transition-all duration-150
+              cursor-pointer
+              whitespace-nowrap
+            "
+            >
+              Get Started
+            </Button>
+
           </a>
         </div>
 
