@@ -63,7 +63,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#FAFAFE] text-[#1C1B1F] flex font-sans">
+    <div className="min-h-screen w-full  text-[#1C1B1F] flex font-sans">
       
       {/* 1. Global Side Navigation */}
       <Sidebar />

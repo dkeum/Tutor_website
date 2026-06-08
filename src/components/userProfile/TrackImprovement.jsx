@@ -52,6 +52,29 @@ const TrackImprovement = () => {
 
   const data = useSelector((state) => state.personDetail?.marks_section) || temp_data;
 
+  // --- START NEW TIME EXTRACTION METRICS ---
+  const getGoalStatusMetrics = () => {
+    // Dynamic fallback mock calculation based on active filter view
+    let actualHours = 16.0;
+    let targetHours = 15.0;
+
+    if (filterType === "month") {
+      actualHours = 58.5;
+      targetHours = 60.0;
+    } else if (filterType === "year") {
+      actualHours = 612.0;
+      targetHours = 550.0;
+    }
+
+    const percentMet = Math.round((actualHours / targetHours) * 100);
+    const isGoalMet = percentMet >= 100;
+
+    return { percentMet, isGoalMet, actualHours, targetHours };
+  };
+
+  const goalMetrics = getGoalStatusMetrics();
+  // --- END NEW TIME EXTRACTION METRICS ---
+
   const getTrendMetrics = () => {
     if (!data.length) return { currentAvg: 0, isUp: true, percentageDiff: "0.0", label: "vs last week", filteredData: [] };
     const latestDateInData = new Date(d3.max(data, (d) => new Date(d.date)));
@@ -182,15 +205,13 @@ const TrackImprovement = () => {
   const activeItem = items.find((i) => i.option === graphOption);
 
   return (
-    /* FIX: Removed global inline fontFamily value here so layout layout siblings (Navbar/Sidebar) keep their base styling rules */
     <div className="min-h-screen text-on-surface" >
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
       
       <Sidebar />
       <NavbarLoggedIn />
 
-      {/* FIX: Moved the custom tracking fontFamily font layer explicitly down inside the main content canvas wrapper only */}
-      <main className="pt-24 pb-12 px-4 md:px-10 md:ml-64" style={{ fontFamily: "'Lexend', sans-serif" }}>
+      <main className="pt-24 pb-12 px-4 md:px-10 pl-0 lg:pl-64 2xl:pl-0" style={{ fontFamily: "'Lexend', sans-serif" }}>
         <div className="max-w-7xl mx-auto">
 
           {/* Page header */}
@@ -267,14 +288,30 @@ const TrackImprovement = () => {
                       )}
 
                       {graphOption === 2 && (
-                        <div className="flex items-center gap-5 text-[10px] font-black tracking-wider text-gray-400 mt-2">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span>
-                            <span className="uppercase tracking-widest">ACTUAL TIME</span>
+                        <div className="flex flex-col items-end gap-1">
+                          <div className="flex items-center gap-5 text-[10px] font-black tracking-wider text-gray-400">
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span>
+                              <span className="uppercase tracking-widest">ACTUAL TIME</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-4 border-t-2 border-dashed border-slate-300 inline-block"></span>
+                              <span className="uppercase tracking-widest">STUDY GOAL</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-4 border-t-2 border-dashed border-slate-300 inline-block"></span>
-                            <span className="uppercase tracking-widest">STUDY GOAL</span>
+                          
+                          {/* Sync dynamic status pill onto primary header view layer */}
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <div 
+                              className="text-xs font-bold px-1.5 py-0.5 rounded"
+                              style={{
+                                color: goalMetrics.isGoalMet ? "#38A169" : "#E53E3E",
+                                backgroundColor: goalMetrics.isGoalMet ? "#F0FDF4" : "#FFF5F5"
+                              }}
+                            >
+                              {goalMetrics.percentMet}%
+                            </div>
+                            <span className="text-xs text-gray-400 font-medium">of goal completed</span>
                           </div>
                         </div>
                       )}
@@ -341,11 +378,15 @@ const TrackImprovement = () => {
                     }`}
                     style={{ boxShadow: PURPLE_SHADOW_THEME }}
                   >
-                    <div className="text-center lg:text-left">
-                      <p className="font-bold text-sm text-gray-800" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                        {i.previewLabel}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-0.5">{i.topic}</p>
+                    <div className="flex justify-between items-start text-center lg:text-left w-full">
+                      <div>
+                        <p className="font-bold text-sm text-gray-800" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                          {i.previewLabel}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-0.5">{i.topic}</p>
+                      </div>
+
+                  
                     </div>
 
                     <div className="flex items-center justify-between text-xs font-bold transition-colors group-hover:text-purple-700 mt-auto pt-2" style={{ color: "#5d3fd3" }}>
@@ -388,7 +429,8 @@ const TrackImprovement = () => {
                 {[
                   { value: trendMetrics.filteredData.length, label: "Sessions" },
                   { value: "83%", label: "Avg Grade" },
-                  { value: "16.0h", label: "Time Logged" },
+                  // Dynamic display binding on footer summary column card module
+                  { value: `${goalMetrics.actualHours.toFixed(1)}h`, label: "Time Logged" },
                   { value: "4", label: "Topics Done" },
                 ].map(({ value, label }) => (
                   <div key={label} className="rounded-2xl p-3" style={{ background: "rgba(255,255,255,0.08)" }}>

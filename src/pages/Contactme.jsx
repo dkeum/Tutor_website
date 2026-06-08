@@ -94,18 +94,15 @@ const Contactme = () => {
             <div className="mt-20 shadow-input mx-auto  max-w-2xl max-h-[700px] rounded-none bg-white p-4 md:rounded-2xl md:p-8 dark:bg-black my-10">
               <div className="flex flex-row justify-around">
                 <div className="flex flex-col w-full ">
-                  <h2 className="text-xl font-bold text-neutral-800 dark:text-neutral-200 tracking-normal">
+                  <h2 className="text-3xl font-bold text-neutral-800 dark:text-neutral-200 tracking-normal">
                     Contact Us
                   </h2>
-                  <p className="mt-2 max-w-sm text-sm text-neutral-500 tracking-normal">
-                    Here's our lead tutor's info: <br />➔ Phone Number:
-                    604-440-9543
-                  </p>
+            
                 </div>
                 <div className="min-w-[100px] flex flex-col">
                   <img
                     className="w-15 h-auto rounded-full border-2 ml-2"
-                    src="/smile_tutor.jpeg"
+                    src="/headshot.jpg"
                   />
                   <p className="text-sm font-normal tracking-normal text-left">
                     Daniel Keum
@@ -115,9 +112,7 @@ const Contactme = () => {
 
               <div className="my-7 flex items-center max-w-lg">
                 <div className="flex-grow border-t border-neutral-300" />
-                <span className="mx-4 text-sm text-neutral-500 tracking-wide">
-                  or
-                </span>
+               
                 <div className="flex-grow border-t border-neutral-300" />
               </div>
 

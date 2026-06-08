@@ -44,8 +44,11 @@ const Pricing = lazy(() => import("./pages/Pricing"))
 const Lessons = lazy(() => import("./pages/Lessons"))
 
 const Tutors = lazy(() => import("./pages/Tutors"))
-
+const BookTutor = lazy(() => import("./pages/BookTutor"))
 const PracticeTopics = lazy(() => import("./pages/PracticeTopics"))
+
+const PrivatePolicy = lazy(() => import("./pages/PrivacyPolicy"))
+const TermsOfService = lazy(() => import("./pages/TermsOfService"))
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -102,14 +105,18 @@ createRoot(document.getElementById("root")).render(
               <Route path="/random/test" element={<ProtectedRoute>
                 <Test />
               </ProtectedRoute>} />
+              <Route path="/book-tutor" element={<BookTutor />} />
               <Route path="/lessons" element={<Lessons />} />
               <Route path="/tutors" element={<Tutors />} />
               <Route path="/practice-topics" element={<PracticeTopics />} />
               <Route path="/homework-help" element={<HomeworkHelp />} />
               <Route path="/donate" element={<Donate />} />
               <Route path="/final-exam-prep" element={<ProtectedRoute>
+
                 <FinalExamPrep />
               </ProtectedRoute>} />
+              <Route path="/privacy-policy" element={<PrivatePolicy />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
             </Routes>
           </Suspense>
         </BrowserRouter>
