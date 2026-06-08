@@ -22,7 +22,7 @@ import {
 import Footer from "../components/Footer";
 import TrustedCreators from "../components/HomePage/Testimonial";
 import TestimonialsCarousel from "../components/TestimonialsCarousel";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Homepage = () => {
   const words = ["Grades", "Understanding", "Confidence", "Results", "Focus"];
@@ -81,15 +81,12 @@ const Homepage = () => {
 
 
             <div className="flex flex-wrap gap-5 mt-10">
-              <Button1 className="w-[180px] h-[50px] text-center text-2xl p-3 bg-[#004ac6] text-white hover:bg-blue-500 cursor-pointer border-neutral-200 dark:border-slate-800 tracking-normal" >
-                Let's Chat
-              </Button1>
 
-              <Button1 className="w-[200px] h-[50px] text-center text-2xl p-3  bg-white text-black border hover:bg-blue-100 border-black tracking-normal" >
-                See our courses
-
-              </Button1>
-
+              <Link to="/contact">
+                <Button1 className="w-[180px] h-[50px] text-center text-2xl p-3 bg-[#004ac6] text-white hover:bg-blue-500 cursor-pointer border-neutral-200 dark:border-slate-800 tracking-normal" >
+                  Let's Chat
+                </Button1>
+              </Link>
             </div>
 
             <div className="tracking-normal">

@@ -43,7 +43,7 @@ const Contactme = () => {
 
     setErrors({});
 
-  
+
     axios
       .post("https://mathamagic-backend.vercel.app/email", {
         fullName,
@@ -61,7 +61,7 @@ const Contactme = () => {
 
         console.log("Error detected")
       });
-      setIsSent(true);
+    setIsSent(true);
     // Optionally reset
     // setFullName("");
     // setEmail("");
@@ -97,14 +97,18 @@ const Contactme = () => {
                   <h2 className="text-3xl font-bold text-neutral-800 dark:text-neutral-200 tracking-normal">
                     Contact Us
                   </h2>
-            
+                  <p className="mt-4 text-neutral-600 dark:text-neutral-400 text-sm tracking-normal font-normal">
+                    Your Math Journey starts here. <br /> Say Hi!
+                  </p>
+
+
                 </div>
                 <div className="min-w-[100px] flex flex-col">
                   <img
-                    className="w-15 h-auto rounded-full border-2 ml-2"
+                    className="w-17 h-auto rounded-full border-2 ml-2"
                     src="/headshot.jpg"
                   />
-                  <p className="text-sm font-normal tracking-normal text-left">
+                  <p className="text-sm tracking-normal text-left font-semibold mt-2 text-neutral-600 dark:text-neutral-400">
                     Daniel Keum
                   </p>
                 </div>
@@ -112,7 +116,7 @@ const Contactme = () => {
 
               <div className="my-7 flex items-center max-w-lg">
                 <div className="flex-grow border-t border-neutral-300" />
-               
+
                 <div className="flex-grow border-t border-neutral-300" />
               </div>
 
@@ -174,8 +178,8 @@ const Contactme = () => {
                   {isSent
                     ? "Sent!"
                     : isSubmitting
-                    ? "Sending..."
-                    : "Send Email"}
+                      ? "Sending..."
+                      : "Send Email"}
                   <BottomGradient />
                 </button>
               </form>
