@@ -3,9 +3,9 @@ import * as d3 from "d3";
 import { useSelector } from "react-redux";
 
 const Profile = () => {
-  const completionProgress = useSelector((state) => state.personDetail.completionProgress) || 50;
-  const current_grade = useSelector((state) => state.personDetail.current_grade) || 50;
-  const goal_commitment = useSelector((state) => state.personDetail.timeGoals) || 50;
+  const completionProgress = useSelector((state) => state.personDetail.completionProgress);
+  const current_grade = useSelector((state) => state.personDetail.current_grade) ;
+  const goal_commitment = useSelector((state) => state.personDetail.time_logged_pct ) ;
 
   return (
     <div className="w-full h-full grid grid-cols-2  gap-x-2 mb-4">

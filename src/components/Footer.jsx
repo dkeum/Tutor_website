@@ -1,10 +1,9 @@
 import { Separator } from "@/components/ui/separator";
 
-const footerSections = [
+const footerSectionsData = [
   {
     title: "Product",
     links: [
-      { title: "Features",     href: "/features"  },
       { title: "Pricing",      href: "/pricing"   },
     ],
   },
@@ -20,7 +19,6 @@ const footerSections = [
       { title: "Contact Us",  href: "/contact" },
     ],
   },
-
 ];
 
 const legalLinks = [
@@ -29,6 +27,23 @@ const legalLinks = [
 ];
 
 const Footer = () => {
+  // Read environment variable from Vite engine
+  const isDevelopment = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT";
+
+  // Filter out the Pricing link if not in development mode
+  const footerSections = footerSectionsData
+    .map((section) => {
+      if (section.title === "Product") {
+        return {
+          ...section,
+          links: isDevelopment ? section.links : [],
+        };
+      }
+      return section;
+    })
+    // Optional: Hide the entire "Product" category column if it has no active links
+    .filter((section) => section.links.length > 0);
+
   return (
     <div className="w-full flex flex-col mt-10 border-t border-gray-100">
       <footer className="w-full px-6 md:px-10 bg-white">
@@ -44,7 +59,7 @@ const Footer = () => {
                   src="/mathamagic_m_blue_star.svg"
                   alt="Mathamagic logo"
                 />
-                <span className="font-bold -ml-[11px] mt-[1px] text-xl">athamagic</span>
+                <span className="font-bold -ml-[11px] mt-[1px] text-2xl" >athamagic</span>
               </div>
 
               <p className="mt-4 text-muted-foreground text-sm leading-relaxed">
@@ -63,7 +78,7 @@ const Footer = () => {
                   href="tel:6044409543"
                   className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  604-440-9543
+           
                 </a>
               </div>
             </div>

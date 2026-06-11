@@ -19,74 +19,108 @@ import Profile from "../components/userProfile/Profile";
 import UserInfo from "../components/userProfile/UserInfo";
 import Topics from "../components/userProfile/Topics";
 
-import bookEngineering from "../assets/book-engineering-svgrepo-com.svg";
-import correct_mistakes from "../assets/correct_mistake_logo.png";
 import homework_icon from "../assets/book-mark-book-svgrepo-com.svg";
 import exam_icon from "../assets/exam-svgrepo-com.svg";
-import donate_icon from "../assets/donate-svgrepo-com.svg";
-import { BookAlert, BookOpenText, ChartNoAxesColumnIncreasingIcon, LayoutDashboard, LibraryBig, SquareDashed, X } from 'lucide-react';
+import { BookAlert, BookOpenText, ChartNoAxesColumnIncreasingIcon, LibraryBig, SquareDashed, X } from 'lucide-react';
 
 import Footer from "../components/Footer";
-import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import NavbarLoggedIn from "../components/NavbarLoggedIn";
 
-// ─── Main component ───────────────────────────────────────────────────────────
+import { supabase } from "../db/supabaseclient";
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 const ShowPersonalData = () => {
   const name = useSelector((state) => state.personDetail.name);
-  const email = useSelector((state) => state.personDetail.email);
+  const wrong_count = useSelector((state) => state.personDetail.wrong_count);
+
   const [open, setOpen] = useState(false);
+  const [loadingSession, setLoadingSession] = useState(true);
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!name || name.trim() === "") setOpen(true);
-
-    const fetchProfile = async () => {
+    const initializeUserSession = async () => {
       try {
+        // 💡 FIX: Short-circuit if profile is already cached in Redux.
+        // This prevents re-fetching and layout re-evaluation on client-side routing.
+        if (name && name.trim() !== "") {
+          setLoadingSession(false);
+          return;
+        }
+
         const base = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
           ? "http://localhost:3000"
           : "https://mathamagic-backend.vercel.app";
-        const res = await axios.get(`${base}/${email}/getprofile`, { withCredentials: true });
-        dispatch(setProfileInfo(res?.data));
+
+        // 1. Check Supabase for an existing local session
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session?.user) {
+          const userEmail = session.user.email;
+
+          // 2. Fetch profile from backend using the session email
+          const res = await axios.get(`${base}/${userEmail}/getprofile`, { withCredentials: true });
+          console.log("Profile data fetched on refresh:", res.data);
+
+          // 3. Hydrate Redux store
+          dispatch(setProfileInfo(res?.data));
+          // console.log(res.data?.name)
+
+          if (!res.data?.name) {
+            setOpen(true); // Open dialog only if they truly don't have a name in DB
+          }
+        } else {
+          // No Supabase session found? Redirect to login
+          navigate("/login");
+        }
       } catch (err) {
-        console.error("Error fetching profile:", err);
+        console.error("Error initializing session on refresh:", err);
+      } finally {
+        setLoadingSession(false); // Session check completed
       }
     };
 
-    const getQuestionsData = async () => {
-      try {
-        const base = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-          ? "http://localhost:3000"
-          : "https://mathamagic-backend.vercel.app";
-        const res = await axios.get(`${base}/questions/get-questions`, { withCredentials: true });
-        dispatch(setQuestions(res.data?.mark_section));
-      } catch (err) {
-        console.error("Error fetching questions:", err);
-      }
-    };
+    // const getQuestionsData = async () => {
+    //   try {
+    //     const base = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+    //       ? "http://localhost:3000"
+    //       : "https://mathamagic-backend.vercel.app";
+    //     const res = await axios.get(`${base}/questions/get-questions`, { withCredentials: true });
+    //     dispatch(setQuestions(res.data?.mark_section));
+    //   } catch (err) {
+    //     console.error("Error fetching questions:", err);
+    //   }
+    // };
 
-    fetchProfile();
-    getQuestionsData();
-  }, [name, email]);
+    initializeUserSession();
+    // getQuestionsData();
+  }, [dispatch, navigate, name]); // Added name to dependencies so it can evaluate the short-circuit accurately
+
+  // 4. Guard layout until session validation finishes
+  if (loadingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ fontFamily: "'Lexend', sans-serif" }}
     >
       <NavbarLoggedIn />
 
       {/* ── Outer Structural Wrapper ── */}
-      {/* Splits layout space seamlessly between Sidebar channel track and Content container */}
       <div className="flex flex-1 w-full pt-20">
-        
+
         {/* Desktop Left Spacer Block matching exact Sidebar dimensions */}
-        <div className="hidden md:block w-64 flex-shrink-0" />
+        <div className="hidden lg:block w-64 flex-shrink-0" />
         <Sidebar />
 
         {/* ── Main Content Container ── */}
-        {/* Centered within remaining page viewport, isolating overflow charts safely */}
         <div className="flex-1 min-w-0 overflow-x-hidden flex justify-center">
           <main className="w-full max-w-7xl p-6 md:p-10 flex flex-col gap-8">
 
@@ -174,7 +208,10 @@ const ShowPersonalData = () => {
                 iconBg="#ffdad6"
                 iconColor="#ba1a1a"
                 title="Correct Mistakes"
-                footer="12 Questions Wrong"
+                footer={wrong_count === 0
+                  ? "All caught up! 🎉"
+                  : `${wrong_count} mistake${wrong_count !== 1 ? "s" : ""} to review`
+                }
                 footerHoverColor="#ba1a1a"
                 path="/correct-mistakes"
                 navigate={navigate}
@@ -233,9 +270,7 @@ const ShowPersonalData = () => {
   );
 };
 
-export default ShowPersonalData;
-
-// ─── Action Card ─────────────────────────────────────────────────────────────
+// ─── Action Card Subcomponent ────────────────────────────────────────────────
 const ActionCard = ({ icon, iconBg, iconColor, title, footer, footerHoverColor, path, navigate, children }) => {
   const [hovered, setHovered] = useState(false);
   return (
@@ -267,18 +302,7 @@ const ActionCard = ({ icon, iconBg, iconColor, title, footer, footerHoverColor, 
   );
 };
 
-// ─── Utility Button ───────────────────────────────────────────────────────────
-const UtilityButton = ({ icon, label, onClick }) => (
-  <button
-    className="bg-gray-50 rounded-xl p-4 flex flex-col items-center gap-2 hover:bg-gray-100 transition-colors w-full"
-    onClick={onClick}
-  >
-    <span className="material-symbols-outlined text-gray-400">{icon}</span>
-    <span className="text-xs font-bold text-gray-500">{label}</span>
-  </button>
-);
-
-// ─── Name Dialog ──────────────────────────────────────────────────────────────
+// ─── Name Dialog Subcomponent ────────────────────────────────────────────────
 const DialogBox = ({ open, setOpen }) => {
   const [username, setUsername] = useState("");
   const dispatch = useDispatch();
@@ -319,10 +343,12 @@ const DialogBox = ({ open, setOpen }) => {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleSubmit} type="submit">Save changes</Button>
+            <Button type="submit">Save changes</Button>
           </DialogFooter>
         </DialogContent>
       </form>
     </Dialog>
   );
 };
+
+export default ShowPersonalData;

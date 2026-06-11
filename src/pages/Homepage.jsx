@@ -28,6 +28,7 @@ const Homepage = () => {
   const words = ["Grades", "Understanding", "Confidence", "Results", "Focus"];
 
   const navigate = useNavigate()
+  const isDevelopment = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT";
 
 
   return (
@@ -425,15 +426,18 @@ const Homepage = () => {
 
           {/* Buttons */}
           <div className="relative z-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto shrink-0">
-            <Button1 className="bg-white text-[#1a4fd6] font-bold hover:bg-gray-100 whitespace-nowrap shadow-md">
+
+            <Button1 onClick={() => navigate("/waitlist")} className="bg-white text-[#1a4fd6] font-bold hover:bg-gray-100 whitespace-nowrap shadow-md">
               Start your Free Trial
             </Button1>
-            <Button1
-              onClick={() => navigate("/pricing")}
-              className="bg-white/90 text-[#1a4fd6] font-bold hover:bg-white whitespace-nowrap shadow-md"
-            >
-              View Pricing
-            </Button1>
+            {isDevelopment && (
+              <Button1
+                onClick={() => navigate("/pricing")}
+                className="bg-white/90 text-[#1a4fd6] font-bold hover:bg-white whitespace-nowrap shadow-md"
+              >
+                View Pricing
+              </Button1>
+            )}
           </div>
 
         </div>

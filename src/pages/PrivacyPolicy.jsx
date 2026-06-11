@@ -249,7 +249,7 @@ const PrivacyPolicy = () => {
         </p>
         <div className="mt-3 text-gray-600 leading-relaxed">
           <p className="font-semibold text-gray-800">Daniel Keum — Mathamagic</p>
-          <p>1322 Ross Ave, Coquitlam, BC, V3J 2K1</p>
+          <p>21385 121 Ave, Maple Ridge, BC, V2X 3S8</p>
           <p>
             <a href="mailto:mathamagic.dkeum@gmail.com" className="text-indigo-600 hover:underline">
               mathamagic.dkeum@gmail.com

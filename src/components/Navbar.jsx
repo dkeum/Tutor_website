@@ -28,13 +28,20 @@ const helpItems = [
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Read environment variable cleanly from Vite engine
+  const isDevelopment = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT";
+
+  // Compute CTA settings based on the current environment profile
+  const ctaLink = isDevelopment ? "/login" : "/waitlist";
+  const ctaLabel = isDevelopment ? "Login/Signup" : "Join Waitlist";
+
   return (
     <div className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="flex flex-row justify-between items-center px-6 md:px-10 py-2">
         {/* Logo */}
         <div className="flex flex-row items-center gap-x-3 text-2xl md:text-3xl">
           <img className="w-10 h-8 md:w-12 md:h-10" src="/mathamagic_m_blue_star.svg" alt="logo" />
-          <a href="/" className="font-bold -ml-6 ">athamagic</a>
+          <a href="/" className="font-bold -ml-6">athamagic</a>
         </div>
 
         {/* Desktop nav */}
@@ -53,9 +60,9 @@ const Navbar = () => {
                         >
                           <div className="mt-10 mb-2 text-lg font-medium h-full flex flex-col items-center">
                             <img className="mx-auto rounded-full w-15 h-15" src="/tutor.png" alt="tutor icons" />
-                            <div className="flex flex-col gap-y-2">
-                              <p>Our Tutors</p>
-                              <p className="text-muted-foreground text-sm leading-tight">will help with</p>
+                            <div className="flex flex-col gap-y-2 text-center">
+                              <p>Our Website</p>
+                              <p className="text-muted-foreground text-sm leading-tight -mt-2">will help with</p>
                             </div>
                           </div>
                         </a>
@@ -78,39 +85,43 @@ const Navbar = () => {
                   <a className="font-semibold" href="/about">About</a>
                 </NavigationMenuLink>
               </NavigationMenuItem>
-
+{/* 
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <a className="font-semibold" href="/freeResources">Free Resources</a>
                 </NavigationMenuLink>
-              </NavigationMenuItem>
+              </NavigationMenuItem> */}
 
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <a className="font-semibold text-lg tracking-normal" href="/login">Login / Signup</a>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
+              {/* Conditionally render Pricing item only in DEVELOPMENT */}
+              {isDevelopment && (
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <a className="font-semibold" href="/pricing">Pricing</a>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              )}
+
             </NavigationMenuList>
           </NavigationMenu>
 
-          <a href="/contact">
+          {/* Dynamic Desktop CTA Button */}
+          <a href={ctaLink}>
             <Button
               className="
-              px-7 py-3
-              text-base font-bold
-              bg-[#1a4fd6] text-white
-              rounded-[10px]
-              shadow-[0_2px_12px_rgba(26,79,214,0.18)]
-              hover:bg-[#1540b8] hover:shadow-[0_4px_18px_rgba(26,79,214,0.28)] hover:-translate-y-px
-              active:translate-y-px
-              transition-all duration-150
-              cursor-pointer
-              whitespace-nowrap
-            "
+                px-7 py-3
+                text-base font-bold
+                bg-[#2b56de] text-white
+                rounded-[12px]
+                shadow-[0_4px_14px_rgba(43,86,222,0.2)]
+                hover:bg-[#1e40af] hover:shadow-[0_6px_20px_rgba(43,86,222,0.3)] hover:-translate-y-px
+                active:translate-y-px
+                transition-all duration-150
+                cursor-pointer
+                whitespace-nowrap
+              "
             >
-              Get Started
+              {ctaLabel}
             </Button>
-
           </a>
         </div>
 
@@ -121,12 +132,10 @@ const Navbar = () => {
           aria-label="Toggle menu"
         >
           {menuOpen ? (
-            // X icon
             <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           ) : (
-            // Burger icon
             <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
@@ -139,31 +148,34 @@ const Navbar = () => {
         <div className="md:hidden border-t border-gray-100 bg-white px-6 py-4 flex flex-col gap-4 shadow-lg">
           <a
             href="/about"
-            className="text-lg font-semibold text-gray-800 hover:text-indigo-600 transition-colors py-1"
+            className="text-lg font-semibold text-gray-800 hover:text-[#2b56de] transition-colors py-1"
             onClick={() => setMenuOpen(false)}
           >
             About
           </a>
           <a
             href="/freeResources"
-            className="text-lg font-semibold text-gray-800 hover:text-indigo-600 transition-colors py-1"
+            className="text-lg font-semibold text-gray-800 hover:text-[#2b56de] transition-colors py-1"
             onClick={() => setMenuOpen(false)}
           >
             Free Resources
           </a>
-          <a
-            href="/login"
-            className="text-lg font-semibold text-gray-800 hover:text-indigo-600 transition-colors py-1"
-            onClick={() => setMenuOpen(false)}
-          >
-            Login / Signup
-          </a>
-          <a href="/contact" onClick={() => setMenuOpen(false)}>
-            <button className="p-[3px] relative text-base w-full cursor-pointer font-medium mt-1">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-              <div className="px-4 py-2 bg-black rounded-[10px] relative transition duration-200 text-white hover:bg-transparent">
-                <span className="font-extrabold">➜</span> Let's Chat
-              </div>
+          
+          {/* Conditionally render Pricing link in Mobile View only in DEVELOPMENT */}
+          {isDevelopment && (
+            <a
+              href="/pricing"
+              className="text-lg font-semibold text-gray-800 hover:text-[#2b56de] transition-colors py-1"
+              onClick={() => setMenuOpen(false)}
+            >
+              Pricing
+            </a>
+          )}
+
+          {/* Dynamic Mobile CTA Button */}
+          <a href={ctaLink} className="w-full mt-2" onClick={() => setMenuOpen(false)}>
+            <button className="w-full text-base font-bold text-white bg-[#2b56de] hover:bg-[#1e40af] py-3 rounded-xl transition-all duration-150 shadow-md shadow-blue-100">
+              {ctaLabel}
             </button>
           </a>
         </div>
