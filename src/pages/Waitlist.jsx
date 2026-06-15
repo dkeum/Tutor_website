@@ -196,7 +196,7 @@ const Waitlist = () => {
                   >
                     <div className="mb-6 rounded-xl overflow-hidden bg-black aspect-[16/9] border border-zinc-200 dark:border-zinc-800 flex items-center justify-center">
                       <video
-                        src="/PromptScene.mp4"
+                        src="/waitlist_video.mp4"
                         autoPlay
                         muted
                         playsInline
