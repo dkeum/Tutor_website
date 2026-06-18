@@ -49,6 +49,7 @@ const Sidebar = () => {
   const is_on_trial = useSelector(s => s.personDetail?.is_on_trial) ?? false;
   const days_remaining = useSelector(s => s.personDetail?.days_remaining) ?? 0;
   const subscription_status = useSelector(s => s.personDetail?.subscription_status) ?? "inactive";
+  const className = useSelector(s => s.personDetail?.class)
 
   const planLabel = PLAN_LABELS[plan_type] ?? "Free";
   const creditTotal = PLAN_CREDIT_TOTALS[plan_type] ?? 50;
@@ -93,7 +94,7 @@ const Sidebar = () => {
         </div>
         <div>
           <div className="font-bold text-gray-800">{studentName || "Student"}</div>
-          <div className="text-xs text-gray-400">Student</div>
+          <div className="text-xs text-gray-400">{className}</div>
         </div>
       </div>
 

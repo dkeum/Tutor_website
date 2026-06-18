@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import { BadgeCheck, User, SlidersHorizontal } from "lucide-react";
 import Sidebar from "../Sidebar";
 import NavbarLoggedIn from "../NavbarLoggedIn";
 
@@ -63,7 +64,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen w-full  text-[#1C1B1F] flex font-sans">
+    <div className="min-h-screen w-full text-[#1C1B1F] flex font-sans">
       
       {/* 1. Global Side Navigation */}
       <Sidebar />
@@ -86,7 +87,7 @@ const Settings = () => {
             <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
               <div className="flex items-center gap-5">
                 <div className="w-14 h-14 bg-[#6200EE] rounded-full flex items-center justify-center text-white shadow-md shadow-purple-200">
-                  <span className="material-symbols-outlined text-2xl">verified</span>
+                  <BadgeCheck className="w-6 h-6" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -122,7 +123,7 @@ const Settings = () => {
             <section className="lg:col-span-7 bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
               <div>
                 <h3 className="text-md font-bold text-gray-800 mb-6 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[#6200EE] text-xl">person</span>
+                  <User className="text-[#6200EE] w-5 h-5" />
                   Profile Settings
                 </h3>
 
@@ -179,7 +180,7 @@ const Settings = () => {
             {/* Application Preferences Container Block */}
             <section className="lg:col-span-5 bg-white rounded-3xl p-6 shadow-sm border border-gray-100 min-h-[340px]">
               <h3 className="text-md font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#6200EE] text-xl">tune</span>
+                <SlidersHorizontal className="text-[#6200EE] w-5 h-5" />
                 Preferences
               </h3>
               <div className="flex flex-col justify-center h-[calc(100%-3rem)]">
