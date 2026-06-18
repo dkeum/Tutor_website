@@ -1,73 +1,99 @@
 import { Separator } from "@/components/ui/separator";
 
-const footerSections = [
-    {
-      title: "Contact",
-      links: [
-        { title: "danielkeum2@gmail.com", href: "/contact" },
-        { title: "604-440-9543", href: "/contact" },
-      ],
-    },
+const footerSectionsData = [
+  {
+    title: "Product",
+    links: [
+      { title: "Pricing",      href: "/pricing"   },
+    ],
+  },
   {
     title: "Company",
-    links: [{ title: "About us", href: "/about" }],
+    links: [
+      { title: "About Us",  href: "/about"    },
+    ],
   },
-  //   {
-  //     title: "Resources",
-  //     links: [
-  //       { title: "Blog", href: "#" },
-  //       { title: "Newsletter", href: "#" },
-  //       { title: "Events", href: "#" },
-  //       { title: "Help centre", href: "#" },
-  //       { title: "Tutorials", href: "#" },
-  //       { title: "Support", href: "#" },
-  //     ],
-  //   },
   {
-    title: "Social",
-    links: [{ title: "Discord", href: "#" }],
+    title: "Support",
+    links: [
+      { title: "Contact Us",  href: "/contact" },
+    ],
   },
 ];
 
+const legalLinks = [
+  { title: "Privacy Policy", href: "/privacy-policy" },
+  { title: "Terms of Service", href: "/terms-of-service" },
+];
+
 const Footer = () => {
+  // Read environment variable from Vite engine
+  const isDevelopment = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT";
+
+  // Filter out the Pricing link if not in development mode
+  const footerSections = footerSectionsData
+    .map((section) => {
+      if (section.title === "Product") {
+        return {
+          ...section,
+          links: isDevelopment ? section.links : [],
+        };
+      }
+      return section;
+    })
+    // Optional: Hide the entire "Product" category column if it has no active links
+    .filter((section) => section.links.length > 0);
+
   return (
-    <div className=" min-h-[380px] w-full max-w-[70rem] ml-20  flex flex-col mt-10">
-      <div className="grow bg-muted " />
-      <footer>
-        <div className="max-w-screen-xl mx-auto">
-          <div className="py-12 grid grid-cols-2  sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-x-8 gap-y-10 px-6 xl:px-0">
-            <div className="col col-span-full justify-end xl:col-span-2">
-              <div className="flex flex-row gap-x-3  items-center">
-                <img className="w-12 h-12 " src="/logo.ico" alt="logo" />
-                <p className="text-lg font-bold pt-4">Mathamagic</p>
+    <div className="w-full flex flex-col mt-10 border-t border-gray-100">
+      <footer className="w-full px-6 md:px-10 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="py-14 flex flex-col md:flex-row justify-between gap-12">
+
+            {/* ── Brand column ── */}
+            <div className="max-w-xs shrink-0">
+              {/* Logo — matches NavbarLoggedIn treatment */}
+              <div className="flex flex-row items-center gap-x-0 text-2xl">
+                <img
+                  className="w-10 h-8"
+                  src="/mathamagic_m_blue_star.svg"
+                  alt="Mathamagic logo"
+                />
+                <span className="font-bold -ml-[11px] mt-[1px] text-2xl" >athamagic</span>
               </div>
 
-              <svg
-                id="logo-7"
-                width="124"
-                height="32"
-                viewBox="0 0 124 32"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {/* SVG paths omitted for brevity */}
-              </svg>
-              <p className="mt-4 text-muted-foreground">
-                Foster amazing academic experiences that create more happy in
-                the world.
+              <p className="mt-4 text-muted-foreground text-sm leading-relaxed">
+                Foster amazing academic experiences that create more happy in the world.
               </p>
+
+              {/* Contact details */}
+              <div className="mt-6 space-y-1">
+                <a
+                  href="mailto:mathamagic.dkeum@gmail.com"
+                  className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  mathamagic.dkeum@gmail.com
+                </a>
+                <a
+                  href="tel:6044409543"
+                  className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+           
+                </a>
+              </div>
             </div>
 
-            <div className="  ml-[500px] w-full flex flex-row  gap-x-30 justify-end items-start">
+            {/* ── Link columns ── */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-10">
               {footerSections.map(({ title, links }) => (
-                <div className='pt-5' key={title}>
-                  <h6 className="font-semibold">{title}</h6>
-                  <ul className="mt-6 space-y-4">
+                <div key={title}>
+                  <h6 className="font-semibold text-sm text-foreground">{title}</h6>
+                  <ul className="mt-4 space-y-3">
                     {links.map(({ title, href }) => (
                       <li key={title}>
                         <a
                           href={href}
-                          className="text-muted-foreground hover:text-foreground"
+                          className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                         >
                           {title}
                         </a>
@@ -77,14 +103,29 @@ const Footer = () => {
                 </div>
               ))}
             </div>
+
           </div>
+
           <Separator />
-          <div className="py-8 flex flex-col-reverse sm:flex-row items-center justify-between gap-x-2 gap-y-5 px-6 xl:px-0">
-            <span className="text-muted-foreground">
-              &copy; {new Date().getFullYear()} . All rights reserved.
+
+          {/* ── Bottom bar ── */}
+          <div className="py-6 flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
+            <span className="text-muted-foreground text-sm">
+              &copy; {new Date().getFullYear()} Mathamagic. All rights reserved.
             </span>
-            <div className="flex items-center gap-5 text-muted-foreground"></div>
+            <div className="flex items-center gap-6">
+              {legalLinks.map(({ title, href }) => (
+                <a
+                  key={title}
+                  href={href}
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                >
+                  {title}
+                </a>
+              ))}
+            </div>
           </div>
+
         </div>
       </footer>
     </div>

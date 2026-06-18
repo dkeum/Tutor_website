@@ -8,6 +8,11 @@ import { ContainerTextFlip } from "@/components/ui/container-text-flip";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
+import { Badge } from "@/components/ui/badge"
+import { Button as Button1 } from "@/components/ui/button"
+
+import { BadgeCheck, Star, TrendingUp } from "lucide-react"
+
 import {
   Accordion,
   AccordionContent,
@@ -15,15 +20,22 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import Footer from "../components/Footer";
+import TrustedCreators from "../components/HomePage/Testimonial";
+import TestimonialsCarousel from "../components/TestimonialsCarousel";
+import { Link, useNavigate } from "react-router-dom";
 
 const Homepage = () => {
   const words = ["Grades", "Understanding", "Confidence", "Results", "Focus"];
+
+  const navigate = useNavigate()
+  const isDevelopment = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT";
+
 
   return (
     <div className="max-w-6xl overflow-x-hidden">
       <Navbar />
 
-      <div className="relative flex h-[40rem] w-full  justify-center bg-white dark:bg-black mt-3">
+      <div className="relative flex h-[44rem] w-full  justify-center bg-white dark:bg-black mt-3">
         <div
           className={cn(
             "absolute inset-0",
@@ -38,7 +50,7 @@ const Homepage = () => {
                 [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] 
                 [-webkit-mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"
         />
-        <section className="flex flex-row pt-20 ml-20 justify-items-center px-8 w-full h-[500px]">
+        <section className="flex flex-row pt-20 ml-20 justify-items-center px-8 w-full h-[700px]">
           <motion.h1
             initial={{
               opacity: 0,
@@ -51,22 +63,38 @@ const Homepage = () => {
             )}
             layout
           >
-            <div className=" inline-block min-h-[200px]">
-              Achieve better <ContainerTextFlip words={words} />
+
+            <div className="flex flex-col min-h-[300px] ">
+              <Badge className=" w-max text-[16px] tracking-normal bg-blue-200 text-blue-500 font-semibold " variant="outline">
+
+                <BadgeCheck className="w-10 h-10" />
+                Serving Lower Mainland and MetroVancouver
+              </Badge>
+              <div>
+                Achieve Better <ContainerTextFlip words={words} />
+              </div>
+
+              <p className=" font-medium text-3xl w-2/3 h-[70px] mt-5">
+                Mathamagic have been teaching students close to a decade
+              </p>
+
             </div>
 
-            <p className=" font-medium text-3xl w-2/3">
-              Mathamagic have been teaching students close to a decade
-            </p>
 
-            <a href="/contact">
-              <button className="p-[3px] relative text-2xl w-[200px] cursor-pointer font-medium">
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-                <div className="px-8 py-2  bg-black rounded-[10px]  relative group transition duration-200 text-white hover:bg-transparent">
-                  ➜ Let's Chat
-                </div>
-              </button>
-            </a>
+            <div className="flex flex-wrap gap-5 mt-10">
+
+              <Link to="/contact">
+                <Button1 className="w-[180px] h-[50px] text-center text-2xl p-3 bg-[#004ac6] text-white hover:bg-blue-500 cursor-pointer border-neutral-200 dark:border-slate-800 tracking-normal" >
+                  Let's Chat
+                </Button1>
+              </Link>
+            </div>
+
+            <div className="tracking-normal">
+              <TrustedCreators />
+            </div>
+
+
           </motion.h1>
 
           <div className="absolute ml-[400px]">
@@ -81,8 +109,8 @@ const Homepage = () => {
       </div>
 
       <section className="h-[30rem] mt-30 ml-20">
-        <h1 className="sm:text-xl first-letter md:text-4xl font-extrabold w-2/3">
-          Finding the right tutor, learning style, and academic support
+        <h1 className="sm:text-xl first-letter md:text-4xl font-bold w-2/3 font-[family-name:var(--font-sans)] text-left">
+          Finding the right tutor, learning style <br /> and academic support
           shouldn’t be a struggle
         </h1>
         <div className="mt-10 flex flex-row justify-start items-start ">
@@ -113,33 +141,57 @@ const Homepage = () => {
       <hr className="w-2/3 max-w-9xl mx-auto my-20" />
 
       <section className="h-[30rem] sm:mt-50 md:mt-0">
-        <header className="text-4xl font-extrabold mx-auto">
+        <header className="text-4xl font-bold mx-auto font-[family-name:var(--font-sans)]">
           🎖️ The Results
         </header>
         <h1 className="mt-5">
           After 5-10 Tutoring Sessions, Our Students Typically Experience...
         </h1>
+
+
+
+
         <ul className="flex flex-row gap-x-10  text-extrabold items-center justify-center my-10 overflow-x-auto min-w-fit sm:text-3xl">
-          <li className="flex flex-col gap-y-2">
-            <p className="font-extrabold">+15%</p>
-            <p>Average Grade</p>
-            <p className="text-lg">That's a whole letter grade!</p>
+          <li className="flex flex-col justify-center gap-y-4 border border-slate-300 rounded-md p-5 md:min-h-[300px] w-[320px]">
+
+            <Badge className="mx-auto  text-[16px] tracking-normal bg-blue-200 border-blue-400 border-[1.5px] text-blue-500 font-semibold w-20 h-20 " variant="outline">
+              <TrendingUp className="!w-10 !h-10" />
+            </Badge>
+
+            <p className="font-extrabold text-blue-500 text-4xl">+15%</p>
+            <p className="font-semibold">Average Grade</p>
+            <p className="text-lg text-slate-600">That's a whole letter grade!</p>
           </li>
-          <li className="flex flex-col gap-y-2">
-            <p className="font-extrabold">+32%</p>
-            <p>Study Efficiency</p>
-            <p className="text-lg">
+          <li className="flex flex-col justify-center gap-y-4 border border-slate-300 rounded-md p-5 md:min-h-[300px] w-[320px]">
+
+            <Badge className="mx-auto  text-[16px] tracking-normal border-green-400 border-[1.5px] bg-green-200 text-green-500 font-semibold w-20 h-20 " variant="outline">
+              <img
+                src="noun-gauge-17970-cropped.svg"
+                className="ml-1 mb-2 !w-10 !h-10"
+                style={{ filter: "invert(48%) sepia(79%) saturate(476%) hue-rotate(86deg) brightness(95%) contrast(95%)" }}
+              />
+            </Badge>
+            <p className="font-extrabold  text-green-600 text-4xl">+32%</p>
+            <p className="font-semibold" >Study Efficiency</p>
+            <p className="text-lg text-slate-600">
               Students complete work faster with better focus
             </p>
           </li>
-          <li className="flex flex-col gap-y-2">
-            <p className="font-extrabold">+100%</p>
-            <p>Confidence</p>
-            <p className="text-lg">Students become self-learner!</p>
+          <li className="flex flex-col justify-center gap-y-4 border border-slate-300 rounded-md p-5 md:min-h-[300px] w-[320px]">
+            <Badge
+              className="mx-auto bg-[#FAEEDA] border-[#EF9F27] border-[1.5px] text-[#854F0B] w-20 h-20 rounded-full"
+              variant="outline"
+            >
+              <Star className="!w-10 !h-10" />
+            </Badge>
+
+            <p className="font-extrabold text-[#854F0B] text-4xl">+100%</p>
+            <p className="font-semibold">Confidence</p>
+            <p className="text-lg text-slate-600">Students become self-learners!</p>
           </li>
         </ul>
 
-        <div className="my-20 text-slate-800">
+        {/* <div className="my-20 text-slate-800">
           <p className="w-2/3 max-w-[600px] mx-auto text-xl">
             "Making a postive impact on student's academic journey is a humbling
             experience. If you're looking for a tutor with a positive attitude
@@ -154,28 +206,34 @@ const Homepage = () => {
             />
             <p>Daniel Keum, Founder and Lead STEM tutor</p>
           </div>
-        </div>
+        </div> */}
       </section>
 
-      <section className="flex flex-col mt-100 lg:mt-30 xl:ml-20">
-        <h3 className="mt-10  w-full flex justify-center sm:text-xl xl:text-4xl font-extrabold ">
+
+
+      <section className="items-center justify-center">
+        {/* <h3 className="mt-10  w-full flex justify-center sm:text-xl xl:text-4xl font-extrabold ">
           Previous Student's Testimonials
-        </h3>
-        <div className=" h-[20rem] rounded-md flex flex-col antialiased bg-white dark:bg-black dark:bg-grid-white/[0.05] items-center justify-center relative overflow-hidden">
+        </h3> */}
+        {/* <div className=" h-[20rem] rounded-md flex flex-col antialiased bg-white dark:bg-black dark:bg-grid-white/[0.05] items-center justify-center relative overflow-hidden">
           <InfiniteMovingCards
             items={testimonials}
             direction="right"
             speed="slow"
           />
-        </div>
+        </div> */}
+        <TestimonialsCarousel />
       </section>
+
+
+
 
       <section className="xl:ml-20 my-30 text-start">
         <div className="flex flex-row items-center w-full justify-start gap-x-5 xl:gap-x-30">
           <div>
-            <p className="text-lg">Act now</p>
+            <p className="text-lg font-semibold text-blue-700">Act now</p>
             <br />
-            <h1 className="text-4xl font-extrabold ">
+            <h1 className="text-4xl font-bold font-[family-name:var(--font-sans)] ">
               Be Better than Good Enough
             </h1>
             <br />
@@ -209,7 +267,7 @@ const Homepage = () => {
         </div>
       </section>
 
-      <section className="xl:ml-20 overflow-y-hidden">
+      {/* <section className="xl:ml-20 overflow-y-hidden">
         <h2 className="text-start text-4xl font-extrabold">Services</h2>
 
         <ul className="flex flex-row justify-around gap-x-10 my-10">
@@ -229,7 +287,7 @@ const Homepage = () => {
           </li>
 
           <li>
-          <div className="flex flex-row gap-x-3 justify-center underline font-medium text-lg">
+            <div className="flex flex-row gap-x-3 justify-center underline font-medium text-lg">
               <p>Physics</p>
               <img className="pb-5" src="/physics.png" />
             </div>
@@ -240,7 +298,7 @@ const Homepage = () => {
           </li>
 
           <li>
-          <div className="flex flex-row gap-x-3 justify-center underline font-medium text-lg">
+            <div className="flex flex-row gap-x-3 justify-center underline font-medium text-lg">
               <p>Chemistry</p>
               <img className="pb-5" src="/chemistry.png" />
             </div>
@@ -251,7 +309,7 @@ const Homepage = () => {
           </li>
 
           <li>
-          <div className="flex flex-row gap-x-3 justify-center underline font-medium text-lg">
+            <div className="flex flex-row gap-x-3 justify-center underline font-medium text-lg">
               <p>Others</p>
               <img className="pb-5 w-[32px] h-auto" src="/others.png" />
             </div>
@@ -262,9 +320,9 @@ const Homepage = () => {
             <p>Linear Algebra</p>
           </li>
         </ul>
-      </section>
+      </section> */}
 
-      <section className="xl:ml-20 overflow-y-hidden">
+      {/* <section className="xl:ml-20 overflow-y-hidden">
         <h2 className="text-start text-4xl font-extrabold mb-5">
           Frequently Asked Questions
         </h2>
@@ -341,6 +399,48 @@ const Homepage = () => {
             </AccordionContent>
           </AccordionItem>
         </Accordion>
+      </section> */}
+
+      <section className="px-6 py-10 mt-10">
+        <div className="max-w-5xl mx-auto bg-[#1a4fd6] rounded-2xl px-10 py-12 relative overflow-hidden shadow-xl flex flex-col md:flex-row justify-between items-center gap-8">
+
+          {/* Background grid pattern */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+          </div>
+
+          {/* Text */}
+          <div className="relative z-10 text-center md:text-left">
+            <h2 className="text-2xl font-bold text-white mb-2">Ready for your child to thrive?</h2>
+            <p className="text-white/90 max-w-lg text-base">
+              Join hundreds of parents seeing real academic transformation. Our AI-driven platform adapts to your child's unique learning pace.
+            </p>
+          </div>
+
+          {/* Buttons */}
+          <div className="relative z-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto shrink-0">
+
+            <Button1 onClick={() => navigate("/waitlist")} className="bg-white text-[#1a4fd6] font-bold hover:bg-gray-100 whitespace-nowrap shadow-md">
+              Start your Free Trial
+            </Button1>
+            {isDevelopment && (
+              <Button1
+                onClick={() => navigate("/pricing")}
+                className="bg-white/90 text-[#1a4fd6] font-bold hover:bg-white whitespace-nowrap shadow-md"
+              >
+                View Pricing
+              </Button1>
+            )}
+          </div>
+
+        </div>
       </section>
       <Footer />
     </div>
@@ -349,35 +449,3 @@ const Homepage = () => {
 
 export default Homepage;
 
-const testimonials = [
-  {
-    quote:
-      "I can't wait to have Daniel as a math tutor again for my next term! I went from 63% to 77%.",
-    name: "- Hudson gr.9",
-    title: "",
-  },
-  {
-    quote:
-      "I got a 98% on my Pre-cal 12 final! 93% on my physics 12. Thank you.",
-    name: "- Dajeong  gr.12",
-    title: "",
-  },
-  {
-    quote: "My physics 11 grade went up, I'm really happy with the tutoring.",
-    name: "- Jackson gr.11",
-    title: "",
-  },
-  {
-    quote:
-      "I didn't really like math before and I still don't but at least now I can do it",
-    name: "- Anatasizia gr.7",
-    title: "",
-  },
-  {
-    quote:
-      "I play a lot of soccer after school but with tutoring I don't have to worry about my grades anymore.",
-    name: "- Yousif gr.8",
-    title: "",
-  },
-];
- 

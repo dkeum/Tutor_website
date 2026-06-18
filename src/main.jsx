@@ -8,6 +8,10 @@ import { Loader2 } from "lucide-react";
 import store from "./app/store";
 import { Provider } from "react-redux";
 
+import ProtectedRoute from "./components/ProtectRoute.jsx";
+import { AuthProvider } from "./hook/useAuthSession.jsx";
+
+
 // Lazy load the pages
 const Contactme = lazy(() => import("./pages/Contactme"));
 const About = lazy(() => import("./pages/About"));
@@ -25,16 +29,33 @@ const Login = lazy(() => import("./pages/Login"));
 
 const TrackImprovement = lazy(() => import("./components/userProfile/TrackImprovement"));
 
-const History = lazy(() => import("./components/userProfile/History"));
+const Settings = lazy(() => import("./components/userProfile/Settings"));
 
-const Mistakes = lazy(()=>  import("./components/userProfile/Mistakes"))
+const Mistakes = lazy(() => import("./components/userProfile/Mistakes"))
 
-const Test = lazy(()=>  import("./pages/Test"))
+const Test = lazy(() => import("./pages/Test"))
 
+const HomeworkHelp = lazy(() => import("./pages/HomeworkHelp"))
+const Donate = lazy(() => import("./pages/Donate"))
+const FinalExamPrep = lazy(() => import("./pages/FinalExamPrep"))
+
+const Pricing = lazy(() => import("./pages/Pricing"))
+
+const Lessons = lazy(() => import("./pages/Lessons"))
+
+<<<<<<< HEAD
 const HomeworkHelp = lazy(()=>  import("./pages/HomeworkHelp"))
 const Donate = lazy(()=>  import("./pages/Donate"))
 const FinalExamPrep = lazy(()=>  import("./pages/FinalExamPrep"))
 const MySchedule = lazy(()=> import("./pages/MySchedule"))
+=======
+const Tutors = lazy(() => import("./pages/Tutors"))
+const BookTutor = lazy(() => import("./pages/BookTutor"))
+const PracticeTopics = lazy(() => import("./pages/PracticeTopics"))
+
+const PrivatePolicy = lazy(() => import("./pages/PrivacyPolicy"))
+const TermsOfService = lazy(() => import("./pages/TermsOfService"))
+>>>>>>> 47dd308bda848bb318ddeb197739ed00ea93d6f2
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -44,8 +65,9 @@ const Loader = () => (
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
- 
-      <Provider store={store}>
+
+    <Provider store={store}>
+      <AuthProvider>
         <BrowserRouter>
           <Suspense fallback={<Loader />}>
             <Routes>
@@ -55,24 +77,62 @@ createRoot(document.getElementById("root")).render(
               <Route path="/Waitlist" element={<Waitlist />} />
               <Route path="/freeResources" element={<FreeResources />} />
               <Route path="/freeResources/:subject" element={<Subject />} />
-              <Route path="/showpersonaldata" element={<ShowPersonalData />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/showpersonaldata" element={
+                <ProtectedRoute>
+                  <ShowPersonalData />
+                </ProtectedRoute>
+              } />
               <Route
                 path="/surveypersonaldetail"
                 element={<SurveyPersonalDetail />}
               />
-              <Route path="/question/:topic" element={<SolveProblems />} />
+              <Route path="/question/:topic" element={
+                <ProtectedRoute>
+
+                  <SolveProblems />
+                </ProtectedRoute>
+              } />
               <Route path="/login" element={<Login />} />
-              <Route path="/user/track-improvement" element={<TrackImprovement  />} />
-              <Route path="/user/setting" element={<History />} />
-              <Route path="/user/mistakes" element={<Mistakes />} />
-              <Route path="/random/test" element={<Test />} />
+              <Route path="/track-improvement" element={
+                <ProtectedRoute>
+                  <TrackImprovement />
+                </ProtectedRoute>
+              } />
+              <Route path="/settings" element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              } />
+              <Route path="/correct-mistakes" element={
+                <ProtectedRoute>
+                  <Mistakes />
+                </ProtectedRoute>
+              } />
+              <Route path="/random/test" element={<ProtectedRoute>
+                <Test />
+              </ProtectedRoute>} />
+              <Route path="/book-tutor" element={<BookTutor />} />
+              <Route path="/lessons" element={<Lessons />} />
+              <Route path="/tutors" element={<Tutors />} />
+              <Route path="/practice-topics" element={<PracticeTopics />} />
               <Route path="/homework-help" element={<HomeworkHelp />} />
               <Route path="/donate" element={<Donate />} />
+<<<<<<< HEAD
               <Route path="/final-exam-prep" element={<FinalExamPrep />} />
                <Route path="/my-schedule" element={<MySchedule />} />
+=======
+              <Route path="/final-exam-prep" element={<ProtectedRoute>
+
+                <FinalExamPrep />
+              </ProtectedRoute>} />
+              <Route path="/privacy-policy" element={<PrivatePolicy />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
+>>>>>>> 47dd308bda848bb318ddeb197739ed00ea93d6f2
             </Routes>
           </Suspense>
         </BrowserRouter>
-      </Provider>
+      </AuthProvider>
+    </Provider>
   </StrictMode>
 );

@@ -1,285 +1,255 @@
-import React, { useEffect, useState, useMemo } from "react";
-import NavbarLoggedIn from "../NavbarLoggedIn";
-import { useSelector } from "react-redux";
-import axios from "axios";
-import { addStyles, EditableMathField } from "react-mathquill";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import normalizeLatex from "../../helperFunctions/normalizeLatex";
-import { motion } from "framer-motion";
-import SolveProblems_stepbystep from "../solveProblems/SolveProblems_stepbystep";
-import useDog_standalone from "../../hook/useDog_standalone";
+import React, { useState, useEffect, useRef } from 'react';
+import NavbarLoggedIn from '../NavbarLoggedIn';
+import Sidebar from '../Sidebar';
 
-addStyles();
+export default function Mistakes() {
+  // Manage which accordions are expanded (supports multiple open at once)
+  const [openAccordions, setOpenAccordions] = useState({
+    calculus: true,
+    linearAlgebra: false,
+    trigonometry: false
+  });
 
-const Mistakes = () => {
-  const data = useSelector((state) => state.personDetail.marks_section) || [];
-  const [api, setApi] = useState(null);
-  const [questions, setQuestions] = useState([]);
-  const [latex, setLatex] = useState("");
-  const [recordedAnswers, setRecordedAnswers] = useState([]);
-  const [answerResults, setAnswerResults] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [showResults, setShowResults] = useState(false);
-  const [wrongAnswerFeedback, setWrongAnswerFeedback] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const {
-    divRef,
-    playAnimation,
-    handlePlayAudio,
-    muted,
-    toggleMute,
-  } = useDog_standalone();
-
-  // Get only wrong unique question IDs
-  const wrongUniqueQuestionIds = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          data.flatMap(
-            (item) =>
-              item.recordedAnswers
-                ?.filter((ans) => ans.isCorrect === false)
-                .map((ans) => ans.questionId) || []
-          )
-        )
-      ),
-    [data]
-  );
-
-  // Fetch wrong questions from backend
-  useEffect(() => {
-    if (!wrongUniqueQuestionIds.length) return;
-
-    const getQuestions = async () => {
-      try {
-        const response = await axios.post(
-          import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-            ? "http://localhost:3000/questions/fix-questions"
-            : "https://mathamagic-backend.vercel.app/questions/fix-questions",
-          { questions_id: wrongUniqueQuestionIds },
-          { withCredentials: true }
-        );
-
-        setQuestions(response.data.question || []);
-      } catch (err) {
-        console.error("Failed to fetch questions:", err);
-      }
-    };
-
-    getQuestions();
-  }, [wrongUniqueQuestionIds]);
-
-  const currentQuestion = questions[currentIndex] || {};
-  const isLastQuestion = currentIndex === questions.length - 1;
-
-  const previousAnswer = useMemo(() => {
-    return (
-      data
-        .flatMap((item) => item.recordedAnswers || [])
-        .find((ans) => ans.questionId === currentQuestion.id)?.answer || ""
-    );
-  }, [currentQuestion, data]);
-
-  const handleNextOrSubmit = async () => {
-    const correctAnswer = currentQuestion?.answer || "";
-    const isCorrect = normalizeLatex(latex) === normalizeLatex(correctAnswer);
-
-    setWrongAnswerFeedback(isCorrect ? "" : `Correct answer: ${correctAnswer}`);
-
-    const newAnswer = {
-      questionId: currentQuestion.id,
-      answer: latex,
-      isCorrect,
-    };
-
-    setRecordedAnswers((prev) => [...prev, newAnswer]);
-    setAnswerResults((prev) => [
-      ...prev,
-      { questionId: currentQuestion.id, isCorrect },
-    ]);
-    setLatex("");
-
-    if (isCorrect) {
-      await axios.post(
-        import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-          ? "http://localhost:3000/questions/fixed-mistakes"
-          : "https://mathamagic-backend.vercel.app/questions/fixed_mistakes",
-        { fixed_questions_id: [currentQuestion.id] },
-        { withCredentials: true }
-      );
-
-      if (api) {
-        api.scrollNext();
-        setCurrentIndex((prev) => prev + 1);
-      }
-    }
+  const toggleAccordion = (key) => {
+    setOpenAccordions(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
-    <div>
+    <div className="min-h-screen  text-[#101b30] font-sans antialiased ">
+      {/* Global Navigation Layouts */}
       <NavbarLoggedIn />
+      <Sidebar />
 
-      <div className="grid grid-cols-3 max-w-6xl gap-4 min-h-[500px] mt-10">
-        {/* LEFT side (carousel, no animation) */}
-        <div className="col-span-2 border rounded-lg p-4 overflow-y-auto space-y-4 flex flex-col justify-between">
-          <Carousel
-            className="w-full pointer-events-none"
-            setApi={setApi}
-            opts={{ loop: false }}
-          >
-            <CarouselContent>
-              {questions.map((q, index) => (
-                <CarouselItem key={index}>
-                  <div className="border rounded-lg p-4 w-[95%] mx-auto bg-white shadow flex-grow">
-                    <h2 className="mb-2 flex-grow">
-                      <b>Question {index + 1}:</b> {q.question}
-                    </h2>
-                    {q?.image_url && <img src={`${q.image_url}`} className="max-h-[300px]"/>}
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-
-          <div className="mb-2 text-red-600">{wrongAnswerFeedback}</div>
-
-          <div className="flex flex-row justify-between mt-2">
-            <div>
-              <div className="mb-2">
-                The answer you submitted before was:{" "}
-                <span className="font-semibold">
-                  {previousAnswer || "No previous answer"}
-                </span>
-              </div>
-              <EditableMathField
-                latex={latex}
-                onChange={(mathField) => setLatex(mathField.latex())}
-                style={{
-                  minWidth: "400px",
-                  minHeight: "30px",
-                  textAlign: "left",
-                }}
-              />
-            </div>
-
-            <button
-              className="px-4 py-2 bg-blue-500 text-white rounded whitespace-nowrap self-start hover:bg-blue-600 transition"
-              onClick={handleNextOrSubmit}
-            >
-              {isLastQuestion ? "SUBMIT" : "NEXT"}
-            </button>
-          </div>
-
-          {showResults && (
-            <p className="mt-4 text-green-600">Results submitted!</p>
-          )}
-        </div>
-
-        {/* RIGHT side (animated sidebar) */}
-        <motion.div
+      {/* Main Content Viewport Area: Offset classes handle the fixed sidebar/navbar real estate */}
+      <main className="pt-24 pb-12 px-4 sm:px-6 pl-0 lg:pl-64 2xl:pl-0 lg:pr-8 max-w-[1440px] mx-auto transition-all duration-300">
         
-          whileHover={{
-            scale: 1.03,
-            boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.25)",
-          }}
-          transition={{ duration: 0.3 }}
-          className="border rounded-lg p-4 flex flex-col"
-        >
-          <div className="flex-1 overflow-y-auto">
-          {data.length === 0 ? (
-            <p className="text-gray-500">No data available.</p>
-          ) : (
-            <div className="space-y-4">
-              {Array.from(
-                data.reduce((map, item) => {
-                  const topic = item.topic;
-                  const section = item.section_name || item.section;
-                  if (!map.has(topic)) map.set(topic, new Set());
-                  if (section) map.get(topic).add(section); // only add if not empty
-                  return map;
-                }, new Map())
-              ).map(([topic, sections], idx) => {
-                const isCurrentTopic = topic === currentQuestion.topic;
-                const currentSection =
-                  currentQuestion.section_name ||
-                  currentQuestion.section ||
-                  "Multiplying Rational Numbers"; // fallback section
-
-                return (
-                  <div
-                    key={idx}
-                    className={`p-2 rounded ${
-                      isCurrentTopic ? "bg-slate-100" : "bg-white"
-                    } transition-colors duration-300`}
-                  >
-                    <p className="font-semibold">{topic}</p>
-                    <ul className="list-disc pl-5 text-sm text-gray-700">
-                      {Array.from(sections)
-                        .filter((sec) => sec && sec.trim() !== "") // filter out empty sections
-                        .map((sec, i) => {
-                          const isCurrentSection = sec === currentSection;
-                          return (
-                            <div
-                              key={i}
-                              className={`p-1 rounded ${
-                                isCurrentSection
-                                  ? "bg-slate-100 font-semibold"
-                                  : ""
-                              } transition-colors duration-300`}
-                            >
-                              {sec}
-                            </div>
-                          );
-                        })}
-                    </ul>
-                  </div>
-                );
-              })}
+        {/* Hero Header Section */}
+        <section className="mb-10">
+          <div className="flex items-end justify-between mx-auto">
+            <div>
+              <h2 className="text-4xl font-bold tracking-tight mb-2"  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                Correct Your Mistakes
+              </h2>
+              <p className="text-lg text-[#494456] text-left">
+                Every mistake is a step towards mastery.
+              </p>
             </div>
-          )}</div>
-          <div className="flex min-h-[100px] items-center justify-center">
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">Step by Step</Button>
-              </DialogTrigger>
-              <DialogContent className="min-w-6xl max-h-[700px] sm:h-[400px] lg:h-[600px]">
-                <DialogHeader className="hidden">
-                  <DialogTitle></DialogTitle>
-                  <DialogDescription></DialogDescription>
-                </DialogHeader>
-                <SolveProblems_stepbystep
-                  playAnimation={playAnimation}
-                  handlePlayAudio={handlePlayAudio}
-                  handleNextOrSubmit={handleNextOrSubmit}
-                  question={currentQuestion}
-                  setIsDialogOpen={setIsDialogOpen}
-                  muted={muted}
-                  toggleMute={toggleMute}
-                  dogRef={divRef}
-                />
-              </DialogContent>
-            </Dialog>
+          
           </div>
-        </motion.div>
-      </div>
+        </section>
+
+        {/* Main Responsive Split Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* LEFT COLUMN: Accordions / Topics (8/12 wide) */}
+          <div className="lg:col-span-8 space-y-6">
+            <div className="flex items-center justify-between px-2">
+              <h3 className="text-sm font-bold text-[#7a7488] uppercase tracking-widest">
+                Review Topics
+              </h3>
+              <div className="flex gap-2 items-center text-sm">
+                <span className="text-[#494456]">Sort by:</span>
+                <select className="bg-transparent border-none font-bold text-[#4800b2] focus:ring-0 cursor-pointer p-0 text-sm">
+                  <option>Priority</option>
+                  <option>Topic Name</option>
+                  <option>Questions Count</option>
+                </select>
+              </div>
+            </div>
+
+            {/* CALCULUS ACCORDION */}
+            <div className="bg-white/70 backdrop-blur-md border border-white/30 rounded-2xl shadow-[0_8px_32px_0_rgba(98,0,238,0.06)] hover:translate-y-[-4px] hover:shadow-[0_12px_40px_0_rgba(98,0,238,0.12)] transition-all duration-300 overflow-hidden">
+              <div 
+                className="p-6 flex items-center justify-between cursor-pointer hover:bg-[#F3E8FF]/20 transition-colors"
+                onClick={() => toggleAccordion('calculus')}
+              >
+                <div className="flex items-center gap-4">
+              
+                  <div>
+                    <h4 className="text-xl font-bold text-[#101b30] leading-tight text-left">Calculus</h4>
+                    <p className="text-xs font-semibold text-[#4800b2] flex items-center gap-1 mt-1">
+                      <span className="w-1.5 h-1.5 bg-[#4800b2] rounded-full inline-block"></span>
+                      6 Questions to review
+                    </p>
+                  </div>
+                </div>
+                <ChevronIcon isOpen={openAccordions.calculus} />
+              </div>
+              
+              <AccordionWrapper isOpen={openAccordions.calculus}>
+                <div className="p-6 space-y-3 bg-[#F8F9FE]/50 border-t border-[#cbc3d9]/30">
+                  <div className="flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm border border-[#cbc3d9]/10">
+                    <div>
+                      <p className="font-bold text-[#101b30]">Integrals</p>
+                      <p className="text-xs text-[#494456]">Area under curve, substitution</p>
+                    </div>
+                    <ReviewButton count={4} />
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm border border-[#cbc3d9]/10">
+                    <div>
+                      <p className="font-bold text-[#101b30]">Derivatives</p>
+                      <p className="text-xs text-[#494456]">Chain rule, Power rule</p>
+                    </div>
+                    <ReviewButton count={2} />
+                  </div>
+                </div>
+              </AccordionWrapper>
+            </div>
+
+            {/* LINEAR ALGEBRA ACCORDION */}
+            <div className="bg-white/70 backdrop-blur-md border border-white/30 rounded-2xl shadow-[0_8px_32px_0_rgba(98,0,238,0.06)] hover:translate-y-[-4px] hover:shadow-[0_12px_40px_0_rgba(98,0,238,0.12)] transition-all duration-300 overflow-hidden">
+              <div 
+                className="p-6 flex items-center justify-between cursor-pointer hover:bg-[#F3E8FF]/20 transition-colors"
+                onClick={() => toggleAccordion('linearAlgebra')}
+              >
+                <div className="flex items-center gap-4">
+               
+                  <div>
+                    <h4 className="text-xl font-bold text-[#101b30] leading-tight text-left">Linear Algebra</h4>
+                    <p className="text-xs font-semibold text-[#00696b] flex items-center gap-1 mt-1">
+                      <span className="w-1.5 h-1.5 bg-[#00696b] rounded-full inline-block"></span>
+                      5 Questions to review
+                    </p>
+                  </div>
+                </div>
+                <ChevronIcon isOpen={openAccordions.linearAlgebra} />
+              </div>
+
+              <AccordionWrapper isOpen={openAccordions.linearAlgebra}>
+                <div className="p-6 space-y-3 bg-[#F8F9FE]/50 border-t border-[#cbc3d9]/30">
+                  <div className="flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm border border-[#cbc3d9]/10">
+                    <div>
+                      <p className="font-bold text-[#101b30]">Matrix Multiplication</p>
+                      <p className="text-xs text-[#494456]">Standard and dot products</p>
+                    </div>
+                    <ReviewButton count={5} isSecondary />
+                  </div>
+                </div>
+              </AccordionWrapper>
+            </div>
+
+            {/* TRIGONOMETRY ACCORDION */}
+            <div className="bg-white/70 backdrop-blur-md border border-white/30 rounded-2xl shadow-[0_8px_32px_0_rgba(98,0,238,0.06)] hover:translate-y-[-4px] hover:shadow-[0_12px_40px_0_rgba(98,0,238,0.12)] transition-all duration-300 overflow-hidden">
+              <div 
+                className="p-6 flex items-center justify-between cursor-pointer hover:bg-[#F3E8FF]/20 transition-colors"
+                onClick={() => toggleAccordion('trigonometry')}
+              >
+                <div className="flex items-center gap-4">
+                
+                  <div>
+                    <h4 className="text-xl font-bold text-[#101b30] leading-tight text-left">Trigonometry</h4>
+                    <p className="text-xs font-semibold text-[#594e6d] flex items-center gap-1 mt-1">
+                      <span className="w-1.5 h-1.5 bg-[#594e6d] rounded-full inline-block"></span>
+                      3 Questions to review
+                    </p>
+                  </div>
+                </div>
+                <ChevronIcon isOpen={openAccordions.trigonometry} />
+              </div>
+
+              <AccordionWrapper isOpen={openAccordions.trigonometry}>
+                <div className="p-6 space-y-3 bg-[#F8F9FE]/50 border-t border-[#cbc3d9]/30">
+                  <div className="flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm border border-[#cbc3d9]/10">
+                    <div>
+                      <p className="font-bold text-[#101b30]">Sine & Cosine Laws</p>
+                      <p className="text-xs text-[#494456]">Non-right angled triangles</p>
+                    </div>
+                    <ReviewButton count={3} isTertiary />
+                  </div>
+                </div>
+              </AccordionWrapper>
+            </div>
+
+          </div>
+
+          {/* RIGHT COLUMN: Sidebar Stats and Tip Cards (4/12 wide) */}
+          <div className="lg:col-span-4 flex flex-col gap-8">
+            
+            {/* Total Pending Card */}
+            <div className="bg-white/70 backdrop-blur-md border border-white/30 rounded-2xl p-8 relative overflow-hidden shadow-[0_8px_32px_0_rgba(98,0,238,0.06)] hover:translate-y-[-4px] transition-all duration-300">
+              <div className="relative z-10">
+                <p className="text-xs font-bold text-[#4800b2] mb-4 uppercase tracking-wider">Total Pending</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-extrabold text-[#101b30]">14</span>
+                  <span className="text-sm text-[#494456]">Questions</span>
+                </div>
+                <p className="text-xs text-[#494456] mt-4 leading-relaxed">
+                  Most errors found in <span className="font-bold text-[#4800b2]">Calculus Integrals</span>. Review this first!
+                </p>
+              </div>
+              <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-[#4800b2]/10 rounded-full blur-3xl"></div>
+              <div className="absolute top-6 right-6">
+                <div className="w-12 h-12 bg-[#e8ddff]/50 rounded-full flex items-center justify-center text-[#4800b2]">
+                  <span className="text-xl">✦</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Review Widget */}
+            <div className="bg-white/70 backdrop-blur-md border border-white/30 rounded-2xl p-6 shadow-[0_8px_32px_0_rgba(98,0,238,0.06)] hover:translate-y-[-4px] transition-all duration-300">
+              <h5 className="font-bold text-[#494456] uppercase tracking-widest text-[10px] mb-6">Mastery Tip</h5>
+              <div className="flex gap-4 items-start mb-6">
+                <div className="w-10 h-10 rounded-full bg-[#2ECC71]/10 flex items-center justify-center flex-shrink-0 text-[#2ECC71]">
+                  <span className="text-lg">💡</span>
+                </div>
+                <p className="text-xs text-[#494456] italic leading-relaxed">
+                  "Reviewing mistakes within 24 hours increases long-term retention by 60%. Try to tackle 2 questions now."
+                </p>
+              </div>
+            </div>
+
+         
+          </div>
+        </div>
+      </main>
     </div>
   );
-};
+}
 
-export default Mistakes;
+/* ==========================================================================
+   SUB-COMPONENTS
+   ========================================================================== */
+
+function AccordionWrapper({ isOpen, children }) {
+  const contentRef = useRef(null);
+  const [height, setHeight] = useState('0px');
+
+  useEffect(() => {
+    setHeight(isOpen ? `${contentRef.current.scrollHeight}px` : '0px');
+  }, [isOpen]);
+
+  return (
+    <div
+      ref={contentRef}
+      style={{ maxHeight: height }}
+      className="transition-[max-height] duration-300 ease-out overflow-hidden text-left"
+    >
+      {children}
+    </div>
+  );
+}
+
+function ReviewButton({ count, isSecondary, isTertiary }) {
+  let styles = "bg-[#e8ddff] text-[#4800b2] hover:bg-[#6200ee] hover:text-white";
+  if (isSecondary) styles = "bg-[#7cf5f7] text-[#002020] hover:bg-[#00696b] hover:text-white";
+  if (isTertiary) styles = "bg-[#ebddff] text-[#201632] hover:bg-[#413755] hover:text-white";
+
+  return (
+    <button 
+      onClick={(e) => e.stopPropagation()} 
+      className={`px-5 py-2 rounded-full font-bold text-sm transition-all active:scale-95 flex items-center gap-2 ${styles}`}
+    >
+      Review {count}
+      <span className="text-xs font-bold">→</span>
+    </button>
+  );
+}
+
+// Fixed spacing down-arrow indicator icon 
+function ChevronIcon({ isOpen }) {
+  return (
+    <span className={`text-[#7a7488] block text-xs transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+      ▼
+    </span>
+  );
+}

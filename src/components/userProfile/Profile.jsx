@@ -3,23 +3,21 @@ import * as d3 from "d3";
 import { useSelector } from "react-redux";
 
 const Profile = () => {
-  const completionProgress =
-    useSelector((state) => state.personDetail.completionProgress);
-  const current_grade =
-    useSelector((state) => state.personDetail.current_grade);
-  const goal_commitment =  useSelector((state) => state.personDetail.timeGoals);
+  const completionProgress = useSelector((state) => state.personDetail.completionProgress);
+  const current_grade = useSelector((state) => state.personDetail.current_grade) ;
+  const goal_commitment = useSelector((state) => state.personDetail.time_logged_pct ) ;
 
   return (
-    <div className="w-full h-full grid grid-cols-2 gap-1">
-      <div className="">
-        <Completion_graph name="Completed" value={completionProgress} />
+    <div className="w-full h-full grid grid-cols-2  gap-x-2 mb-4">
+      <div className="flex justify-center mt-5">
+        <Completion_graph name="COMPLETED" value={completionProgress} />
       </div>
-      <div className="">
-        <Completion_graph name="Grade" value={current_grade} />
+      <div className="flex justify-center mt-5">
+        <Completion_graph name="GRADE" value={current_grade} />
       </div>
 
-      <div className="col-span-2 w-1/2 mx-auto">
-        <Completion_graph name="Time Logged" value={goal_commitment} />
+      <div className="col-span-2 w-full flex justify-center -mt-8">
+        <Completion_graph name="TIME LOGGED" value={goal_commitment} />
       </div>
     </div>
   );
@@ -28,30 +26,29 @@ const Profile = () => {
 export default Profile;
 
 const Completion_graph = ({ name, value }) => {
-  const ref = useRef(); // ✅ Define ref first
+  const ref = useRef();
 
   useEffect(() => {
-    const container = d3.select(ref.current);
-    container.selectAll("*").remove(); // clear previous render
+    if (!ref.current) return;
 
-    const width = 250;
-    const height = Math.min(160, width);
-    const outerRadius = height / 2 - 10;
-    const innerRadius = outerRadius * 0.75;
+    const container = d3.select(ref.current);
+    container.selectAll("*").remove(); 
+
+    const width = 160;
+    const height = 160;
+    const outerRadius = width / 2 - 10;
+    const innerRadius = outerRadius * 0.76;
     const tau = 2 * Math.PI;
 
-    let color;
-    if (value < 50) {
-      color = "red";
-    } else if (value >= 50 && value <= 80) {
-      color = "yellow";
-    } else if (value > 80 && value < 100) {
-      color = "#39ff14"; // neon green
-    } else if (value === 100) {
-      color = "purple";
-    }
+    const trackColor = "#EBF1FF";
+    const brandPurple = "#6366F1"; 
 
-    const svg = container.append("svg").attr("viewBox", [0, 0, width, height]);
+    const svg = container
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("width", "100%")
+      .attr("height", "100%")
+      .attr("class", "block mx-auto");
 
     const g = svg
       .append("g")
@@ -61,73 +58,82 @@ const Completion_graph = ({ name, value }) => {
       .arc()
       .innerRadius(innerRadius)
       .outerRadius(outerRadius)
-      .startAngle(0);
+      .startAngle(0)
+      .cornerRadius(4);
 
-    // Background arc
+    // Track baseline ring
     g.append("path")
       .datum({ endAngle: tau })
-      .style("fill", "#ddd")
+      .style("fill", trackColor)
       .attr("d", arc);
 
-    // Foreground arc (animated)
+    // Foreground animated indicator path
     const foreground = g
       .append("path")
       .datum({ endAngle: 0 })
-      .style("fill", color)
+      .style("fill", brandPurple)
       .attr("d", arc);
 
-    // Text in center
-    const text = g
+    // Dynamic numeric node - isolated to keep center alignment locked over (0,0)
+    const valueNode = g
       .append("text")
       .attr("text-anchor", "middle")
-      .attr("dy", "0.35em")
-      .style("font-size", "1.8rem")
-      .style("fill", "black")
-      .style("font-weight", "800") // <-- slightly bold
-      .text(`0%`);
+      .attr("dominant-baseline", "central")
+      .style("fill", brandPurple)
+      .style("font-size", "2.1rem")
+      .style("font-weight", "800")
+      .style("font-family", "system-ui, -apple-system, sans-serif")
+      .text("0");
 
-    // Animate the arc and text from 0 to value
-    const animate = () => {
-      foreground
-        .datum({ endAngle: 0 }) // reset arc
-        .attr("d", arc)
-        .transition()
-        .duration(3000)
-        .attrTween("d", function (d) {
-          const interpolate = d3.interpolate(d.endAngle, (value / 100) * tau);
-          return function (t) {
-            d.endAngle = interpolate(t);
-            return arc(d);
-          };
-        });
+    // Percentage symbol - explicitly positioned relative to the center without disrupting the number layout
+    g.append("text")
+      .attr("dominant-baseline", "central")
+      // Safely shifts the symbol slightly right and up on the absolute grid matrix
+      .attr("dx", "1.15em") 
+      .attr("dy", "-0.35em") 
+      .style("fill", brandPurple)
+      .style("font-size", "1.1rem")
+      .style("font-weight", "700")
+      .style("opacity", "0.9")
+      .style("font-family", "system-ui, -apple-system, sans-serif")
+      .text("%");
 
-      text
-        .transition()
-        .duration(3000)
-        .tween("text", function () {
-          const i = d3.interpolate(0, value);
-          return function (t) {
-            text.text(`${Math.round(i(t))}%`);
-          };
-        });
-    };
+    // Dynamic Arc drawing transition curve loop
+    foreground
+      .transition()
+      .duration(1800)
+      .ease(d3.easeCubicOut)
+      .attrTween("d", function (d) {
+        const interpolate = d3.interpolate(d.endAngle, (Math.max(0, Math.min(100, value)) / 100) * tau);
+        return function (t) {
+          d.endAngle = interpolate(t);
+          return arc(d);
+        };
+      });
 
-    // Run animation initially
-    animate();
-
-    // Repeat every 10 seconds
-    // const interval = setInterval(animate, 10000);
+    // Numerical text count-up values tween mapping
+    valueNode
+      .transition()
+      .duration(1800)
+      .ease(d3.easeCubicOut)
+      .tween("text", function () {
+        const i = d3.interpolate(0, value);
+        return function (t) {
+          d3.select(this).text(Math.round(i(t)));
+        };
+      });
 
     return () => {
-    //   clearInterval(interval);
       container.selectAll("*").remove();
     };
   }, [value]);
 
   return (
-    <div className="flex flex-col ">
-      <div ref={ref} />
-      <div className="text-center text-sm font-bold ">{name}</div>
+    <div className="flex flex-col items-center w-full max-w-[140px]">
+      <div className="w-28 h-28" ref={ref} />
+      <div className="text-center text-[11px] font-bold tracking-widest text-gray-400 mt-0 select-none">
+        {name}
+      </div>
     </div>
   );
 };

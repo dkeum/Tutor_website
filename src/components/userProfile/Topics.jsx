@@ -1,92 +1,218 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
+import { Play, CheckCircle2, PenLine, Circle, Lock } from "lucide-react";
+
+// Robust fallback blueprint tracking real production database fields
+const FALLER_PROGRESS_DATA = [
+  {
+    topic_name: "Rational Numbers",
+    topic_mastery: 0,
+    sections: [
+      { section_name: "Introduction to Fractions", latest_grade: 0, completed: false, section_id: 101 },
+      { section_name: "Equivalent Fractions", latest_grade: 0, completed: false, section_id: 102 },
+      { section_name: "Comparing Fractions", latest_grade: 0, completed: false, section_id: 103 },
+      { section_name: "Fractions on a Number Line", latest_grade: 0, completed: false, section_id: 104 },
+    ],
+  },
+];
+
+const getMasteryColor = (grade) => {
+  if (grade >= 80) return { text: "text-emerald-600", bar: "bg-emerald-500", light: "bg-emerald-50" };
+  if (grade >= 50) return { text: "text-amber-500",  bar: "bg-amber-400",  light: "bg-amber-50"  };
+  return               { text: "text-rose-500",    bar: "bg-rose-400",    light: "bg-rose-50"    };
+};
+
+// Status Icon resolver driven by explicit status strings
+const StatusIcon = ({ status }) => {
+  switch (status) {
+    case "done":
+      return <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />;
+    case "active":
+      return <PenLine className="w-4 h-4 text-indigo-500 flex-shrink-0" />;
+    case "locked":
+      return <Lock className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />;
+    default:
+      return <Circle className="w-4 h-4 text-slate-300 flex-shrink-0" />;
+  }
+};
 
 const Topics = () => {
-  const progressArray = useSelector(
-    (state) => state.personDetail.progressArray
-  );
-
   const navigate = useNavigate();
 
-  const handleClick = (topic, section) => {
-    navigate(
-      `/question/${encodeURIComponent(topic)}?section=${encodeURIComponent(
-        section
-      )}`
-    );
+  // ── 💡 FIX 1: Safely grab state matching the actual Redux slice keys ──
+ 
+  const progressArrayFromRedux = useSelector((state) => state.personDetail?.progressArray);
+  const currentModule = useSelector((state) => state.personDetail?.current_module);
+  const hasActivityHistory = useSelector((state) => state.personDetail?.hasActivityHistory ?? true);
+
+  const progressArray = progressArrayFromRedux && progressArrayFromRedux.length > 0
+    ? progressArrayFromRedux
+    : FALLER_PROGRESS_DATA;
+
+  const currentTopic = progressArray?.[0];
+  const allSections = currentTopic?.sections ?? [];
+
+  // ── 💡 FIX 2: Dynamic Status Mapping & Clean Slicing for Fresh Accounts ──
+  // Instead of slicing from the end (-3), show sections sequentially from the beginning (0 to 4)
+  const processedSections = allSections.slice(0, 3).map((section, idx) => {
+    // If the database endpoint hasn't computed a status, resolve it inline
+    let status = section.status;
+    
+    if (!status) {
+      if (section.completed) {
+        status = "done";
+      } else if (currentModule && section.section_id === currentModule.section_id) {
+        status = "active";
+      } else if (!currentModule && idx === 0) {
+        status = "active"; // Auto-target section 1 if user is clean
+      } else {
+        status = "todo";
+      }
+    }
+    return { ...section, status };
+  });
+
+  // Pinpoint dynamic target section for the main resume button action
+  const resumeSection = processedSections.find((s) => s.status === "active") ?? processedSections[0];
+
+  const handleClick = (topicName, sectionName) => {
+    navigate(`/question/${encodeURIComponent(topicName)}?section=${encodeURIComponent(sectionName)}`);
   };
 
-  return (
-    <div>
-      {progressArray && progressArray.length > 0 ? (
-        <Carousel className="w-[80%] mx-auto min-h-[6rem]">
-          <CarouselContent>
-            {progressArray.map((topic, key) => (
-              <CarouselItem key={key}>
-                <div className="p-1">
-                  <Card className="min-h-[200px] lg:min-h-[250px]">
-                    <CardContent className="flex items-center justify-center">
-                      <div className="text-center">
-                        <span className="block font-semibold text-xl">
-                          {topic.topic_name}
-                        </span>
+  if (!currentTopic || allSections.length === 0) {
+    return (
+      <div className="text-center py-10 bg-white rounded-xl border border-dashed border-slate-200 p-6">
+        <p className="text-sm font-bold text-slate-400 tracking-wide uppercase">
+          All topics complete!
+        </p>
+      </div>
+    );
+  }
 
-                        <div className="mt-3">
-                          {topic.sections.slice(0, 6).map((section, key2) => (
-                            <button
-                              key={key2}
-                              className="flex flex-row gap-x-4 justify-between w-full hover:bg-slate-100 cursor-pointer"
-                              onClick={() =>
-                                handleClick(
-                                  topic.topic_name,
-                                  section.section_name
-                                )
-                              }
-                            >
-                              <span className="text-sm">
-                                {section.section_name}
-                              </span>
-                              <span
-                                className={
-                                  section?.latest_grade != null
-                                    ? section.latest_grade < 50
-                                      ? "text-red-500"
-                                      : section.latest_grade < 75
-                                      ? "text-yellow-500"
-                                      : "text-green-500"
-                                    : "text-gray-500"
-                                }
-                              >
-                                {section?.latest_grade != null
-                                  ? Math.round(section.latest_grade)
-                                  : 0}
-                                %
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
-      ) : (
-        <p>All topics complete!</p>
+  const displayMastery = currentTopic.topic_mastery ?? 0;
+
+  return (
+    <div className="w-full select-none space-y-4">
+      
+
+
+      {/* ── Topic Header ── */}
+      <div className="flex flex-col gap-y-1">
+        <span className="text-[10px] font-bold tracking-widest uppercase text-slate-400">
+          Current Module
+        </span>
+        <div className="flex items-center justify-between gap-x-3">
+          <h3
+            className="text-xl font-extrabold tracking-tight text-slate-800 uppercase"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+          >
+            {currentTopic.topic_name}
+          </h3>
+          <span className="text-sm font-bold text-slate-500">
+            {displayMastery}% mastery
+          </span>
+        </div>
+        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-0.5">
+          <div
+            className="h-full rounded-full bg-indigo-500 transition-all duration-700"
+            style={{ width: `${displayMastery}%` }}
+          />
+        </div>
+      </div>
+
+      {/* ── Resume Bar ── */}
+      {resumeSection && (
+        <div className="flex items-center justify-between gap-x-3 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3">
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center gap-x-1.5 mb-0.5">
+              <span className="text-[10px] font-bold tracking-widest uppercase text-indigo-400">
+                {hasActivityHistory ? "Last session" : "Up Next"}
+              </span>
+            </div>
+            <span className="text-sm font-bold text-indigo-800 truncate">
+              {resumeSection.section_name}
+            </span>
+            {resumeSection.latest_grade > 0 && (
+              <span className="text-[11px] text-indigo-400 mt-0.5">
+                Last Score: {Math.round(resumeSection.latest_grade)}%
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => handleClick(currentTopic.topic_name, resumeSection.section_name)}
+            className="flex items-center gap-x-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-sm shadow-indigo-200 transition-all duration-150 flex-shrink-0 cursor-pointer"
+          >
+            <Play className="w-3 h-3 fill-white text-white" />
+           {hasActivityHistory ? "Resume" : "Start"} 
+          </button>
+        </div>
       )}
+
+      {/* ── Section List ── */}
+      <div className="flex flex-col gap-y-2">
+        {processedSections.map((section, idx) => {
+          const grade = section?.latest_grade != null ? Math.round(section.latest_grade) : 0;
+          const colors = getMasteryColor(grade);
+          const isLocked = section.status === "locked";
+          const isActive = section.status === "active";
+
+          return (
+            <div
+              key={section.section_id || idx}
+              onClick={() => !isLocked && handleClick(currentTopic.topic_name, section.section_name)}
+              className={[
+                "flex items-center gap-x-3 px-4 py-3 rounded-xl border transition-all duration-150",
+                isLocked
+                  ? "bg-slate-50 border-slate-100 opacity-50 cursor-not-allowed"
+                  : isActive
+                  ? "bg-white border-indigo-200 shadow-sm cursor-pointer hover:border-indigo-300 hover:shadow-md"
+                  : "bg-white border-slate-100 cursor-pointer hover:border-slate-200 hover:shadow-sm",
+              ].join(" ")}
+            >
+              <span className="text-[11px] font-bold text-slate-300 w-5 text-center flex-shrink-0">
+                {idx + 1}
+              </span>
+
+              <StatusIcon status={section.status} />
+
+              <div className="flex-1 min-w-0">
+                <p className={["text-sm font-bold leading-snug truncate", isLocked ? "text-slate-400" : "text-slate-700"].join(" ")}>
+                  {section.section_name}
+                </p>
+                {grade > 0 && (
+                  <div className="flex items-center gap-x-2 mt-1">
+                    <div className="w-24 h-1 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${colors.bar} transition-all duration-700`}
+                        style={{ width: `${Math.max(6, Math.min(100, grade))}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-shrink-0 flex items-center">
+                {grade > 0 ? (
+                  <span className={`text-sm font-extrabold ${colors.text}`}>
+                    {grade}%
+                  </span>
+                ) : section.status === "todo" || section.status === "active" ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleClick(currentTopic.topic_name, section.section_name);
+                    }}
+                    className="text-[11px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-md px-2 py-1 hover:bg-indigo-100 transition-colors cursor-pointer"
+                  >
+                    Start
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
