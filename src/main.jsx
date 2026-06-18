@@ -34,6 +34,7 @@ const Test = lazy(()=>  import("./pages/Test"))
 const HomeworkHelp = lazy(()=>  import("./pages/HomeworkHelp"))
 const Donate = lazy(()=>  import("./pages/Donate"))
 const FinalExamPrep = lazy(()=>  import("./pages/FinalExamPrep"))
+const MySchedule = lazy(()=> import("./pages/MySchedule"))
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -68,6 +69,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="/homework-help" element={<HomeworkHelp />} />
               <Route path="/donate" element={<Donate />} />
               <Route path="/final-exam-prep" element={<FinalExamPrep />} />
+               <Route path="/my-schedule" element={<MySchedule />} />
             </Routes>
           </Suspense>
         </BrowserRouter>

@@ -105,9 +105,9 @@ const NavbarLoggedIn = () => {
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuLink asChild>
-                <a className="font-semibold" href="/about">
+              <button className="font-semibold" onClick={()=>{navigate("/my-schedule")}}>
                   Book Tutor
-                </a>
+                  </button>
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
