@@ -12,21 +12,21 @@ const NavbarLoggedIn = () => {
   // --- Session Tracking Lifecycle ---
   useEffect(() => {
     startTimeRef.current = new Date();
-  
+
     const handleUnload = () => {
       const endTime = new Date();
       sendSessionData(startTimeRef.current, endTime);
     };
-  
+
     const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden") {
         handleUnload();
       }
     };
-  
+
     window.addEventListener("beforeunload", handleUnload);
     document.addEventListener("visibilitychange", handleVisibilityChange);
-  
+
     return () => {
       window.removeEventListener("beforeunload", handleUnload);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
@@ -53,52 +53,50 @@ const NavbarLoggedIn = () => {
   };
 
   const handleLogout = async () => {
-    const endTime = new Date();
-    try {
-      await sendSessionData(startTimeRef.current, endTime);
-
-      await axios.post(
-        import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-          ? "http://localhost:3000/logout"
-          : "https://mathamagic-backend.vercel.app/logout",
-        { email },
-        { withCredentials: true }
-      );
-
-      navigate("/login");
-    } catch (err) {
-      navigate("/login");
-    }
+    navigate("/login");
   };
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm w-full">
       <div className="flex flex-row justify-between items-center px-6 md:px-10 py-2">
-        
         {/* Logo Element Block */}
         <div className="flex flex-row items-center gap-x-3 text-2xl md:text-3xl">
-          <img className="w-10 h-8 md:w-12 md:h-10" src="/mathamagic_m_blue_star.svg" alt="logo" />
-          <a href="/" className="font-bold -ml-[25px] mt-[1px]">athamagic</a>
+          <img
+            className="w-10 h-8 md:w-12 md:h-10"
+            src="/mathamagic_m_blue_star.svg"
+            alt="logo"
+          />
+          <a href="/" className="font-bold -ml-[25px] mt-[1px]">
+            athamagic
+          </a>
         </div>
 
         {/* Desktop Interface Action Options */}
         <div className="hidden md:flex flex-row gap-x-10 items-center text-xl">
-          <a href="/about" className="text-base font-semibold text-gray-700 hover:text-indigo-600 transition-colors">
+          <a
+            href="/about"
+            className="text-base font-semibold text-gray-700 hover:text-indigo-600 transition-colors"
+          >
             About
           </a>
-          <a href="/freeResources" className="text-base font-semibold text-gray-700 hover:text-indigo-600 transition-colors">
-            Free Resources
-          </a>
-          
+
           {/* Logout Button */}
           <button
             onClick={handleLogout}
-            className="p-[3px] relative text-base w-[130px] cursor-pointer font-medium"
+            className="
+              px-7 py-1
+              text-base font-bold
+              bg-[#2b56de] text-white
+              rounded-[12px]
+              shadow-[0_4px_14px_rgba(43,86,222,0.2)]
+              hover:bg-[#1e40af] hover:shadow-[0_6px_20px_rgba(43,86,222,0.3)] hover:-translate-y-px
+              active:translate-y-px
+              transition-all duration-150
+              cursor-pointer
+              whitespace-nowrap
+  "
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-            <div className="px-3 py-1.5 bg-black rounded-[10px] relative group transition duration-200 text-white hover:bg-transparent text-center">
-              <span className="font-extrabold">➜</span> Logout
-            </div>
+            Logout
           </button>
         </div>
 
@@ -109,12 +107,34 @@ const NavbarLoggedIn = () => {
           aria-label="Toggle menu"
         >
           {menuOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           )}
         </button>
@@ -146,9 +166,9 @@ const NavbarLoggedIn = () => {
           >
             Profile
           </button>
-          
+
           {/* Mobile Specific User Logoff Action Element */}
-          <button 
+          <button
             onClick={() => {
               setMenuOpen(false);
               handleLogout();

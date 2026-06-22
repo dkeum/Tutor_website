@@ -28,6 +28,7 @@ import Sidebar from "../components/Sidebar";
 import NavbarLoggedIn from "../components/NavbarLoggedIn";
 
 import { supabase } from "../db/supabaseclient";
+import LoggedInLayout from "../components/LoggedInLayout";
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 const ShowPersonalData = () => {
@@ -43,65 +44,43 @@ const ShowPersonalData = () => {
   useEffect(() => {
     const initializeUserSession = async () => {
       try {
-        // 💡 FIX: Short-circuit if profile is already cached in Redux.
-        // This prevents re-fetching and layout re-evaluation on client-side routing.
-        if (name && name.trim() !== "") {
-          setLoadingSession(false);
-          return;
-        }
-
         const base = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
           ? "http://localhost:3000"
           : "https://mathamagic-backend.vercel.app";
-
+  
         // 1. Check Supabase for an existing local session
         const { data: { session } } = await supabase.auth.getSession();
-
+  
         if (session?.user) {
           const userEmail = session.user.email;
-
-          // 2. Fetch profile from backend using the session email
+  
+          // 2. Fetch complete profile from backend
           const res = await axios.get(`${base}/${userEmail}/getprofile`, { withCredentials: true });
-          console.log("Profile data fetched on refresh:", res.data);
-
+          // console.log("Profile data fetched:", res.data);
+  
           // 3. Hydrate Redux store
           dispatch(setProfileInfo(res?.data));
-          // console.log(res.data?.name)
-
+  
           if (!res.data?.name) {
-            setOpen(true); // Open dialog only if they truly don't have a name in DB
+            setOpen(true); 
           }
         } else {
-          // No Supabase session found? Redirect to login
           navigate("/login");
         }
       } catch (err) {
-        console.error("Error initializing session on refresh:", err);
+        console.error("Error initializing session:", err);
       } finally {
-        setLoadingSession(false); // Session check completed
+        setLoadingSession(false); 
       }
     };
-
-    // const getQuestionsData = async () => {
-    //   try {
-    //     const base = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-    //       ? "http://localhost:3000"
-    //       : "https://mathamagic-backend.vercel.app";
-    //     const res = await axios.get(`${base}/questions/get-questions`, { withCredentials: true });
-    //     dispatch(setQuestions(res.data?.mark_section));
-    //   } catch (err) {
-    //     console.error("Error fetching questions:", err);
-    //   }
-    // };
-
+  
     initializeUserSession();
-    // getQuestionsData();
-  }, [dispatch, navigate, name]); // Added name to dependencies so it can evaluate the short-circuit accurately
+  }, [dispatch, navigate]); // Removed 'name' from dependencies to prevent infinite loop/re-runs
 
   // 4. Guard layout until session validation finishes
   if (loadingSession) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center ">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
       </div>
     );
@@ -111,15 +90,17 @@ const ShowPersonalData = () => {
     <div
       className="min-h-screen flex flex-col"
     >
-      <NavbarLoggedIn />
+    <LoggedInLayout>
+
+
+
 
       {/* ── Outer Structural Wrapper ── */}
-      <div className="flex flex-1 w-full pt-20">
+      <div className="flex flex-1 w-full pt-24 pb-12 px-4 md:px-10 pl-0 lg:pl-64 2xl:pl-0"
+                  style={{ fontFamily: "'Lexend', sans-serif" }}
+      >
 
-        {/* Desktop Left Spacer Block matching exact Sidebar dimensions */}
-        <div className="hidden lg:block w-64 flex-shrink-0" />
-        <Sidebar />
-
+ 
         {/* ── Main Content Container ── */}
         <div className="flex-1 min-w-0 overflow-x-hidden flex justify-center">
           <main className="w-full max-w-7xl p-6 md:p-10 flex flex-col gap-8">
@@ -263,8 +244,8 @@ const ShowPersonalData = () => {
           </main>
         </div>
       </div>
-
-      <Footer />
+      </LoggedInLayout>
+   
       <DialogBox open={open} setOpen={setOpen} />
     </div>
   );
@@ -316,6 +297,9 @@ const DialogBox = ({ open, setOpen }) => {
         ? "http://localhost:3000"
         : "https://mathamagic-backend.vercel.app";
       const res = await axios.put(`${base}/user/setname`, { name: username.trim() }, { withCredentials: true });
+
+
+      console.log(res)
       if (res.status === 200) setOpen(false);
     } catch (err) {
       console.error("Error setting name:", err);
@@ -343,7 +327,7 @@ const DialogBox = ({ open, setOpen }) => {
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit">Save changes</Button>
+            <Button onClick={handleSubmit}type="submit">Save changes</Button>
           </DialogFooter>
         </DialogContent>
       </form>

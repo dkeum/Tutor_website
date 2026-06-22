@@ -130,44 +130,78 @@ const TrackingDottedGraph = ({ data, width, filterType }) => {
       .attr("transform", `translate(0,${height - marginBottom})`)
       .call(xAxis);
 
+    // Match slate gray axis styling
+    xAxisGroup.select(".domain").attr("stroke", "#E2E8F0");
+    xAxisGroup.selectAll(".tick line").attr("stroke", "#E2E8F0");
+    xAxisGroup.selectAll(".tick text")
+      .attr("fill", "#64748B")
+      .style("font-size", "11px")
+      .style("font-weight", "500")
+      .attr("dy", "12px");
+
     if (filterType === "week") {
       xAxisGroup.selectAll(".tick").each(function(d) {
         d3.select(this)
           .append("text")
-          .attr("fill", "currentColor")
+          .attr("fill", "#94A3B8")
           .attr("y", 26) 
           .attr("x", 0)
           .attr("dy", "0.71em")
-          .style("font-size", "11px")
-          .style("opacity", 0.7)
+          .style("font-size", "10px")
+          .style("font-weight", "500")
           .text(d3.timeFormat("%a")(d));
       });
     }
 
-    // ─── Repositioned Context Timeline Label ──────────────────────────────────────
-    // Pushed y down to height - 8 to sit perfectly below the custom multi-row text labels
+    // --- Y Axis ---
+    const yAxisGroup = svg.append("g")
+      .attr("transform", `translate(${marginLeft},0)`)
+      .call(d3.axisLeft(y).ticks(5).tickFormat((d) => `${d}%`));
+
+    yAxisGroup.select(".domain").attr("stroke", "none");
+    yAxisGroup.selectAll(".tick line").attr("stroke", "none");
+    yAxisGroup.selectAll(".tick text")
+      .attr("fill", "#64748B")
+      .style("font-size", "11px")
+      .style("font-weight", "500")
+      .attr("dx", "-4px");
+
+    // --- Grid Lines ---
+    svg.append("g")
+      .attr("class", "grid-lines")
+      .attr("transform", `translate(${marginLeft},0)`)
+      .selectAll("line")
+      .data(y.ticks(5))
+      .enter()
+      .append("line")
+      .attr("x1", 0)
+      .attr("x2", width - marginLeft - marginRight)
+      .attr("y1", (d) => y(d))
+      .attr("y2", (d) => y(d))
+      .attr("stroke", "#F1F5F9")
+      .attr("stroke-width", 1);
+
+    // ─── Repositioned & Bold Context Timeline Label ──────────────────────────────────────
     svg.append("text")
       .attr("text-anchor", "middle")
       .attr("x", marginLeft + (width - marginLeft - marginRight) / 2)
-      .attr("y", height - 8)
-      .attr("fill", "#718096")
-      .style("font-size", "13px")
-      .style("font-weight", "600")
-      .text(axisContextLabel);
+      .attr("y", height - 12)
+      .attr("fill", "#64748B") // Stepped up contrast slightly for bold presentation
+      .style("font-size", "11px")
+      .style("font-weight", "800") // Made bold
+      .style("letter-spacing", "0.06em")
+      .text(axisContextLabel.toUpperCase());
 
-    svg.append("g")
-      .attr("transform", `translate(${marginLeft},0)`)
-      .call(d3.axisLeft(y).ticks(5));
-
-    // Left Y Axis Title Marker
+    // Left Y Axis Title Marker — Bold
     svg.append("text")
       .attr("text-anchor", "start")
       .attr("x", marginLeft - 50) 
       .attr("y", marginTop - 15)
-      .attr("fill", "#4A5568")
-      .style("font-size", "14px")
-      .style("font-weight", "600")
-      .text("Grade (%)");
+      .attr("fill", "#64748B")
+      .style("font-size", "11px")
+      .style("font-weight", "800") // Made bold
+      .style("letter-spacing", "0.06em")
+      .text("GRADE");
 
     // --- Area Line paths ---
     const area = d3
@@ -230,8 +264,8 @@ const TrackingDottedGraph = ({ data, width, filterType }) => {
           .style("left", `${mouseX}px`)
           .style("top", `${mouseY - 55}px`) 
           .html(`
-            <div style="font-weight: 600; margin-bottom: 2px; white-space: nowrap;">${dateFormatter(d.date)}</div>
-            <div style="color: #5D3FD3; font-weight: bold;">Grade: ${d.value.toFixed(1)}%</div>
+            <div style="font-size: 11px; color: #64748B; font-weight: 500; margin-bottom: 2px; white-space: nowrap;">${dateFormatter(d.date)}</div>
+            <div style="color: #5D3FD3; font-weight: bold; font-size: 13px;">Grade: ${d.value.toFixed(1)}%</div>
           `);
       })
       .on("mousemove", function (event) {
@@ -266,14 +300,13 @@ const TrackingDottedGraph = ({ data, width, filterType }) => {
           pointerEvents: "none",
           backgroundColor: "rgba(255, 255, 255, 0.96)",
           border: "1px solid #E2E8F0",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
           borderRadius: "8px",
           padding: "8px 12px",
-          fontSize: "14px",
-          color: "#1A202C",
           transform: "translateX(-50%)", 
           transition: "opacity 0.15s ease, left 0.05s linear, top 0.05s linear",
           zIndex: 100,
+          fontFamily: "'Lexend', sans-serif",
         }}
       ></div>
     </div>

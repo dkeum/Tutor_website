@@ -89,7 +89,7 @@ export const personDetailSlice = createSlice({
 
       
       state.class_ID = p.Class_ID ?? 1;
-      console.log(state.class_ID)
+      // console.log(state.class_ID)
     },
 
     setQuestions: (state, action) => {

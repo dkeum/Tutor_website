@@ -1,3 +1,4 @@
+import "katex/dist/katex.min.css";
 import { StrictMode, Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
@@ -10,7 +11,6 @@ import { Provider } from "react-redux";
 
 import ProtectedRoute from "./components/ProtectRoute.jsx";
 import { AuthProvider } from "./hook/useAuthSession.jsx";
-
 
 // Lazy load the pages
 const Contactme = lazy(() => import("./pages/Contactme"));
@@ -27,28 +27,35 @@ const SolveProblems = lazy(() => import("./pages/SolveProblems"));
 
 const Login = lazy(() => import("./pages/Login"));
 
-const TrackImprovement = lazy(() => import("./components/userProfile/TrackImprovement"));
+const TrackImprovement = lazy(() =>
+  import("./components/userProfile/TrackImprovement")
+);
 
 const Settings = lazy(() => import("./components/userProfile/Settings"));
 
-const Mistakes = lazy(() => import("./components/userProfile/Mistakes"))
+const Mistakes = lazy(() => import("./components/userProfile/Mistakes"));
+const MistakesQuestions = lazy(() =>
+  import("./components/userProfile/Mistakes_Questions")
+);
 
-const Test = lazy(() => import("./pages/Test"))
+const Test = lazy(() => import("./pages/Test"));
 
-const HomeworkHelp = lazy(() => import("./pages/HomeworkHelp"))
-const Donate = lazy(() => import("./pages/Donate"))
-const FinalExamPrep = lazy(() => import("./pages/FinalExamPrep"))
+const HomeworkHelp = lazy(() => import("./pages/HomeworkHelp"));
+const Donate = lazy(() => import("./pages/Donate"));
+const FinalExamPrep = lazy(() => import("./pages/FinalExamPrep"));
 
-const Pricing = lazy(() => import("./pages/Pricing"))
+const Pricing = lazy(() => import("./pages/Pricing"));
 
-const Lessons = lazy(() => import("./pages/Lessons"))
+const Lessons = lazy(() => import("./pages/Lessons"));
 
-const Tutors = lazy(() => import("./pages/Tutors"))
-const BookTutor = lazy(() => import("./pages/BookTutor"))
-const PracticeTopics = lazy(() => import("./pages/PracticeTopics"))
+const Tutors = lazy(() => import("./pages/Tutors"));
+const BookTutor = lazy(() => import("./pages/BookTutor"));
+const PracticeTopics = lazy(() => import("./pages/PracticeTopics"));
 
-const PrivatePolicy = lazy(() => import("./pages/PrivacyPolicy"))
-const TermsOfService = lazy(() => import("./pages/TermsOfService"))
+const PrivatePolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+
+const FinalExamTest = lazy(() => import("./pages/FinalExamTest"));
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -58,7 +65,6 @@ const Loader = () => (
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-
     <Provider store={store}>
       <AuthProvider>
         <BrowserRouter>
@@ -71,50 +77,91 @@ createRoot(document.getElementById("root")).render(
               <Route path="/freeResources" element={<FreeResources />} />
               <Route path="/freeResources/:subject" element={<Subject />} />
               <Route path="/pricing" element={<Pricing />} />
-              <Route path="/showpersonaldata" element={
-                <ProtectedRoute>
-                  <ShowPersonalData />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="/showpersonaldata"
+                element={
+                  <ProtectedRoute>
+                    <ShowPersonalData />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/surveypersonaldetail"
                 element={<SurveyPersonalDetail />}
               />
-              <Route path="/question/:topic" element={
-                <ProtectedRoute>
-
-                  <SolveProblems />
-                </ProtectedRoute>
-              } />
+              <Route
+                path="/question/:topic"
+                element={
+                  <ProtectedRoute>
+                    <SolveProblems />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/login" element={<Login />} />
-              <Route path="/track-improvement" element={
-                <ProtectedRoute>
-                  <TrackImprovement />
-                </ProtectedRoute>
-              } />
-              <Route path="/settings" element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              } />
-              <Route path="/correct-mistakes" element={
-                <ProtectedRoute>
-                  <Mistakes />
-                </ProtectedRoute>
-              } />
-              <Route path="/random/test" element={<ProtectedRoute>
-                <Test />
-              </ProtectedRoute>} />
+              <Route
+                path="/track-improvement"
+                element={
+                  <ProtectedRoute>
+                    <TrackImprovement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/correct-mistakes"
+                element={
+                  <ProtectedRoute>
+                    <Mistakes />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/mistakes/questions"
+                element={
+                  <ProtectedRoute>
+                    <MistakesQuestions />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/final-exam/test"
+                element={
+                  <ProtectedRoute>
+                    <FinalExamTest />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/random/test"
+                element={
+                  <ProtectedRoute>
+                    <Test />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/book-tutor" element={<BookTutor />} />
               <Route path="/lessons" element={<Lessons />} />
               <Route path="/tutors" element={<Tutors />} />
               <Route path="/practice-topics" element={<PracticeTopics />} />
               <Route path="/homework-help" element={<HomeworkHelp />} />
               <Route path="/donate" element={<Donate />} />
-              <Route path="/final-exam-prep" element={<ProtectedRoute>
-
-                <FinalExamPrep />
-              </ProtectedRoute>} />
+              <Route
+                path="/final-exam-prep"
+                element={
+                  <ProtectedRoute>
+                    <FinalExamPrep />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/privacy-policy" element={<PrivatePolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
             </Routes>

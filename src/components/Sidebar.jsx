@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'; // 💡 FIXED: Added useEffect to your imports
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   LayoutDashboard, BookOpenCheck, SquarePen,
   GraduationCap, Settings, ChevronRight, ChevronDown,
@@ -50,6 +51,8 @@ const Sidebar = () => {
   const days_remaining = useSelector(s => s.personDetail?.days_remaining) ?? 0;
   const subscription_status = useSelector(s => s.personDetail?.subscription_status) ?? "inactive";
   const className = useSelector(s => s.personDetail?.class)
+  const profile_picture = useSelector((state) => state.personDetail.profile_pic);
+  const userInitials = name ? name[0].toUpperCase() : "?";
 
   const planLabel = PLAN_LABELS[plan_type] ?? "Free";
   const creditTotal = PLAN_CREDIT_TOTALS[plan_type] ?? 50;
@@ -86,12 +89,29 @@ const Sidebar = () => {
     >
       {/* User profile card */}
       <div className="flex items-center gap-3 p-2 mb-2 mt-2">
-        <div
+        {/* <div
           className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
           style={{ background: "#5d3fd3" }}
         >
           {studentName ? studentName[0].toUpperCase() : "?"}
-        </div>
+        </div> */}
+        <Avatar 
+        className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
+        style={{ borderColor: "#e6deff" }}
+      >
+        <AvatarImage
+          src={profile_picture}
+          alt={name || "Student profile"}
+          className="object-cover w-full h-full"
+        />
+        {/* Dynamic structural substitution fallback handler inheriting old design typography markup */}
+        <AvatarFallback 
+          className="w-full h-full flex items-center justify-center text-lg font-black rounded-full"
+          style={{ background: "#5d3fd3", color: "#fff" }}
+        >
+          {userInitials}
+        </AvatarFallback>
+      </Avatar>
         <div>
           <div className="font-bold text-gray-800">{studentName || "Student"}</div>
           <div className="text-xs text-gray-400">{className}</div>

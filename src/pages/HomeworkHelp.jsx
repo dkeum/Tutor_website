@@ -31,6 +31,7 @@ import ReadPdfOrImageFiles_AI from "../components/AI/ReadPdfOrImageFiles_AI";
 import { useSelector } from "react-redux";
 import NavbarLoggedIn from "../components/NavbarLoggedIn";
 import Sidebar from "../components/Sidebar";
+import LoggedInLayout from "../components/LoggedInLayout";
 
 // ── Filler data for recent submissions ──────────────────────────────────────
 const FILLER_SUBMISSIONS = [
@@ -113,10 +114,11 @@ const RecentSubmissionsTable = ({ submissions = FILLER_SUBMISSIONS }) => (
             {/* File name */}
             <td className="px-6 py-4">
               <div className="flex items-center gap-2 min-w-0">
-                {row.type === "pdf"
-                  ? <FileText className="w-4 h-4 text-primary flex-shrink-0 group-hover:scale-110 transition-transform" />
-                  : <ImageIcon className="w-4 h-4 text-primary flex-shrink-0 group-hover:scale-110 transition-transform" />
-                }
+                {row.type === "pdf" ? (
+                  <FileText className="w-4 h-4 text-primary flex-shrink-0 group-hover:scale-110 transition-transform" />
+                ) : (
+                  <ImageIcon className="w-4 h-4 text-primary flex-shrink-0 group-hover:scale-110 transition-transform" />
+                )}
                 <span className="font-bold text-sm text-on-surface truncate">
                   {row.name}
                 </span>
@@ -205,7 +207,10 @@ const HomeworkHelp = () => {
               ? "http://localhost:3000/homework-help/upload-pdf"
               : "https://mathamagic-backend.vercel.app/homework-help/upload-pdf",
             formData,
-            { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
+            {
+              withCredentials: true,
+              headers: { "Content-Type": "multipart/form-data" },
+            }
           );
           setFileURL(response.data?.githubUrls);
         } catch (error) {
@@ -224,7 +229,10 @@ const HomeworkHelp = () => {
               ? "http://localhost:3000/homework-help/upload-image"
               : "https://mathamagic-backend.vercel.app/homework-help/upload-image",
             formData,
-            { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
+            {
+              withCredentials: true,
+              headers: { "Content-Type": "multipart/form-data" },
+            }
           );
           setFileURL(response.data?.githubUrls);
         } catch (error) {
@@ -239,143 +247,147 @@ const HomeworkHelp = () => {
 
   return (
     <div className="bg-background text-on-background min-h-screen antialiased flex flex-col">
-      <NavbarLoggedIn />
-      <Sidebar />
+      <LoggedInLayout>
+        <main className="pl-0 lg:pl-64 2xl:pl-0  pt-24 pr-8 pb-12 w-full min-h-screen box-border flex-1">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+            {/* Hero Header */}
+            <section className="mb-10">
+              <h2
+                className="font-display-lg text-4xl font-bold text-primary mb-2 tracking-tight text-left"
+                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+              >
+                Submit Your Work.
+              </h2>
+              <p className="font-body-lg text-on-surface-variant max-w-2xl text-base opacity-90 text-left">
+                Upload your math problems for expert review or AI-assisted
+                step-by-step solutions.
+              </p>
+            </section>
 
-      <main className="pl-0 lg:pl-64 2xl:pl-0  pt-24 pr-8 pb-12 w-full min-h-screen box-border flex-1">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-
-          {/* Hero Header */}
-          <section className="mb-10">
-            <h2
-              className="font-display-lg text-4xl font-bold text-primary mb-2 tracking-tight text-left"
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-            >
-              Submit Your Work.
-            </h2>
-            <p className="font-body-lg text-on-surface-variant max-w-2xl text-base opacity-90 text-left">
-              Upload your math problems for expert review or AI-assisted step-by-step solutions.
-            </p>
-          </section>
-
-          {/* Top row: upload zone + sidebar — same height via items-stretch */}
-          <div className="flex gap-8 items-stretch mb-8">
-
-            {/* Upload / preview zone */}
-            <div className="flex-1 min-w-0">
-              {!file ? (
-                <div className="h-full bg-white rounded-2xl p-10 border-2 border-dashed border-outline-variant shadow-sm flex flex-col items-center justify-center text-center transition-all hover:border-primary group bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-100/20 to-transparent">
-                  <div className="w-full max-w-2xl mx-auto rounded-xl p-4 flex flex-col items-center justify-center">
-                    <FileUpload
-                      onChange={handleFileUpload}
-                      accept="image/*,application/pdf"
-                    />
+            {/* Top row: upload zone + sidebar — same height via items-stretch */}
+            <div className="flex gap-8 items-stretch mb-8">
+              {/* Upload / preview zone */}
+              <div className="flex-1 min-w-0">
+                {!file ? (
+                  <div className="h-full bg-white rounded-2xl p-10 border-2 border-dashed border-outline-variant shadow-sm flex flex-col items-center justify-center text-center transition-all hover:border-primary group bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-100/20 to-transparent">
+                    <div className="w-full max-w-2xl mx-auto rounded-xl p-4 flex flex-col items-center justify-center">
+                      <FileUpload
+                        onChange={handleFileUpload}
+                        accept="image/*,application/pdf"
+                      />
+                    </div>
+                    <p className="mt-6 text-sm text-on-surface-variant/60">
+                      Supported formats: JPG, PNG, PDF (Max 25MB)
+                    </p>
                   </div>
-                  <p className="mt-6 text-sm text-on-surface-variant/60">
-                    Supported formats: JPG, PNG, PDF (Max 25MB)
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch h-full">
-                  <div className="bg-white p-6 rounded-2xl border border-outline-variant/30 shadow-sm flex flex-col justify-between">
-                    <ReadPdfOrImageFiles_AI
-                      fileURL={fileURL}
-                      currentPage={currentPage - 1}
-                    />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch h-full">
+                    <div className="bg-white p-6 rounded-2xl border border-outline-variant/30 shadow-sm flex flex-col justify-between">
+                      <ReadPdfOrImageFiles_AI
+                        fileURL={fileURL}
+                        currentPage={currentPage - 1}
+                      />
+                    </div>
+                    <div className="bg-white border border-dashed border-neutral-200 rounded-2xl p-4 flex flex-col items-center justify-center min-h-[550px] shadow-sm">
+                      <div className="w-full flex justify-center items-center h-[500px]">
+                        {file.type.startsWith("image/") ? (
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt="Uploaded Preview"
+                            className="w-full max-w-[380px] object-contain border rounded-xl shadow-sm"
+                          />
+                        ) : (
+                          <Document
+                            file={file}
+                            onLoadSuccess={({ numPages }) =>
+                              setNumPages(numPages)
+                            }
+                            className="w-full flex justify-center"
+                          >
+                            {numPages && (
+                              <Carousel
+                                setApi={setApi}
+                                className="w-full max-w-xs sm:max-w-sm"
+                                opts={{ loop: false }}
+                              >
+                                <CarouselContent>
+                                  {Array.from(
+                                    new Array(numPages),
+                                    (_, index) => (
+                                      <CarouselItem key={`page-${index + 1}`}>
+                                        <Card className="border-none shadow-none bg-transparent">
+                                          <CardContent className="flex flex-col items-center justify-center p-0 overflow-y-auto overflow-x-hidden">
+                                            <Page
+                                              width={320}
+                                              pageNumber={index + 1}
+                                              renderTextLayer={false}
+                                              renderAnnotationLayer={false}
+                                              className="my-2 shadow-sm border rounded-lg overflow-hidden object-contain"
+                                            />
+                                            <div className="mt-4 text-xs font-semibold tracking-wider text-gray-400 uppercase">
+                                              Page {index + 1} / {numPages}
+                                            </div>
+                                          </CardContent>
+                                        </Card>
+                                      </CarouselItem>
+                                    )
+                                  )}
+                                </CarouselContent>
+                                <CarouselPrevious className="bg-black text-white hover:bg-black/80 -left-4" />
+                                <CarouselNext className="bg-black text-white hover:bg-black/80 -right-4" />
+                              </Carousel>
+                            )}
+                          </Document>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="bg-white border border-dashed border-neutral-200 rounded-2xl p-4 flex flex-col items-center justify-center min-h-[550px] shadow-sm">
-                    <div className="w-full flex justify-center items-center h-[500px]">
-                      {file.type.startsWith("image/") ? (
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt="Uploaded Preview"
-                          className="w-full max-w-[380px] object-contain border rounded-xl shadow-sm"
-                        />
-                      ) : (
-                        <Document
-                          file={file}
-                          onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-                          className="w-full flex justify-center"
-                        >
-                          {numPages && (
-                            <Carousel
-                              setApi={setApi}
-                              className="w-full max-w-xs sm:max-w-sm"
-                              opts={{ loop: false }}
-                            >
-                              <CarouselContent>
-                                {Array.from(new Array(numPages), (_, index) => (
-                                  <CarouselItem key={`page-${index + 1}`}>
-                                    <Card className="border-none shadow-none bg-transparent">
-                                      <CardContent className="flex flex-col items-center justify-center p-0 overflow-y-auto overflow-x-hidden">
-                                        <Page
-                                          width={320}
-                                          pageNumber={index + 1}
-                                          renderTextLayer={false}
-                                          renderAnnotationLayer={false}
-                                          className="my-2 shadow-sm border rounded-lg overflow-hidden object-contain"
-                                        />
-                                        <div className="mt-4 text-xs font-semibold tracking-wider text-gray-400 uppercase">
-                                          Page {index + 1} / {numPages}
-                                        </div>
-                                      </CardContent>
-                                    </Card>
-                                  </CarouselItem>
-                                ))}
-                              </CarouselContent>
-                              <CarouselPrevious className="bg-black text-white hover:bg-black/80 -left-4" />
-                              <CarouselNext className="bg-black text-white hover:bg-black/80 -right-4" />
-                            </Carousel>
-                          )}
-                        </Document>
-                      )}
+                )}
+              </div>
+
+              {/* Sidebar — stretches to match upload zone height */}
+              <aside className="w-72 flex-shrink-0">
+                <div className="h-full bg-white rounded-2xl p-4 shadow-sm border border-outline-variant/20 flex flex-col">
+                  <h3 className="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
+                    <ListChecks className="w-4 h-4 text-primary" />
+                    Submission Tips
+                  </h3>
+                  <div className="space-y-2">
+                    {[
+                      "Ensure your handwriting is clear and legible for our AI and tutors.",
+                      "Capture the entire problem, including any given diagrams or tables.",
+                    ].map((tip, i) => (
+                      <div key={i} className="flex gap-2 items-start">
+                        <div className="w-4 h-4 rounded-full bg-purple-100 text-primary flex-shrink-0 flex items-center justify-center text-[9px] font-bold mt-0.5">
+                          {i + 1}
+                        </div>
+                        <p className="text-xs text-on-surface-variant leading-relaxed">
+                          {tip}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-outline-variant/30 flex-1 flex flex-col">
+                    <p className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">
+                      Quality Example
+                    </p>
+                    <div className="flex-1 bg-purple-50/50 rounded-xl flex items-center justify-center border border-purple-100">
+                      <img
+                        alt="Submission Example"
+                        className="mix-blend-multiply opacity-80 max-h-32 object-contain"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCT43JZpujVgIpkQ0HJqCXHnDXScRkcAkS2d0eIz--N5aum-OemW-DuTh3KVkcc6LDKCNOVpn3kkavYutBimac6bYBw9gNovqkyQp53vzB16X3iHa1EEZUsUT9gEE22LJDWj_TcYg51OfX0PWtiOnZEhVJU4_EeU88JxBvB432cqHYPSeiKNMXjvau6AUD_TGCZLfrLgS46cvuilI2Ja_IMCHWx0Dyg_1LZKDAZTJ3lFhC50_f7cNUgu4MqLEDjlhkU0gyaKQ6zvQ"
+                      />
                     </div>
                   </div>
                 </div>
-              )}
+              </aside>
             </div>
 
-            {/* Sidebar — stretches to match upload zone height */}
-            <aside className="w-72 flex-shrink-0">
-              <div className="h-full bg-white rounded-2xl p-4 shadow-sm border border-outline-variant/20 flex flex-col">
-                <h3 className="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
-                  <ListChecks className="w-4 h-4 text-primary" />
-                  Submission Tips
-                </h3>
-                <div className="space-y-2">
-                  {[
-                    "Ensure your handwriting is clear and legible for our AI and tutors.",
-                    "Capture the entire problem, including any given diagrams or tables.",
-                  ].map((tip, i) => (
-                    <div key={i} className="flex gap-2 items-start">
-                      <div className="w-4 h-4 rounded-full bg-purple-100 text-primary flex-shrink-0 flex items-center justify-center text-[9px] font-bold mt-0.5">
-                        {i + 1}
-                      </div>
-                      <p className="text-xs text-on-surface-variant leading-relaxed">{tip}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-3 pt-3 border-t border-outline-variant/30 flex-1 flex flex-col">
-                  <p className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">
-                    Quality Example
-                  </p>
-                  <div className="flex-1 bg-purple-50/50 rounded-xl flex items-center justify-center border border-purple-100">
-                    <img
-                      alt="Submission Example"
-                      className="mix-blend-multiply opacity-80 max-h-32 object-contain"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuCT43JZpujVgIpkQ0HJqCXHnDXScRkcAkS2d0eIz--N5aum-OemW-DuTh3KVkcc6LDKCNOVpn3kkavYutBimac6bYBw9gNovqkyQp53vzB16X3iHa1EEZUsUT9gEE22LJDWj_TcYg51OfX0PWtiOnZEhVJU4_EeU88JxBvB432cqHYPSeiKNMXjvau6AUD_TGCZLfrLgS46cvuilI2Ja_IMCHWx0Dyg_1LZKDAZTJ3lFhC50_f7cNUgu4MqLEDjlhkU0gyaKQ6zvQ"
-                    />
-                  </div>
-                </div>
-              </div>
-            </aside>
-
+            {/* Full-width submissions table */}
+            <RecentSubmissionsTable />
           </div>
-
-          {/* Full-width submissions table */}
-          <RecentSubmissionsTable />
-        </div>
-      </main>
+        </main>
+      </LoggedInLayout>
     </div>
   );
 };
