@@ -134,7 +134,7 @@ const FinalExamPrep = () => {
   return (
     <div className="text-[#101b30] min-h-screen font-sans overflow-x-hidden antialiased">
       <LoggedInLayout>
-        <main className="pl-0 lg:pl-64 2xl:pl-0 pt-[64px] min-h-screen relative transition-all duration-300">
+        <main className=" relative transition-all duration-300">
           <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-12">
             {/* Header */}
             <div className="flex flex-col lg:flex-row justify-between items-start mb-12 gap-8">

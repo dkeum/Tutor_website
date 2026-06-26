@@ -102,7 +102,7 @@ export default function Mistakes() {
   return (
     <div className="min-h-screen text-[#101b30] font-sans antialiased">
       <LoggedInLayout>
-        <main className="pt-24 pb-12 px-4 sm:px-6 pl-0 lg:pl-64 2xl:pl-0 lg:pr-8 max-w-[1440px] mx-auto transition-all duration-300">
+        <main className=" mx-auto transition-all duration-300">
           {/* Hero Header */}
           <section className="mb-10">
             <div className="flex items-end justify-between mx-auto">

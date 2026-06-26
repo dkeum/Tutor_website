@@ -171,10 +171,10 @@ const PracticeTopics = () => {
       `}</style>
 
       <LoggedInLayout>
-        <div className="flex-1 ml-64 flex flex-col min-h-screen relative overflow-hidden">
+        <div className="flex-1 flex flex-col relative overflow-hidden">
           <div className="absolute inset-0 math-grid pointer-events-none z-0"></div>
 
-          <main className="mt-20 p-10 max-w-[1280px] w-full mx-auto flex-1 z-10 flex flex-col gap-10">
+          <main className=" mx-auto flex-1 z-10 flex flex-col gap-10">
             {/* Header Layout */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center">
               <div>

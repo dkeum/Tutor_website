@@ -1,233 +1,341 @@
-import React, { useEffect } from "react";
-import { CheckCircle2, PlayCircle, ArrowRight } from "lucide-react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { CheckCircle2, PlayCircle, X, Loader2, Clock } from "lucide-react";
+import { useSelector } from "react-redux";
+import axios from "axios";
 
 import Sidebar from "../components/Sidebar";
 import NavbarLoggedIn from "../components/NavbarLoggedIn";
 import LoggedInLayout from "../components/LoggedInLayout";
 
-// ── Data ──────────────────────────────────────────────────────────────────────
-// Set currentTopic to null to hide the Quick Review panel and show the full grid
-const currentTopic = {
-  title: "Pythagorean Identities",
-  subject: "Geometry",
-  description:
-    "Prepare for the Geometry midterm with our curated summary and interactive cheat sheet.",
-};
+const BASE =
+  import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+    ? "http://localhost:3000"
+    : "https://mathamagic-backend.vercel.app";
 
-const topics = [
-  {
-    title: "Advanced Algebra",
-    meta: "12 Lessons • 8 Hours total",
-    subtopics: [
-      {
-        name: "Linear Equations & Inequalities",
-        meta: "Video • 45 mins",
-        done: true,
-      },
-      {
-        name: "Quadratic Functions",
-        meta: "Interactive • 1 hour",
-        done: false,
-      },
-      { name: "Systems of Equations", meta: "Document • 30 mins", done: false },
-      { name: "Exponential Expressions", meta: "Video • 50 mins", done: false },
-    ],
-  },
-  {
-    title: "Coordinate Geometry",
-    meta: "8 Lessons • 6 Hours",
-    subtopics: [
-      {
-        name: "Slope & Distance Formula",
-        meta: "Document • 15 mins",
-        done: true,
-      },
-      { name: "Circle Equations", meta: "Video • 40 mins", done: false },
-      { name: "Transformations", meta: "Interactive • 30 mins", done: false },
-      { name: "Vectors & Scalars", meta: "Document • 20 mins", done: true },
-    ],
-  },
-  {
-    title: "Trigonometry",
-    meta: "10 Lessons • 7 Hours",
-    subtopics: [
-      {
-        name: "Sine, Cosine & Tangent Laws",
-        meta: "Video • 1 hour",
-        done: true,
-      },
-      {
-        name: "Trigonometric Ratios",
-        meta: "Interactive • 25 mins",
-        done: false,
-      },
-      { name: "Unit Circle", meta: "Document • 20 mins", done: false },
-      { name: "Pythagorean Identities", meta: "Video • 35 mins", done: false },
-    ],
-  },
-  {
-    title: "Statistics & Probability",
-    meta: "9 Lessons • 5 Hours",
-    subtopics: [
-      { name: "Mean, Median & Mode", meta: "Document • 20 mins", done: true },
-      { name: "Probability Trees", meta: "Interactive • 30 mins", done: true },
-      { name: "Standard Deviation", meta: "Video • 45 mins", done: false },
-      { name: "Data Distributions", meta: "Document • 25 mins", done: false },
-    ],
-  },
-];
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function toEmbedUrl(url) {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    if (u.hostname === "youtu.be") return `https://www.youtube.com/embed${u.pathname}`;
+    if (u.hostname.includes("youtube.com")) {
+      if (u.pathname.startsWith("/embed/")) return url;
+      const v = u.searchParams.get("v");
+      if (v) return `https://www.youtube.com/embed/${v}`;
+    }
+  } catch (_) { }
+  return null;
+}
 
-const recentLesson = {
-  title: "Polynomial Division",
-  subject: "Algebra • Part 2",
-  progress: 80,
-  image:
-    "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=150&q=80",
-};
+// ── YouTube Modal ─────────────────────────────────────────────────────────────
+const YouTubeModal = ({ section, onClose, onWatched }) => {
+  const embedUrl = toEmbedUrl(section?.youtube_link);
 
-// ── Sub-components ────────────────────────────────────────────────────────────
-const SubtopicRow = ({ name, meta, done }) => (
-  <div className="flex items-center gap-3 p-3 rounded-xl border border-transparent hover:border-[#4800b2]/20 hover:bg-[#F8F9FE] transition-all cursor-pointer group/row">
-    <div className="flex-shrink-0">
-      {done ? (
-        <CheckCircle2 className="w-4 h-4 text-[#2ECC71]" />
-      ) : (
-        <PlayCircle className="w-4 h-4 text-[#4800b2]" />
-      )}
-    </div>
-    <div className="flex-1 min-w-0">
-      <p className="text-sm font-bold text-[#101b30] truncate">{name}</p>
-      <p className="text-[10px] text-[#494456] font-medium mt-0.5">{meta}</p>
-    </div>
-    <ArrowRight className="w-4 h-4 text-[#4800b2] opacity-0 group-hover/row:opacity-100 transition-opacity flex-shrink-0" />
-  </div>
-);
-
-const TopicCard = ({ title, meta, subtopics }) => (
-  <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e8ddff] flex flex-col gap-4 hover:shadow-md transition-shadow">
-    <div>
-      <h3 className="text-xl font-bold text-[#101b30]">{title}</h3>
-      <p className="text-xs text-[#494456] font-medium mt-0.5">{meta}</p>
-    </div>
-    <div className="flex flex-col gap-1">
-      {subtopics.map((s, i) => (
-        <SubtopicRow key={i} {...s} />
-      ))}
-    </div>
-  </div>
-);
-
-// ── Page ──────────────────────────────────────────────────────────────────────
-const Lessons = () => {
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const toast = document.getElementById("toast");
-      if (toast) {
-        toast.classList.remove("translate-y-20", "opacity-0");
-        setTimeout(
-          () => toast.classList.add("translate-y-20", "opacity-0"),
-          5000
-        );
-      }
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
+    const handler = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  if (!section) return null;
 
   return (
-    <div className="min-h-screen w-full text-[#101b30] flex font-sans">
-      <LoggedInLayout>
-        <div className="flex-1 ml-64 flex flex-col min-h-screen relative overflow-hidden">
-          <main className="mt-20 p-10 max-w-[1280px] w-full mx-auto flex-1 z-10 flex flex-col gap-12">
-            {/* ── Page header + Quick Review card side by side ── */}
-            <div className="flex flex-col lg:flex-row justify-between items-start gap-8 mb-4">
-              <div className="max-w-2xl">
-                <h2
-                  className="text-4xl font-bold text-[#101b30] tracking-tight text-left"
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                >
-                  Grade 10 Mathematics
-                </h2>
-                <p className="text-lg text-[#494456] max-w-2xl mt-2 text-left">
-                  Explore the foundations of complex logic. Master the rules of
-                  the universe, one theorem at a time.
-                </p>
-              </div>
-
-              {/* Quick Review — only shown when there is an active topic */}
-              {currentTopic && (
-                <div className="bg-[#263046] rounded-2xl p-6 text-white relative overflow-hidden flex flex-col justify-between shadow-md w-full lg:w-80 shrink-0">
-                  <div className="z-10 relative">
-                    <h4 className="text-xl font-bold leading-tight mb-3">
-                      {currentTopic.title}
-                    </h4>
-                  </div>
-                  <button className="z-10 relative mt-6 w-full bg-white text-[#101b30] py-3 rounded-xl text-sm font-bold hover:bg-[#e8ddff] transition-colors shadow-sm">
-                    Resume Topic
-                  </button>
-                  <div className="absolute -bottom-10 -right-10 opacity-10 rotate-12 pointer-events-none">
-                    <div className="w-36 h-36 rounded-full border-[16px] border-white" />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* ── Topic grid ── */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {topics.map((t, i) => (
-                <TopicCard key={i} {...t} />
-              ))}
-            </div>
-
-            {/* ── Single recently viewed lesson ── */}
-            <div>
-              <h4 className="text-xs font-bold text-[#494456] uppercase tracking-widest mb-4">
-                Recently Viewed
-              </h4>
-              <div className="bg-white p-4 rounded-2xl shadow-sm border border-[#cbc3d9]/30 flex gap-4 cursor-pointer items-center hover:shadow-md transition-shadow max-w-sm">
-                <img
-                  alt="Lesson thumbnail"
-                  className="w-20 h-20 rounded-xl object-cover flex-shrink-0 bg-gray-100"
-                  src={recentLesson.image}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-[#101b30] truncate">
-                    {recentLesson.title}
-                  </p>
-                  <p className="text-[11px] text-[#494456] font-medium mb-2">
-                    {recentLesson.subject}
-                  </p>
-                  <div className="h-1 bg-[#e8edff] rounded-full overflow-hidden w-full">
-                    <div
-                      className="h-full bg-[#4800b2] rounded-full"
-                      style={{ width: `${recentLesson.progress}%` }}
-                    />
-                  </div>
-                  <p className="text-[10px] text-[#494456] mt-1">
-                    {recentLesson.progress}% complete
-                  </p>
-                </div>
-              </div>
-            </div>
-          </main>
-
-          <footer className="p-8 text-center text-[#494456]/40 text-[10px] font-bold uppercase tracking-[0.2em] z-10 mt-auto">
-            Powered by Lumina Learning Systems • Grade 10 Mathamagic Portal v2.4
-          </footer>
-
-          {/* Toast */}
-          <div
-            id="toast"
-            className="fixed bottom-10 right-10 translate-y-20 opacity-0 transition-all duration-500 z-[100] flex items-center gap-4 bg-[#2ECC71] text-white px-6 py-4 rounded-2xl shadow-2xl shadow-[#2ECC71]/40"
-          >
-            <div>
-              <p className="text-sm font-bold">Topic Unlocked!</p>
-              <p className="text-xs opacity-90 mt-0.5">
-                You've reached the prerequisite for Advanced Calculus.
-              </p>
-            </div>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-3xl bg-[#101b30] rounded-2xl overflow-hidden shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between p-5 pb-3">
+          <div>
+            <h3 className="text-white font-bold text-lg leading-tight">{section.name}</h3>
+            {section.difficulty && (
+              <span className="inline-block mt-1 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-[#4800b2]/40 text-purple-300">
+                {section.difficulty}
+              </span>
+            )}
           </div>
+          <button onClick={onClose} className="text-white/50 hover:text-white transition-colors ml-4 flex-shrink-0">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
+          {embedUrl ? (
+            <iframe
+              className="absolute inset-0 w-full h-full"
+              src={embedUrl}
+              title={section.name}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-white/40 text-sm">
+              No video available for this section.
+            </div>
+          )}
+        </div>
+
+        <div className="p-5 pt-4 flex items-center justify-between gap-4">
+          {section.notes && <p className="text-white/50 text-xs line-clamp-2 flex-1">{section.notes}</p>}
+          {!section.video_watched ? (
+            <button
+              onClick={() => onWatched(section.id)}
+              className="flex-shrink-0 bg-[#10B981] hover:bg-[#059669] text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors"
+            >
+              Mark as Watched
+            </button>
+          ) : (
+            <span className="flex-shrink-0 flex items-center gap-1.5 text-[#10B981] text-sm font-bold">
+              <CheckCircle2 className="w-4 h-4" /> Watched
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Section Row ───────────────────────────────────────────────────────────────
+const SectionRow = ({ section, onClick }) => {
+  const getDifficultyClass = (diff) => {
+    switch (String(diff).toLowerCase()) {
+      case "easy": return "text-[#10B981] bg-[#ecfdf5]";
+      case "hard": return "text-[#ef4444] bg-[#fef2f2]";
+      default: return "text-[#f59e0b] bg-[#fffbeb]"; // Medium / default
+    }
+  };
+
+  return (
+    <div
+      onClick={() => onClick(section)}
+      className={`p-4 flex items-center gap-4 transition-all duration-150 cursor-pointer border-b border-gray-100 last:border-b-0 active:scale-[0.99] ${
+        section.video_watched && !section.quiz_completed ? "bg-[#3525cd]/5" : "hover:bg-gray-50"
+      }`}
+    >
+      {/* Icon Status Indicator */}
+      <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center">
+        {section.quiz_completed ? (
+          <CheckCircle2 className="w-6 h-6 text-[#10B981] fill-[#10B981]/10" />
+        ) : section.video_watched ? (
+          <CheckCircle2 className="w-6 h-6 text-[#3525cd]/60" />
+        ) : (
+          <PlayCircle className="w-6 h-6 text-[#3525cd]" />
+        )}
+      </div>
+
+      {/* Title & Metadata Group - ADDED text-left and items-start HERE */}
+      <div className="flex-1 min-w-0 flex flex-col items-start text-left">
+        <h4 className={`block w-full text-left text-sm font-semibold tracking-tight ${
+          section.video_watched ? "text-[#3525cd] font-bold" : "text-[#191c1d]"
+        }`}>
+          {section.name}
+        </h4>
+        <span className="block w-full text-left text-xs text-gray-500 font-medium mt-0.5">
+          {section.quiz_completed ? "Completed" : section.video_watched ? "Watched Lesson" : "Watch Lesson"}
+          {section.minutes_this_week > 0 && ` • ${section.minutes_this_week}m studied this week`}
+        </span>
+      </div>
+
+      {/* Difficulty Tag */}
+      {section.difficulty && (
+        <span className={`ml-auto flex-shrink-0 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${getDifficultyClass(section.difficulty)}`}>
+          {section.difficulty}
+        </span>
+      )}
+    </div>
+  );
+};
+
+// ── Topic Card ────────────────────────────────────────────────────────────────
+const TopicCard = React.forwardRef(({ topic, onSectionClick }, ref) => {
+  const total = topic.sections.length;
+  const watched = topic.sections.filter((s) => s.video_watched).length;
+  const percentage = total > 0 ? Math.round((watched / total) * 100) : 0;
+
+  return (
+    <div
+      ref={ref}
+      className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-200"
+    >
+      <div className="p-6 border-b border-gray-100 flex justify-between items-end bg-gray-50/50">
+        <div>
+          <h3 className="text-lg font-bold text-[#191c1d] tracking-tight">{topic.name}</h3>
+          <p className="text-xs text-gray-500 font-medium mt-1">
+            {total} Section{total !== 1 ? "s" : ""} • {watched}/{total} videos watched
+          </p>
+        </div>
+        <div className="w-24 bg-gray-200 h-2 rounded-full overflow-hidden shrink-0 mb-1">
+          <div className="bg-[#10B981] h-full transition-all duration-500" style={{ width: `${percentage}%` }} />
+        </div>
+      </div>
+
+      <div className="flex flex-col">
+        {topic.sections.map((s) => (
+          <SectionRow key={s.id} section={s} onClick={onSectionClick} />
+        ))}
+        {total === 0 && (
+          <p className="text-xs text-gray-400 p-6 text-center">No structural concepts here yet.</p>
+        )}
+      </div>
+    </div>
+  );
+});
+
+// ── Main Page ─────────────────────────────────────────────────────────────────
+const Lessons = () => {
+  const classID = useSelector((state) => state.personDetail?.class_ID);
+
+  const [topics, setTopics] = useState([]);
+  const [resumeTarget, setResumeTarget] = useState(null);
+  const [minutesThisWeek, setMinutesThisWeek] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeSection, setActiveSection] = useState(null);
+
+  // Store references to topic cards for scrolling lookup
+  const topicRefs = useRef({});
+
+  useEffect(() => {
+    console.log(`${BASE}/${classID}/topics-with-sections`)
+    if (!classID) return;
+    const fetchTopics = async () => {
+      try {
+        const res = await axios.get(`${BASE}/${classID}/topics-with-sections`, { withCredentials: true });
+
+
+        setTopics(res.data?.topics ?? []);
+        setMinutesThisWeek(res.data?.minutes_this_week ?? 0);
+        setResumeTarget(res.data?.resume_target ?? null);
+      } catch (err) {
+        console.error("Failed to load topics:", err);
+        setError(err.response?.data?.error ?? err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTopics();
+  }, [classID]);
+
+  const handleMarkWatched = useCallback(async (sectionId) => {
+    setTopics((prev) =>
+      prev.map((t) => ({
+        ...t,
+        sections: t.sections.map((s) => (s.id === sectionId ? { ...s, video_watched: true } : s)),
+      }))
+    );
+    setActiveSection((prev) => (prev?.id === sectionId ? { ...prev, video_watched: true } : prev));
+
+    try {
+      await axios.post(`${BASE}/${classID}/mark-video-watched`, { section_id: sectionId }, { withCredentials: true });
+    } catch (err) {
+      console.error("Failed to save tracking point state:", err);
+    }
+  }, [classID]);
+
+  // Dynamic Scroll and Modal Opener
+  const handleResumeClick = useCallback(() => {
+    if (!resumeTarget) return;
+
+    // 1. Scroll down to the correct topic block seamlessly
+    const element = topicRefs.current[resumeTarget.topic_id];
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    // 2. Automatically throw open the video interface
+    setActiveSection(resumeTarget);
+  }, [resumeTarget]);
+
+  const handleOpenSection = useCallback((section) => setActiveSection(section), []);
+  const handleCloseModal = useCallback(() => setActiveSection(null), []);
+
+  return (
+    <div className="min-h-screen w-full text-[#191d1d] flex font-sans ">
+      <LoggedInLayout>
+        <div className="flex-1 flex flex-col min-h-screen relative overflow-hidden">
+          <main className=" w-full mx-auto flex-1 z-10 flex flex-col gap-8">
+
+            <section className="text-center max-w-2xl mx-auto mt-4 mb-2">
+              <h1 className="text-3xl font-extrabold text-[#191c1d] tracking-tight sm:text-4xl">
+                Lessons & Concept Lectures
+              </h1>
+              <p className="text-base text-gray-500 mt-3 font-medium">
+                Master mathematical foundations with visual contexts, step-by-step recordings, and guided homework support.
+              </p>
+            </section>
+
+            {/* Bento Box Promo */}
+            <section
+              className="relative overflow-hidden rounded-3xl min-h-[14rem] shadow-lg flex items-center p-8 lg:p-12 text-white"
+              style={{ background: "radial-gradient(at 0% 0%, #4f46e5 0%, transparent 75%), radial-gradient(at 100% 100%, #712ae2 0%, #3525cd 100%)" }}
+            >
+              {/* Added text-left here to guarantee left alignment across all child elements */}
+              <div className="relative z-10 w-full max-w-xl text-left flex flex-col items-start">
+                <div className="flex items-center gap-2 mb-2 opacity-90">
+                  <Clock className="w-4 h-4 text-white" />
+                  <span className="text-xs font-bold uppercase tracking-widest">
+                    {resumeTarget ? `Up Next • ${resumeTarget.topic_name}` : "All Caught Up!"}
+                  </span>
+                </div>
+
+                <h2 className="text-2xl lg:text-3xl font-extrabold tracking-tight mb-6">
+                  {resumeTarget ? resumeTarget.name : "Ready to check your weekly practice statistics below?"}
+                </h2>
+
+                {resumeTarget ? (
+                  <button
+                    onClick={handleResumeClick}
+                    // Added self-start to prevent the button from expanding to the full block width
+                    className="self-start bg-white text-[#3525cd] px-8 py-3 rounded-full font-bold shadow-md hover:scale-[1.03] active:scale-[0.97] transition-all duration-150 text-sm"
+                  >
+                    Resume Lesson
+                  </button>
+                ) : minutesThisWeek > 0 ? (
+                  <span className="inline-block bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl text-sm font-bold">
+                    You logged {minutesThisWeek} minutes studying this week!
+                  </span>
+                ) : null}
+              </div>
+            </section>
+
+            {loading && (
+              <div className="flex items-center justify-center py-24 text-gray-500">
+                <Loader2 className="w-6 h-6 animate-spin mr-3 text-[#3525cd]" />
+                <span className="text-sm font-semibold">Loading courses...</span>
+              </div>
+            )}
+
+            {!loading && error && (
+              <div className="bg-red-50 border border-red-100 rounded-2xl p-6 text-center max-w-md mx-auto w-full">
+                <p className="text-red-600 font-bold text-sm">{error}</p>
+                <button onClick={() => window.location.reload()} className="mt-2 text-xs underline text-red-500 font-bold">
+                  Try Again
+                </button>
+              </div>
+            )}
+
+            {!loading && !error && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {topics.map((t) => (
+                  <TopicCard
+                    key={t.id}
+                    topic={t}
+                    onSectionClick={handleOpenSection}
+                    ref={(el) => (topicRefs.current[t.id] = el)} // Wire the component nodes into refs dictionary
+                  />
+                ))}
+              </div>
+            )}
+          </main>
         </div>
       </LoggedInLayout>
+
+      {activeSection && (
+        <YouTubeModal section={activeSection} onClose={handleCloseModal} onWatched={handleMarkWatched} />
+      )}
     </div>
   );
 };

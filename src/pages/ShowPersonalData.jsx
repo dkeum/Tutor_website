@@ -47,22 +47,22 @@ const ShowPersonalData = () => {
         const base = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
           ? "http://localhost:3000"
           : "https://mathamagic-backend.vercel.app";
-  
+
         // 1. Check Supabase for an existing local session
         const { data: { session } } = await supabase.auth.getSession();
-  
+
         if (session?.user) {
           const userEmail = session.user.email;
-  
+
           // 2. Fetch complete profile from backend
           const res = await axios.get(`${base}/${userEmail}/getprofile`, { withCredentials: true });
           // console.log("Profile data fetched:", res.data);
-  
+
           // 3. Hydrate Redux store
           dispatch(setProfileInfo(res?.data));
-  
+
           if (!res.data?.name) {
-            setOpen(true); 
+            setOpen(true);
           }
         } else {
           navigate("/login");
@@ -70,10 +70,10 @@ const ShowPersonalData = () => {
       } catch (err) {
         console.error("Error initializing session:", err);
       } finally {
-        setLoadingSession(false); 
+        setLoadingSession(false);
       }
     };
-  
+
     initializeUserSession();
   }, [dispatch, navigate]); // Removed 'name' from dependencies to prevent infinite loop/re-runs
 
@@ -90,17 +90,9 @@ const ShowPersonalData = () => {
     <div
       className="min-h-screen flex flex-col"
     >
-    <LoggedInLayout>
+      <LoggedInLayout>
 
 
-
-
-      {/* ── Outer Structural Wrapper ── */}
-      <div className="flex flex-1 w-full pt-24 pb-12 px-4 md:px-10 pl-0 lg:pl-64 2xl:pl-0"
-                  style={{ fontFamily: "'Lexend', sans-serif" }}
-      >
-
- 
         {/* ── Main Content Container ── */}
         <div className="flex-1 min-w-0 overflow-x-hidden flex justify-center">
           <main className="w-full max-w-7xl p-6 md:p-10 flex flex-col gap-8">
@@ -243,9 +235,9 @@ const ShowPersonalData = () => {
 
           </main>
         </div>
-      </div>
+
       </LoggedInLayout>
-   
+
       <DialogBox open={open} setOpen={setOpen} />
     </div>
   );
@@ -327,7 +319,7 @@ const DialogBox = ({ open, setOpen }) => {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleSubmit}type="submit">Save changes</Button>
+            <Button onClick={handleSubmit} type="submit">Save changes</Button>
           </DialogFooter>
         </DialogContent>
       </form>

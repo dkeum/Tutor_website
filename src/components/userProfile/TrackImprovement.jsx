@@ -404,8 +404,6 @@ const TrackImprovement = () => {
 
       <LoggedInLayout>
         <main
-          className="pt-24 pb-12 px-4 md:px-10 pl-0 lg:pl-64 2xl:pl-0"
-          style={{ fontFamily: "'Lexend', sans-serif" }}
         >
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
