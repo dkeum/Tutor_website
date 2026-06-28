@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react"; // Lightweight icon wrappers
+import { Menu, X } from "lucide-react";
 import NavbarLoggedIn from "./NavbarLoggedIn";
 import Sidebar from "./Sidebar";
 
-const LoggedInLayout = ({ children }) => {
+const LoggedInLayout = ({ children, bare = false }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  // Close the mobile menu automatically if the screen resizes past the mobile breakpoint
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
@@ -18,7 +17,7 @@ const LoggedInLayout = ({ children }) => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col  text-[#191c1d]">
+    <div className="h-screen flex flex-col text-[#191c1d]">
       {/* Top Navigation Bar */}
       <NavbarLoggedIn />
 
@@ -34,32 +33,31 @@ const LoggedInLayout = ({ children }) => {
       </div>
 
       {/* Navigation Layout Wrapper */}
-      <div className="flex flex-1 pt-16 relative">
-        
-        {/* Desktop Sidebar Sidebar Container */}
+      <div className="flex flex-1 pt-16 relative min-h-0">
+
+        {/* Desktop Sidebar */}
         <div className="hidden lg:block fixed left-0 top-16 bottom-0 w-64 border-r border-gray-200 bg-white z-30">
           <Sidebar />
         </div>
 
-        {/* Mobile Slide-out Navigation Drawer Overlay */}
-        <div 
+        {/* Mobile Slide-out Drawer */}
+        <div
           className={`fixed inset-0 z-40 lg:hidden transition-opacity duration-300 ${
             isMobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           }`}
         >
-          {/* Dark Backdrop Overlay */}
-          <div 
+          {/* Dark Backdrop */}
+          <div
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => setIsMobileOpen(false)}
           />
-          
-          {/* Sidebar Panel Drawer Drawer Wrapper */}
-          <div 
+
+          {/* Sidebar Drawer Panel */}
+          <div
             className={`absolute left-0 top-0 bottom-0 w-72 bg-white shadow-2xl p-6 transition-transform duration-300 ease-out flex flex-col ${
               isMobileOpen ? "translate-x-0" : "-translate-x-full"
             }`}
           >
-            {/* Padding space to account for the overlay button */}
             <div className="h-12 flex-shrink-0" />
             <div className="flex-1 overflow-y-auto">
               <Sidebar closeMobileMenu={() => setIsMobileOpen(false)} />
@@ -67,14 +65,18 @@ const LoggedInLayout = ({ children }) => {
           </div>
         </div>
 
-        {/* Dynamic Main Page Canvas Body Content Section */}
-        <main 
-          className="flex-1 w-full min-w-0 px-4 py-8 md:px-8 lg:pl-72 transition-all duration-300"
-          style={{ fontFamily: "'Lexend', sans-serif" }}
+        {/* Main Content */}
+        <main
+          className={`flex-1 w-full min-w-0 lg:pl-64 transition-all duration-300 ${
+            bare ? "" : "px-4 py-8 md:px-8"
+          }`}
+          style={bare ? undefined : { fontFamily: "'Lexend', sans-serif" }}
         >
-          <div className="max-w-[1280px] mx-auto w-full">
-            {children}
-          </div>
+          {bare ? children : (
+            <div className="max-w-[1280px] mx-auto w-full">
+              {children}
+            </div>
+          )}
         </main>
 
       </div>
