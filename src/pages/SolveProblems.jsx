@@ -24,8 +24,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import SolveProblems_stepbystep from "../components/solveProblems/SolveProblems_stepbystep";
-import useDog from "../hook/useDog";
-import DogPortal from "../components/AI/DogPortal";
+// import useDog from "../hook/useDog";
+// import DogPortal from "../components/AI/DogPortal";
 import Sidebar from "../components/Sidebar";
 import { Loader2, X, PlayCircle } from "lucide-react";
 
@@ -256,13 +256,23 @@ const SolveProblems = () => {
     return () => stopTimers();
   }, []);
 
-  const {
-    canvasRef: mountRef,
-    playAnimation,
-    handlePlayAudio,
-    muted,
-    toggleMute,
-  } = useDog();
+  // const {
+  //   canvasRef: mountRef,
+  //   playAnimation,
+  //   handlePlayAudio,
+  //   muted,
+  //   toggleMute,
+  // } = useDog();
+
+
+  // REPLACE WITH:
+  const [muted, setMuted] = useState(false);
+  const toggleMute = () => setMuted((m) => !m);
+  const handlePlayAudio = (text) => {
+    if (muted) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.speak(utterance);
+  };
 
   // Reset per-question tracking flags when question changes
   useEffect(() => {
@@ -580,7 +590,9 @@ const SolveProblems = () => {
                         </DialogDescription>
                       </DialogHeader>
                       <DialogFooter>
-                        <DialogClose asChild />
+                        <DialogClose asChild>
+                          <Button variant="outline">Close</Button>
+                        </DialogClose>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
@@ -598,7 +610,9 @@ const SolveProblems = () => {
                         </DialogDescription>
                       </DialogHeader>
                       <DialogFooter>
-                        <DialogClose asChild />
+                        <DialogClose asChild>
+                          <Button variant="outline">Close</Button>
+                        </DialogClose>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
@@ -614,7 +628,6 @@ const SolveProblems = () => {
                         <DialogDescription />
                       </DialogHeader>
                       <SolveProblems_stepbystep
-                        playAnimation={playAnimation}
                         handlePlayAudio={handlePlayAudio}
                         handleNextOrSubmit={handleNextOrSubmit_solvetab}
                         question={currentQuestion}
@@ -872,10 +885,7 @@ const SolveProblems = () => {
         )}
       </div>
 
-      <DogPortal
-        mountRef={mountRef}
-        targetId={isDialogOpen ? "dog-dialog" : "dog-sidebar"}
-      />
+ 
     </div>
   </LoggedInLayout>
   );
