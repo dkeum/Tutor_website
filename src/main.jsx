@@ -80,9 +80,9 @@ createRoot(document.getElementById("root")).render(
               <Route
                 path="/showpersonaldata"
                 element={
-                  <ProtectedRoute>
-                    <ShowPersonalData />
-                  </ProtectedRoute>
+
+                  <ShowPersonalData />
+
                 }
               />
               <Route

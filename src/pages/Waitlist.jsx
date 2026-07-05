@@ -194,16 +194,17 @@ const Waitlist = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                   >
-                    <div className="mb-6 rounded-xl overflow-hidden bg-black aspect-[16/9] border border-zinc-200 dark:border-zinc-800 flex items-center justify-center">
-                      <video
-                        src="/waitlist_video.mp4"
-                        autoPlay
-                        muted
-                        playsInline
-                        loop
-                        className="w-full h-full object-cover"
+                    <div className="mb-6 rounded-xl overflow-hidden bg-black aspect-[16/9] border border-zinc-200 dark:border-zinc-800">
+                      <iframe
+                        src="https://www.youtube.com/embed/wTqdIH_Nnng?autoplay=1&mute=1&loop=1&playlist=wTqdIH_Nnng&controls=1&rel=0"
+                        title="Mathamagic Waitlist Preview"
+                        className="w-full h-full"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
                       />
                     </div>
+                    
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <LabelInputContainer>

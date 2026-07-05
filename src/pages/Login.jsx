@@ -68,7 +68,7 @@ const LoginSignup = () => {
         );
 
         console.log("Signup successful:", response.data);
-        setResponseMessage("Signup successful! You can now log in.");
+        setResponseMessage("Signup successful! Check your email for verification.");
         setIsLogin(true);
       }
     } catch (error) {

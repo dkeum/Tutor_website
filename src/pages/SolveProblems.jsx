@@ -24,9 +24,15 @@ import {
 } from "@/components/ui/dialog";
 
 import SolveProblems_stepbystep from "../components/solveProblems/SolveProblems_stepbystep";
+<<<<<<< HEAD
 import useDog from "../hook/useDog";
 import DogPortal from "../components/AI/DogPortal";
 
+=======
+// import useDog from "../hook/useDog";
+// import DogPortal from "../components/AI/DogPortal";
+import Sidebar from "../components/Sidebar";
+>>>>>>> ae23d0b89324627ab9f33b25b15a9b5c119c4188
 import { Loader2, X, PlayCircle } from "lucide-react";
 
 import LoggedInLayout from "../components/LoggedInLayout";
@@ -248,13 +254,23 @@ const SolveProblems = () => {
     return () => stopTimers();
   }, []);
 
-  const {
-    canvasRef: mountRef,
-    playAnimation,
-    handlePlayAudio,
-    muted,
-    toggleMute,
-  } = useDog();
+  // const {
+  //   canvasRef: mountRef,
+  //   playAnimation,
+  //   handlePlayAudio,
+  //   muted,
+  //   toggleMute,
+  // } = useDog();
+
+
+  // REPLACE WITH:
+  const [muted, setMuted] = useState(false);
+  const toggleMute = () => setMuted((m) => !m);
+  const handlePlayAudio = (text) => {
+    if (muted) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.speak(utterance);
+  };
 
   useEffect(() => {
     setUsedAIVideo(false);
@@ -531,6 +547,7 @@ const SolveProblems = () => {
                     gap: 12,
                   }}
                 >
+<<<<<<< HEAD
                   <div>
                     <h2
                       className="sp-headline"
@@ -561,6 +578,77 @@ const SolveProblems = () => {
                       alignItems: "center",
                       flexWrap: "wrap",
                     }}
+=======
+                  <TimerBox secondsElapsed={secondsElapsed} />
+
+                  {/* Formula dialog */}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button className="sp-btn-outline">Formula</button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Formula</DialogTitle>
+                        <DialogDescription>
+                          {currentQuestion.formula || "No formula available."}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="outline">Close</Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Hint dialog */}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button className="sp-btn-outline">Hint</button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Hint</DialogTitle>
+                        <DialogDescription>
+                          {currentQuestion.hint || "No hint available."}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="outline">Close</Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Step by Step dialog */}
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <button className="sp-btn-outline">Step by Step</button>
+                    </DialogTrigger>
+                    <DialogContent className="min-w-6xl max-h-[700px] sm:h-[400px] lg:h-[600px]">
+                      <DialogHeader className="hidden">
+                        <DialogTitle>Step by Step</DialogTitle>
+                        <DialogDescription />
+                      </DialogHeader>
+                      <SolveProblems_stepbystep
+                        handlePlayAudio={handlePlayAudio}
+                        handleNextOrSubmit={handleNextOrSubmit_solvetab}
+                        question={currentQuestion}
+                        setIsDialogOpen={setIsDialogOpen}
+                        muted={muted}
+                        toggleMute={toggleMute}
+                      />
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* AI Video — loading spinner while generating, then opens modal */}
+                  <button
+                    className="sp-btn-outline"
+                    onClick={handleGenerateAndStreamVideo}
+                    disabled={isVideoLoading}
+                    style={{ minWidth: 160 }}
+>>>>>>> ae23d0b89324627ab9f33b25b15a9b5c119c4188
                   >
                     <TimerBox secondsElapsed={secondsElapsed} />
 
@@ -878,7 +966,14 @@ const SolveProblems = () => {
           targetId={isDialogOpen ? "dog-dialog" : "dog-sidebar"}
         />
       </div>
+<<<<<<< HEAD
     </LoggedInLayout>
+=======
+
+ 
+    </div>
+  </LoggedInLayout>
+>>>>>>> ae23d0b89324627ab9f33b25b15a9b5c119c4188
   );
 };
 
