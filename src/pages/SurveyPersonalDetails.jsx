@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import BackgroundWrapper from "../components/BackgroundWrapper";
 import { Button } from "../components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { supabase } from "../db/supabaseclient";
 
 import axios from "axios";
 
@@ -11,6 +12,38 @@ const SurveyPersonalDetails = () => {
   const [questionNumber, setQuestionNumber] = useState(0);
   const [answers, setAnswers] = useState([]);
   const navigate = useNavigate();
+
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const handleTokenVerification = async () => {
+      const token = searchParams.get("token");
+      if (!token) return;
+
+      const base = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+        ? "http://localhost:3000"
+        : "https://mathamagic-backend.vercel.app";
+
+      try {
+        const response = await axios.get(`${base}/verify-email`, {
+          params: { token },
+          withCredentials: true,
+        });
+
+        if (response.data.access_token && response.data.refresh_token) {
+          await supabase.auth.setSession({
+            access_token: response.data.access_token,
+            refresh_token: response.data.refresh_token,
+          });
+        }
+      } catch (verifyErr) {
+        console.error("Email verification failed:", verifyErr);
+        navigate("/login?verify_failed=true", { replace: true });
+      }
+    };
+
+    handleTokenVerification();
+  }, [searchParams, navigate]);
 
   const staticQuestions = [
     {

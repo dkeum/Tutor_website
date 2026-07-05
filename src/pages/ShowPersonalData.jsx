@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useSelector, useDispatch } from "react-redux";
 import { setName, setQuestions, setProfileInfo } from "../features/auth/personDetails";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import LoginActivity from "../components/userProfile/LoginActivity";
 import Profile from "../components/userProfile/Profile";
 import UserInfo from "../components/userProfile/UserInfo";
@@ -40,6 +40,9 @@ const ShowPersonalData = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
+
+
 
   useEffect(() => {
     const initializeUserSession = async () => {
@@ -48,9 +51,34 @@ const ShowPersonalData = () => {
           ? "http://localhost:3000"
           : "https://mathamagic-backend.vercel.app";
 
+
+
+        const token = searchParams.get("token");
+        if (token) {
+          try {
+            const response = await axios.get(`${base}/verify-email`, { params: { token }, withCredentials: true, });
+
+            if (response.data.access_token && response.data.refresh_token) {
+              await supabase.auth.setSession({
+                access_token: response.data.access_token,
+                refresh_token: response.data.refresh_token,
+              });
+            }
+
+            // Let it continue to the session/profile fetch below instead of
+            // navigating away immediately — setSession just ran, so the
+            // getSession() check further down will now succeed naturally
+          } catch (verifyErr) {
+            console.error("Email verification failed:", verifyErr);
+            navigate("/login?verify_failed=true", { replace: true });
+            return;
+          }
+        }
+
         // 1. Check Supabase for an existing local session
         const { data: { session } } = await supabase.auth.getSession();
 
+        console.log("Supabase session:", session);
         if (session?.user) {
           const userEmail = session.user.email;
 
