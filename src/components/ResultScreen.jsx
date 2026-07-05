@@ -1,3 +1,5 @@
+import { TOKEN } from "../pages/SolveProblems";
+
 // ─── Results Screen ───────────────────────────────────────────────────────────
 function ResultsScreen({ answerResults, totalSeconds, onRetry, onHome }) {
   const total = answerResults.length;

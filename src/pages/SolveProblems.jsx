@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
-import NavbarLoggedIn from "../components/NavbarLoggedIn";
+
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -22,22 +22,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+
 import SolveProblems_stepbystep from "../components/solveProblems/SolveProblems_stepbystep";
 import useDog from "../hook/useDog";
 import DogPortal from "../components/AI/DogPortal";
-import Sidebar from "../components/Sidebar";
+
 import { Loader2, X, PlayCircle } from "lucide-react";
 
-import ReactMarkdown from "react-markdown";
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
-import "katex/dist/katex.min.css";
 import LoggedInLayout from "../components/LoggedInLayout";
 import TimerBox from "../components/TimerBox";
 import AIVideoModal from "../components/AIVideoModal";
 import ResultsScreen from "../components/ResultScreen";
 import AISidebar from "../components/AISidebar";
+import MathQuestion from "../components/MathQuestion";
 
 addStyles();
 
@@ -160,12 +157,6 @@ export const styles = `
   }
 `;
 
-
-
-
-
-
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 const SolveProblems = () => {
   const { topic } = useParams();
@@ -199,7 +190,6 @@ const SolveProblems = () => {
   const [videoStreamUrl, setVideoStreamUrl] = useState(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
-  // Trigger: generate + open video modal
   const handleGenerateAndStreamVideo = async () => {
     if (!currentQuestion || isVideoLoading) return;
 
@@ -211,15 +201,17 @@ const SolveProblems = () => {
     const questionText = currentQuestion.question;
     const targetTopicId = currentQuestion.topic_id;
     const targetSectionId = currentQuestion.section_id;
-    const topicName = decodeURIComponent(topic || "");        // already in scope from useParams
-    const sectionName = decodeURIComponent(section || "");    // already in scope from useSearchParams
+    const topicName = decodeURIComponent(topic || "");
+    const sectionName = decodeURIComponent(section || "");
 
     const BASE_URL =
       import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
         ? "http://localhost:3000"
         : "https://mathamagic-backend.vercel.app";
 
-    const streamUrl = `${BASE_URL}/question/ai-video-generate?questionId=${questionId}&topicId=${targetTopicId}&sectionId=${targetSectionId}&questionText=${encodeURIComponent(questionText)}&topicName=${encodeURIComponent(topicName)}&sectionName=${encodeURIComponent(sectionName)}`;
+    const streamUrl = `${BASE_URL}/question/ai-video-generate?questionId=${questionId}&topicId=${targetTopicId}&sectionId=${targetSectionId}&questionText=${encodeURIComponent(
+      questionText
+    )}&topicName=${encodeURIComponent(topicName)}&sectionName=${encodeURIComponent(sectionName)}`;
 
     await new Promise((res) => setTimeout(res, 800));
 
@@ -264,13 +256,11 @@ const SolveProblems = () => {
     toggleMute,
   } = useDog();
 
-  // Reset per-question tracking flags when question changes
   useEffect(() => {
     setUsedAIVideo(false);
     setUsedAIChat(false);
   }, [currentIndex]);
 
-  // Fetch questions
   useEffect(() => {
     const fetchQuestions = async () => {
       if (!topic || !section) return;
@@ -338,27 +328,39 @@ const SolveProblems = () => {
             Do not include any markdown formatting, backticks, or extra text.
           `;
 
-      const response = await window.puter.ai.chat(analysisPrompt, { json_mode: true });
-
-      const aiOutput = response.message?.content || response;
-      const parsedAiData = typeof aiOutput === "string" ? JSON.parse(aiOutput.trim()) : aiOutput;
-
-      verifiedAttempts = finalAttempts.map(originalAttempt => {
-        const aiEvaluation = parsedAiData.find(aiResult => aiResult.question_id === originalAttempt.question_id);
-
-        return {
-          ...originalAttempt,
-          is_correct: aiEvaluation !== undefined ? aiEvaluation.is_correct : originalAttempt.is_correct
-        };
+      const response = await window.puter.ai.chat(analysisPrompt, {
+        json_mode: true,
       });
 
+      const aiOutput = response.message?.content || response;
+      const parsedAiData =
+        typeof aiOutput === "string" ? JSON.parse(aiOutput.trim()) : aiOutput;
+
+      verifiedAttempts = finalAttempts.map((originalAttempt) => {
+        const aiEvaluation = parsedAiData.find(
+          (aiResult) => aiResult.question_id === originalAttempt.question_id
+        );
+        return {
+          ...originalAttempt,
+          is_correct:
+            aiEvaluation !== undefined
+              ? aiEvaluation.is_correct
+              : originalAttempt.is_correct,
+        };
+      });
     } catch (aiError) {
-      console.error("Puter.js evaluation failed, falling back to client-side logic:", aiError);
+      console.error(
+        "Puter.js evaluation failed, falling back to client-side logic:",
+        aiError
+      );
     }
 
     const total = verifiedAttempts.length;
-    const correctCount = verifiedAttempts.filter((a) => a.is_correct === true).length;
-    finalGrade = total > 0 ? Number(((correctCount / total) * 100).toFixed(2)) : 0;
+    const correctCount = verifiedAttempts.filter(
+      (a) => a.is_correct === true
+    ).length;
+    finalGrade =
+      total > 0 ? Number(((correctCount / total) * 100).toFixed(2)) : 0;
 
     const payload = {
       topic_id: topicId,
@@ -367,21 +369,27 @@ const SolveProblems = () => {
       start_time: sessionStartTime,
       end_time: new Date().toISOString(),
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      recordedAnswers: verifiedAttempts
+      recordedAnswers: verifiedAttempts,
     };
 
     try {
-      const BASE_URL = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-        ? "http://localhost:3000"
-        : "https://mathamagic-backend.vercel.app";
+      const BASE_URL =
+        import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+          ? "http://localhost:3000"
+          : "https://mathamagic-backend.vercel.app";
 
-      const res = await axios.post(`${BASE_URL}/questions/save-marks`, payload, {
-        withCredentials: true,
-      });
+      const res = await axios.post(
+        `${BASE_URL}/questions/save-marks`,
+        payload,
+        { withCredentials: true }
+      );
 
       console.log("Marks saved successfully with AI verified data!", res.data);
     } catch (apiError) {
-      console.error("Failed to save marks to the database:", apiError?.response?.data || apiError.message);
+      console.error(
+        "Failed to save marks to the database:",
+        apiError?.response?.data || apiError.message
+      );
     }
   };
 
@@ -460,424 +468,417 @@ const SolveProblems = () => {
     startTimers();
   };
 
-  return (<LoggedInLayout>
-    <div className="sp-root">
-      <style>{styles}</style>
+  return (
+    <LoggedInLayout>
+      <div className="sp-root">
+        <style>{styles}</style>
 
+        {/* ── AI Video Modal ── */}
+        <AIVideoModal
+          isOpen={isVideoModalOpen}
+          onClose={() => {
+            setIsVideoModalOpen(false);
+            setVideoStreamUrl(null);
+          }}
+          videoStreamUrl={videoStreamUrl}
+          questionText={currentQuestion?.question}
+        />
 
-      {/* ── AI Video Modal ── */}
-      <AIVideoModal
-        isOpen={isVideoModalOpen}
-        onClose={() => {
-          setIsVideoModalOpen(false);
-          setVideoStreamUrl(null);
-        }}
-        videoStreamUrl={videoStreamUrl}
-        questionText={currentQuestion?.question}
-      />
-
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        {showResults ? (
-          <div
-            style={{
-              display: "flex",
-              flex: 1,
-              overflow: "hidden",
-            }}
-          >
-            <ResultsScreen
-              answerResults={answerResults}
-              totalSeconds={totalSeconds}
-              onRetry={handleRetry}
-              onHome={() => navigate("/showpersonaldata")}
-            />
-            <AISidebar
-              topic={topic}
-              section={section}
-              currentQuestion={currentQuestion}
-              onOpenStepByStep={() => setIsDialogOpen(true)}
-              setUsedAIChat={setUsedAIChat}
-            />
-          </div>
-        ) : (
-          <div
-            style={{
-              display: "flex",
-              flex: 1,
-              minHeight: 0,
-              overflow: "hidden",
-            }}
-          >
-            {/* ── Solve Area ── */}
-            <section
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          {showResults ? (
+            <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+              <ResultsScreen
+                answerResults={answerResults}
+                totalSeconds={totalSeconds}
+                onRetry={handleRetry}
+                onHome={() => navigate("/showpersonaldata")}
+              />
+              <AISidebar
+                topic={topic}
+                section={section}
+                currentQuestion={currentQuestion}
+                onOpenStepByStep={() => setIsDialogOpen(true)}
+                setUsedAIChat={setUsedAIChat}
+              />
+            </div>
+          ) : (
+            <div
               style={{
-                flex: 1,
-                padding: "4px 24px 24px 24px",
                 display: "flex",
-                flexDirection: "column",
-                gap: 16,
+                flex: 1,
+                minHeight: 0,
                 overflow: "hidden",
               }}
             >
-              {/* Top bar */}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                  gap: 12,
-                }}
-              >
-                <div>
-                  <h2
-                    className="sp-headline"
-                    style={{
-                      fontSize: 22,
-                      fontWeight: 700,
-                      color: TOKEN.onSurface,
-                      margin: 0,
-                    }}
-                  >
-                    Practice Session
-                  </h2>
-                  <p
-                    style={{
-                      fontSize: 13,
-                      color: TOKEN.onSurfaceVariant,
-                      margin: "2px 0 0",
-                    }}
-                  >
-                    {decodeURIComponent(topic || "")} —{" "}
-                    {decodeURIComponent(section || "")}
-                  </p>
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 8,
-                    alignItems: "center",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <TimerBox secondsElapsed={secondsElapsed} />
-
-                  {/* Formula dialog */}
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <button className="sp-btn-outline">Formula</button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Formula</DialogTitle>
-                        <DialogDescription>
-                          {currentQuestion.formula || "No formula available."}
-                        </DialogDescription>
-                      </DialogHeader>
-                      <DialogFooter>
-                        <DialogClose asChild />
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* Hint dialog */}
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <button className="sp-btn-outline">Hint</button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Hint</DialogTitle>
-                        <DialogDescription>
-                          {currentQuestion.hint || "No hint available."}
-                        </DialogDescription>
-                      </DialogHeader>
-                      <DialogFooter>
-                        <DialogClose asChild />
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* Step by Step dialog */}
-                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                      <button className="sp-btn-outline">Step by Step</button>
-                    </DialogTrigger>
-                    <DialogContent className="min-w-6xl max-h-[700px] sm:h-[400px] lg:h-[600px]">
-                      <DialogHeader className="hidden">
-                        <DialogTitle>Step by Step</DialogTitle>
-                        <DialogDescription />
-                      </DialogHeader>
-                      <SolveProblems_stepbystep
-                        playAnimation={playAnimation}
-                        handlePlayAudio={handlePlayAudio}
-                        handleNextOrSubmit={handleNextOrSubmit_solvetab}
-                        question={currentQuestion}
-                        setIsDialogOpen={setIsDialogOpen}
-                        muted={muted}
-                        toggleMute={toggleMute}
-                      />
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* AI Video — loading spinner while generating, then opens modal */}
-                  <button
-                    className="sp-btn-outline"
-                    onClick={handleGenerateAndStreamVideo}
-                    disabled={isVideoLoading}
-                    style={{ minWidth: 160 }}
-                  >
-                    {isVideoLoading ? (
-                      <>
-                        <Loader2 size={14} className="spin-icon" />
-                        Generating…
-                      </>
-                    ) : (
-                      <>
-                        <PlayCircle size={14} />
-                        AI Video Explanation
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Question card */}
-              <div
-                className="sp-card"
+              {/* ── Solve Area ── */}
+              <section
                 style={{
                   flex: 1,
-                  background: "#fff",
-                  borderRadius: 20,
-                  border: `1px solid ${TOKEN.outlineVariant}`,
+                  padding: "4px 24px 24px 24px",
                   display: "flex",
                   flexDirection: "column",
+                  gap: 16,
                   overflow: "hidden",
-                  position: "relative",
                 }}
               >
+                {/* Top bar */}
                 <div
                   style={{
-                    position: "absolute",
-                    left: 0,
-                    top: 0,
-                    width: 4,
-                    height: "100%",
-                    background: TOKEN.primary,
-                    borderRadius: "20px 0 0 20px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    gap: 12,
                   }}
-                />
+                >
+                  <div>
+                    <h2
+                      className="sp-headline"
+                      style={{
+                        fontSize: 22,
+                        fontWeight: 700,
+                        color: TOKEN.onSurface,
+                        margin: 0,
+                      }}
+                    >
+                      Practice Session
+                    </h2>
+                    <p
+                      style={{
+                        fontSize: 13,
+                        color: TOKEN.onSurfaceVariant,
+                        margin: "2px 0 0",
+                      }}
+                    >
+                      {decodeURIComponent(topic || "")} —{" "}
+                      {decodeURIComponent(section || "")}
+                    </p>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 8,
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <TimerBox secondsElapsed={secondsElapsed} />
 
+                    {/* Formula dialog */}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="sp-btn-outline">Formula</button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Formula</DialogTitle>
+                          <DialogDescription>
+                            <MathQuestion
+                              text={currentQuestion.formula || "No formula available."}
+                            />
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <DialogClose asChild />
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* Hint dialog */}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="sp-btn-outline">Hint</button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Hint</DialogTitle>
+                          <DialogDescription>
+                            <MathQuestion
+                              text={currentQuestion.hint || "No hint available."}
+                            />
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <DialogClose asChild />
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* Step by Step dialog */}
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                      <DialogTrigger asChild>
+                        <button className="sp-btn-outline">Step by Step</button>
+                      </DialogTrigger>
+                      <DialogContent className="min-w-6xl max-h-[700px] sm:h-[400px] lg:h-[600px]">
+                        <DialogHeader className="hidden">
+                          <DialogTitle>Step by Step</DialogTitle>
+                          <DialogDescription />
+                        </DialogHeader>
+                        <SolveProblems_stepbystep
+                          playAnimation={playAnimation}
+                          handlePlayAudio={handlePlayAudio}
+                          handleNextOrSubmit={handleNextOrSubmit_solvetab}
+                          question={currentQuestion}
+                          setIsDialogOpen={setIsDialogOpen}
+                          muted={muted}
+                          toggleMute={toggleMute}
+                        />
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* AI Video */}
+                    <button
+                      className="sp-btn-outline"
+                      onClick={handleGenerateAndStreamVideo}
+                      disabled={isVideoLoading}
+                      style={{ minWidth: 160 }}
+                    >
+                      {isVideoLoading ? (
+                        <>
+                          <Loader2 size={14} className="spin-icon" />
+                          Generating…
+                        </>
+                      ) : (
+                        <>
+                          <PlayCircle size={14} />
+                          AI Video Explanation
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Question card */}
                 <div
+                  className="sp-card"
                   style={{
                     flex: 1,
+                    background: "#fff",
+                    borderRadius: 20,
+                    border: `1px solid ${TOKEN.outlineVariant}`,
                     display: "flex",
                     flexDirection: "column",
-                    padding: "24px 24px 24px 32px",
                     overflow: "hidden",
+                    position: "relative",
                   }}
                 >
-                  {/* Progress */}
-                  <div style={{ marginBottom: 20 }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        marginBottom: 6,
-                      }}
-                    >
-                      <span
-                        className="sp-mono"
-                        style={{
-                          color: TOKEN.primary,
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        Progress
-                      </span>
-                      <span
-                        style={{
-                          fontSize: 13,
-                          color: TOKEN.onSurfaceVariant,
-                          fontWeight: 500,
-                        }}
-                      >
-                        Question {currentIndex + 1} of {questions.length}
-                      </span>
-                    </div>
-                    <div className="sp-progress-track">
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      top: 0,
+                      width: 4,
+                      height: "100%",
+                      background: TOKEN.primary,
+                      borderRadius: "20px 0 0 20px",
+                    }}
+                  />
+
+                  <div
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      padding: "24px 24px 24px 32px",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {/* Progress */}
+                    <div style={{ marginBottom: 20 }}>
                       <div
-                        className="sp-progress-fill"
-                        style={{ width: `${progressPct}%` }}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginBottom: 6,
+                        }}
+                      >
+                        <span
+                          className="sp-mono"
+                          style={{
+                            color: TOKEN.primary,
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Progress
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 13,
+                            color: TOKEN.onSurfaceVariant,
+                            fontWeight: 500,
+                          }}
+                        >
+                          Question {currentIndex + 1} of {questions.length}
+                        </span>
+                      </div>
+                      <div className="sp-progress-track">
+                        <div
+                          className="sp-progress-fill"
+                          style={{ width: `${progressPct}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Loading state */}
+                    {loadingQuestions && (
+                      <div
+                        style={{
+                          flex: 1,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: TOKEN.onSurfaceVariant,
+                          fontSize: 14,
+                        }}
+                      >
+                        Loading questions…
+                      </div>
+                    )}
+
+                    {/* Carousel */}
+                    {!loadingQuestions && (
+                      <div
+                        style={{
+                          flex: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <Carousel
+                          className="w-full pointer-events-none"
+                          setApi={setApi}
+                          opts={{ loop: false }}
+                        >
+                          <CarouselContent>
+                            {questions.map((q, index) => (
+                              <CarouselItem key={index}>
+                                <div style={{ padding: "4px 0" }}>
+                                  <span
+                                    className="sp-mono"
+                                    style={{
+                                      color: TOKEN.primary,
+                                      textTransform: "uppercase",
+                                      display: "block",
+                                      marginBottom: 10,
+                                    }}
+                                  >
+                                    Question {index + 1}
+                                  </span>
+                                  <div
+                                    style={{
+                                      fontSize: 16,
+                                      lineHeight: 1.65,
+                                      color: TOKEN.onSurface,
+                                      fontWeight: 500,
+                                      margin: 0,
+                                      maxHeight: 160,
+                                      overflowY: "hidden",
+                                    }}
+                                  >
+                                    <MathQuestion text={q.question} />
+                                  </div>
+                                  {q?.image_url && (
+                                    <img
+                                      src={q.image_url}
+                                      alt="Question visual"
+                                      style={{
+                                        maxHeight: 200,
+                                        marginTop: 16,
+                                        borderRadius: 10,
+                                        border: `1px solid ${TOKEN.outlineVariant}`,
+                                      }}
+                                    />
+                                  )}
+                                </div>
+                              </CarouselItem>
+                            ))}
+                          </CarouselContent>
+                        </Carousel>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Answer area */}
+                  <div
+                    style={{
+                      padding: "16px 24px 20px 32px",
+                      borderTop: `1px solid ${TOKEN.outlineVariant}`,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 16,
+                      background: TOKEN.surfaceContainerLow,
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <label
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: TOKEN.onSurfaceVariant,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                          display: "block",
+                          marginBottom: 6,
+                          fontFamily: "'JetBrains Mono', monospace",
+                        }}
+                      >
+                        Your Answer
+                      </label>
+                      <EditableMathField
+                        latex={latex}
+                        onChange={(mf) => setLatex(mf.latex())}
+                        style={{
+                          minWidth: 280,
+                          minHeight: 44,
+                          textAlign: "left",
+                        }}
                       />
                     </div>
+                    <button
+                      className="sp-btn-primary"
+                      onClick={handleNextOrSubmit}
+                      style={{ flexShrink: 0, marginTop: 20 }}
+                    >
+                      {isLastQuestion ? "Submit" : "Next"}
+                      {!isLastQuestion && (
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                          <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                      )}
+                    </button>
                   </div>
-
-                  {/* Loading state */}
-                  {loadingQuestions && (
-                    <div
-                      style={{
-                        flex: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: TOKEN.onSurfaceVariant,
-                        fontSize: 14,
-                      }}
-                    >
-                      Loading questions…
-                    </div>
-                  )}
-
-                  {/* Carousel */}
-                  {!loadingQuestions && (
-                    <div
-                      style={{
-                        flex: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <Carousel
-                        className="w-full pointer-events-none"
-                        setApi={setApi}
-                        opts={{ loop: false }}
-                      >
-                        <CarouselContent>
-                          {questions.map((q, index) => (
-                            <CarouselItem key={index}>
-                              <div style={{ padding: "4px 0" }}>
-                                <span
-                                  className="sp-mono"
-                                  style={{
-                                    color: TOKEN.primary,
-                                    textTransform: "uppercase",
-                                    display: "block",
-                                    marginBottom: 10,
-                                  }}
-                                >
-                                  Question {index + 1}
-                                </span>
-                                <p
-                                  style={{
-                                    fontSize: 16,
-                                    lineHeight: 1.65,
-                                    color: TOKEN.onSurface,
-                                    fontWeight: 500,
-                                    margin: 0,
-                                    maxHeight: 160,
-                                    overflowY: "auto",
-                                  }}
-                                >
-                                  {q.question}
-                                </p>
-                                {q?.image_url && (
-                                  <img
-                                    src={q.image_url}
-                                    alt="Question visual"
-                                    style={{
-                                      maxHeight: 200,
-                                      marginTop: 16,
-                                      borderRadius: 10,
-                                      border: `1px solid ${TOKEN.outlineVariant}`,
-                                    }}
-                                  />
-                                )}
-                              </div>
-                            </CarouselItem>
-                          ))}
-                        </CarouselContent>
-                      </Carousel>
-                    </div>
-                  )}
                 </div>
+              </section>
 
-                {/* Answer area */}
-                <div
-                  style={{
-                    padding: "16px 24px 20px 32px",
-                    borderTop: `1px solid ${TOKEN.outlineVariant}`,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 16,
-                    background: TOKEN.surfaceContainerLow,
-                  }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <label
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 600,
-                        color: TOKEN.onSurfaceVariant,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                        display: "block",
-                        marginBottom: 6,
-                        fontFamily: "'JetBrains Mono', monospace",
-                      }}
-                    >
-                      Your Answer
-                    </label>
-                    <EditableMathField
-                      latex={latex}
-                      onChange={(mf) => setLatex(mf.latex())}
-                      style={{
-                        minWidth: 280,
-                        minHeight: 44,
-                        textAlign: "left",
-                      }}
-                    />
-                  </div>
-                  <button
-                    className="sp-btn-primary"
-                    onClick={handleNextOrSubmit}
-                    style={{ flexShrink: 0, marginTop: 20 }}
-                  >
-                    {isLastQuestion ? "Submit" : "Next"}
-                    {!isLastQuestion && (
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                        <polyline points="12 5 19 12 12 19" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </section>
+              {/* ── AI Sidebar ── */}
+              <AISidebar
+                topic={topic}
+                section={section}
+                currentQuestion={currentQuestion}
+                onOpenStepByStep={() => setIsDialogOpen(true)}
+                setUsedAIChat={setUsedAIChat}
+              />
+            </div>
+          )}
+        </div>
 
-            {/* ── AI Sidebar ── */}
-            <AISidebar
-              topic={topic}
-              section={section}
-              currentQuestion={currentQuestion}
-              onOpenStepByStep={() => setIsDialogOpen(true)}
-              setUsedAIChat={setUsedAIChat}
-            />
-          </div>
-        )}
+        <DogPortal
+          mountRef={mountRef}
+          targetId={isDialogOpen ? "dog-dialog" : "dog-sidebar"}
+        />
       </div>
-
-      <DogPortal
-        mountRef={mountRef}
-        targetId={isDialogOpen ? "dog-dialog" : "dog-sidebar"}
-      />
-    </div>
-  </LoggedInLayout>
+    </LoggedInLayout>
   );
 };
 

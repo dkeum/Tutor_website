@@ -74,8 +74,8 @@ createRoot(document.getElementById("root")).render(
               <Route path="/contact" element={<Contactme />} />
               <Route path="/about" element={<About />} />
               <Route path="/Waitlist" element={<Waitlist />} />
-              <Route path="/freeResources" element={<FreeResources />} />
-              <Route path="/freeResources/:subject" element={<Subject />} />
+              <Route path="/classes" element={<FreeResources />} />
+              {/* <Route path="/freeResources/:subject" element={<Subject />} /> */}
               <Route path="/pricing" element={<Pricing />} />
               <Route
                 path="/showpersonaldata"

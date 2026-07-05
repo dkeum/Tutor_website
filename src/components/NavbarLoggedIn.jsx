@@ -73,12 +73,15 @@ const NavbarLoggedIn = () => {
 
         {/* Desktop Interface Action Options */}
         <div className="hidden md:flex flex-row gap-x-10 items-center text-xl">
-          <a
-            href="/about"
-            className="text-base font-semibold text-gray-700 hover:text-indigo-600 transition-colors"
-          >
-            About
-          </a>
+        
+
+        <button onClick={() => {navigate("/pricing")}} className="text-base font-semibold text-gray-700 hover:text-indigo-600 transition-colors">
+            Pricing
+          </button>
+
+          <button onClick={() => {navigate("/classes")}} className="text-base font-semibold text-gray-700 hover:text-indigo-600 transition-colors">
+            Classes
+          </button>
 
           {/* Logout Button */}
           <button

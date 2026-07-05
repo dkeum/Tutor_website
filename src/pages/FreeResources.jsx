@@ -3,34 +3,33 @@ import React, { useState } from "react";
 import { PlaceholdersAndVanishInput } from "@/components/ui/placeholders-and-vanish-input";
 import { CardBody, CardContainer, CardItem } from "@/components/ui/3d-card";
 
-import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import NavbarLoggedIn from "../components/NavbarLoggedIn";
+import { Lock, Crown } from "lucide-react";
 
 const placeholders = [
+  "Pre-Calculus 10",
+  "Pre-Calculus 11",
   "Pre-Calculus 12",
+  "AP Calculus",
   "AP Physics 11",
   "Linear Algebra",
   "Chemistry 12",
   "Calculus I",
 ];
 
+const PREMIUM_SUBJECTS = ["AP Calculus", "Calculus I", "Calculus II"];
+
 const subjects = [
   {
-    subject: "Physics 11",
+    subject: "Pre-Calculus 10",
     image:
-      "https://stickmanphysics.com/wp-content/uploads/2020/09/Angular-Projectile-Throw-Definitions.gif",
-    topics: ["Projectile motion"],
-    link: "/freeResources/physics11",
-  },
-  {
-    subject: "Physics 12",
-    image:
-      "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExY25kczFxeXNjNXRsbDk4bW9xNHAyajBqMTlkemp0a2ZqZWlqcjNnZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/nkAIKYsPVk4yA/giphy.gif",
-    topics: ["Equilibrium"],
-    link: "/freeResources/physics12",
+      "/math_high_school_linear_functions_linear_functions_slope_y_intercept.gif",
+    topics: ["Linear Relations"],
+    link: "/freeResources/precalculus10",
   },
   {
     subject: "Pre-Calculus 11",
@@ -42,8 +41,15 @@ const subjects = [
   {
     subject: "Pre-Calculus 12",
     image:
-      "https://personal.morris.umn.edu/~mcquarrb/teachingarchive/Precalculus/Animations/CosineAnim.gif",
-    topics: ["trigonometry"],
+      "/math_high_school_trig_unit_circle_trigonometry_the_unit_circle.gif",
+    topics: ["Trigonometry"],
+    link: "/freeResources/precalculus12",
+  },
+  {
+    subject: "AP Calculus",
+    image:
+      "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExdHByNmVkeHp0cjc0YTF1aTN1d2VuYnE5a3Y2bXU1ZWl2c2pvdGM5byZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/zPbnEgxsPJOJSD3qfr/giphy.gif",
+    topics: ["Limits"],
     link: "/freeResources/precalculus12",
   },
   {
@@ -72,7 +78,57 @@ const subjects = [
     topics: ["Reaction Kinetics"],
     link: "/freeResources/chemistry12",
   },
+  {
+    subject: "Physics 11",
+    image:
+      "https://stickmanphysics.com/wp-content/uploads/2020/09/Angular-Projectile-Throw-Definitions.gif",
+    topics: ["Projectile motion"],
+    link: "/freeResources/physics11",
+  },
+  {
+    subject: "Physics 12",
+    image:
+      "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExY25kczFxeXNjNXRsbDk4bW9xNHAyajBqMTlkemp0a2ZqZWlqcjNnZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/nkAIKYsPVk4yA/giphy.gif",
+    topics: ["Equilibrium"],
+    link: "/freeResources/physics12",
+  },
 ];
+
+const EnrollButton = ({ item }) => {
+  const isPremium = PREMIUM_SUBJECTS.includes(item.subject);
+
+  if (isPremium) {
+    return (
+      <button
+        disabled
+        className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-medium
+          bg-gradient-to-r from-amber-400 to-orange-400
+          text-white cursor-not-allowed opacity-90 select-none"
+      >
+        <Lock size={12} strokeWidth={2.5} />
+        <span className="tracking-normal">Premium</span>
+
+        <Crown size={12} strokeWidth={2.5} />
+      </button>
+    );
+  }
+
+  return (
+    <a
+      href={item.link}
+      className="flex items-center gap-1 px-4 py-2 rounded-full text-xs font-medium
+        bg-black text-white
+        hover:bg-neutral-800 hover:scale-105
+        active:scale-95
+        transition-all duration-150 ease-out
+        dark:bg-white dark:text-black dark:hover:bg-neutral-200
+        tracking-normal
+        "
+    >
+      Enroll →
+    </a>
+  );
+};
 
 const FreeResources = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -83,7 +139,6 @@ const FreeResources = () => {
 
   const onSubmit = (e) => {
     e.preventDefault();
-    console.log("submitted");
   };
 
   const filteredSubjects = subjects.filter((item) =>
@@ -91,8 +146,8 @@ const FreeResources = () => {
   );
 
   return (
-    <div className="flex flex-col">
-      <Navbar />
+    <div className="flex flex-col ">
+      <NavbarLoggedIn />
       <div className="relative flex w-full min-h-screen justify-center bg-white dark:bg-black">
         <div
           className={cn(
@@ -149,23 +204,27 @@ const FreeResources = () => {
                       Learn topics like {item.topics[0]}
                     </CardItem>
                     <CardItem translateZ="100" className="w-full mt-4">
-                      <a href={item.link}>
+                      <a
+                        href={
+                          PREMIUM_SUBJECTS.includes(item.subject)
+                            ? undefined
+                            : item.link
+                        }
+                      >
                         <img
                           src={item.image}
-                          className="h-40 w-full object-cover rounded-xl group-hover/card:shadow-xl"
+                          className={cn(
+                            "h-40 w-full object-cover rounded-xl group-hover/card:shadow-xl",
+                            PREMIUM_SUBJECTS.includes(item.subject) &&
+                              "opacity-60 grayscale"
+                          )}
                           alt="thumbnail"
                         />
                       </a>
                     </CardItem>
                     <div className="flex justify-between items-center mt-10">
-                      <CardItem
-                        translateZ={20}
-                        as="a"
-                        href={item.link}
-                        target="__blank"
-                        className="px-4 py-2 rounded-xl text-xs font-normal dark:text-white tracking-normal"
-                      >
-                        Learn now →
+                      <CardItem translateZ={20}>
+                        <EnrollButton item={item} />
                       </CardItem>
                     </div>
                   </CardBody>
