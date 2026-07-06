@@ -185,7 +185,7 @@ const PricingPage = () => {
             const response = await axios.post(
                 import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
                     ? "http://localhost:3000/payment/create-checkout-session"
-                    : "https://mathamagic-backend.vercel.app/create-checkout-session",
+                    : "https://mathamagic-backend.vercel.app/payment/create-checkout-session",
                 { email, userId, plan: planType },
                 { withCredentials: true }
             );

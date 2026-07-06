@@ -28,7 +28,7 @@ const Homepage = () => {
   const words = ["Grades", "Understanding", "Confidence", "Results", "Focus"];
 
   const navigate = useNavigate()
-  const isDevelopment = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT";
+  const isDevelopment = import.meta.env.VITE_ENVIRONMENT === "PRODUCTION";
 
 
   return (

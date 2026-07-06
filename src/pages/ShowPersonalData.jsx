@@ -53,28 +53,7 @@ const ShowPersonalData = () => {
 
 
 
-        const token = searchParams.get("token");
-        if (token) {
-          try {
-            const response = await axios.get(`${base}/verify-email`, { params: { token }, withCredentials: true, });
-
-            if (response.data.access_token && response.data.refresh_token) {
-              await supabase.auth.setSession({
-                access_token: response.data.access_token,
-                refresh_token: response.data.refresh_token,
-              });
-            }
-
-            // Let it continue to the session/profile fetch below instead of
-            // navigating away immediately — setSession just ran, so the
-            // getSession() check further down will now succeed naturally
-          } catch (verifyErr) {
-            console.error("Email verification failed:", verifyErr);
-            navigate("/login?verify_failed=true", { replace: true });
-            return;
-          }
-        }
-
+  
         // 1. Check Supabase for an existing local session
         const { data: { session } } = await supabase.auth.getSession();
 

@@ -28,7 +28,7 @@ const legalLinks = [
 
 const Footer = () => {
   // Read environment variable from Vite engine
-  const isDevelopment = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT";
+  const isDevelopment = import.meta.env.VITE_ENVIRONMENT === "PRODUCTION";
 
   // Filter out the Pricing link if not in development mode
   const footerSections = footerSectionsData
