@@ -22,17 +22,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 import SolveProblems_stepbystep from "../components/solveProblems/SolveProblems_stepbystep";
-<<<<<<< HEAD
-import useDog from "../hook/useDog";
-import DogPortal from "../components/AI/DogPortal";
-
-=======
-// import useDog from "../hook/useDog";
-// import DogPortal from "../components/AI/DogPortal";
 import Sidebar from "../components/Sidebar";
->>>>>>> ae23d0b89324627ab9f33b25b15a9b5c119c4188
 import { Loader2, X, PlayCircle } from "lucide-react";
 
 import LoggedInLayout from "../components/LoggedInLayout";
@@ -113,11 +106,9 @@ export const styles = `
   .mq-editable-field { min-height: 44px !important; padding: 8px 12px !important; border-radius: 10px !important; border: 1px solid ${TOKEN.outlineVariant} !important; font-size: 15px !important; }
   .mq-editable-field.mq-focused { border-color: ${TOKEN.primary} !important; box-shadow: 0 0 0 2px rgba(68,65,196,0.15) !important; }
 
-  /* Lucide spinner animation */
   @keyframes spin { to { transform: rotate(360deg); } }
   .spin-icon { animation: spin 0.8s linear infinite; }
 
-  /* Video modal overlay */
   .video-modal-overlay {
     position: fixed; inset: 0; z-index: 9999;
     background: rgba(0,0,0,0.72);
@@ -191,10 +182,17 @@ const SolveProblems = () => {
   const [usedAIVideo, setUsedAIVideo] = useState(false);
   const [usedAIChat, setUsedAIChat] = useState(false);
 
-  // Video modal states
   const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [videoStreamUrl, setVideoStreamUrl] = useState(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
+  const [muted, setMuted] = useState(false);
+  const toggleMute = () => setMuted((m) => !m);
+  const handlePlayAudio = (text) => {
+    if (muted) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.speak(utterance);
+  };
 
   const handleGenerateAndStreamVideo = async () => {
     if (!currentQuestion || isVideoLoading) return;
@@ -226,7 +224,6 @@ const SolveProblems = () => {
     setIsVideoModalOpen(true);
   };
 
-  // ── Refs for imperative timer control ──
   const perQuestionTimerRef = useRef(null);
   const totalTimerRef = useRef(null);
 
@@ -253,24 +250,6 @@ const SolveProblems = () => {
     startTimers();
     return () => stopTimers();
   }, []);
-
-  // const {
-  //   canvasRef: mountRef,
-  //   playAnimation,
-  //   handlePlayAudio,
-  //   muted,
-  //   toggleMute,
-  // } = useDog();
-
-
-  // REPLACE WITH:
-  const [muted, setMuted] = useState(false);
-  const toggleMute = () => setMuted((m) => !m);
-  const handlePlayAudio = (text) => {
-    if (muted) return;
-    const utterance = new SpeechSynthesisUtterance(text);
-    window.speechSynthesis.speak(utterance);
-  };
 
   useEffect(() => {
     setUsedAIVideo(false);
@@ -547,38 +526,6 @@ const SolveProblems = () => {
                     gap: 12,
                   }}
                 >
-<<<<<<< HEAD
-                  <div>
-                    <h2
-                      className="sp-headline"
-                      style={{
-                        fontSize: 22,
-                        fontWeight: 700,
-                        color: TOKEN.onSurface,
-                        margin: 0,
-                      }}
-                    >
-                      Practice Session
-                    </h2>
-                    <p
-                      style={{
-                        fontSize: 13,
-                        color: TOKEN.onSurfaceVariant,
-                        margin: "2px 0 0",
-                      }}
-                    >
-                      {decodeURIComponent(topic || "")} —{" "}
-                      {decodeURIComponent(section || "")}
-                    </p>
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: 8,
-                      alignItems: "center",
-                      flexWrap: "wrap",
-                    }}
-=======
                   <TimerBox secondsElapsed={secondsElapsed} />
 
                   {/* Formula dialog */}
@@ -590,7 +537,9 @@ const SolveProblems = () => {
                       <DialogHeader>
                         <DialogTitle>Formula</DialogTitle>
                         <DialogDescription>
-                          {currentQuestion.formula || "No formula available."}
+                          <MathQuestion
+                            text={currentQuestion.formula || "No formula available."}
+                          />
                         </DialogDescription>
                       </DialogHeader>
                       <DialogFooter>
@@ -610,7 +559,9 @@ const SolveProblems = () => {
                       <DialogHeader>
                         <DialogTitle>Hint</DialogTitle>
                         <DialogDescription>
-                          {currentQuestion.hint || "No hint available."}
+                          <MathQuestion
+                            text={currentQuestion.hint || "No hint available."}
+                          />
                         </DialogDescription>
                       </DialogHeader>
                       <DialogFooter>
@@ -648,92 +599,19 @@ const SolveProblems = () => {
                     onClick={handleGenerateAndStreamVideo}
                     disabled={isVideoLoading}
                     style={{ minWidth: 160 }}
->>>>>>> ae23d0b89324627ab9f33b25b15a9b5c119c4188
                   >
-                    <TimerBox secondsElapsed={secondsElapsed} />
-
-                    {/* Formula dialog */}
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <button className="sp-btn-outline">Formula</button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Formula</DialogTitle>
-                          <DialogDescription>
-                            <MathQuestion
-                              text={currentQuestion.formula || "No formula available."}
-                            />
-                          </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                          <DialogClose asChild />
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-
-                    {/* Hint dialog */}
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <button className="sp-btn-outline">Hint</button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Hint</DialogTitle>
-                          <DialogDescription>
-                            <MathQuestion
-                              text={currentQuestion.hint || "No hint available."}
-                            />
-                          </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                          <DialogClose asChild />
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-
-                    {/* Step by Step dialog */}
-                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                      <DialogTrigger asChild>
-                        <button className="sp-btn-outline">Step by Step</button>
-                      </DialogTrigger>
-                      <DialogContent className="min-w-6xl max-h-[700px] sm:h-[400px] lg:h-[600px]">
-                        <DialogHeader className="hidden">
-                          <DialogTitle>Step by Step</DialogTitle>
-                          <DialogDescription />
-                        </DialogHeader>
-                        <SolveProblems_stepbystep
-                          playAnimation={playAnimation}
-                          handlePlayAudio={handlePlayAudio}
-                          handleNextOrSubmit={handleNextOrSubmit_solvetab}
-                          question={currentQuestion}
-                          setIsDialogOpen={setIsDialogOpen}
-                          muted={muted}
-                          toggleMute={toggleMute}
-                        />
-                      </DialogContent>
-                    </Dialog>
-
-                    {/* AI Video */}
-                    <button
-                      className="sp-btn-outline"
-                      onClick={handleGenerateAndStreamVideo}
-                      disabled={isVideoLoading}
-                      style={{ minWidth: 160 }}
-                    >
-                      {isVideoLoading ? (
-                        <>
-                          <Loader2 size={14} className="spin-icon" />
-                          Generating…
-                        </>
-                      ) : (
-                        <>
-                          <PlayCircle size={14} />
-                          AI Video Explanation
-                        </>
-                      )}
-                    </button>
-                  </div>
+                    {isVideoLoading ? (
+                      <>
+                        <Loader2 size={14} className="spin-icon" />
+                        Generating…
+                      </>
+                    ) : (
+                      <>
+                        <PlayCircle size={14} />
+                        AI Video Explanation
+                      </>
+                    )}
+                  </button>
                 </div>
 
                 {/* Question card */}
@@ -960,20 +838,8 @@ const SolveProblems = () => {
             </div>
           )}
         </div>
-
-        <DogPortal
-          mountRef={mountRef}
-          targetId={isDialogOpen ? "dog-dialog" : "dog-sidebar"}
-        />
       </div>
-<<<<<<< HEAD
     </LoggedInLayout>
-=======
-
- 
-    </div>
-  </LoggedInLayout>
->>>>>>> ae23d0b89324627ab9f33b25b15a9b5c119c4188
   );
 };
 

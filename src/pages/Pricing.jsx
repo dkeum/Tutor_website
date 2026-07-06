@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import NavbarLoggedIn from "../components/NavbarLoggedIn";
 import Sidebar from "../components/Sidebar";
+import { School2 } from "lucide-react";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap');
@@ -15,7 +16,6 @@ const styles = `
     font-family: 'Material Symbols Outlined';
   }
 
-  /* Layout Structure for Dashboard Integration */
   .pricing-page-container {
      display: flex;
      width: 100%;
@@ -52,7 +52,6 @@ const styles = `
     flex-grow: 1;
   }
 
-  /* Typography */
   .text-headline-xl {
     font-family: 'Manrope', sans-serif;
     font-size: 48px;
@@ -78,7 +77,6 @@ const styles = `
   .text-body-sm  { font-size: 14px; line-height: 1.5; font-weight: 400; }
   .text-label-md { font-size: 12px; line-height: 1; letter-spacing: 0.05em; font-weight: 600; }
 
-  /* Scoped colors */
   .pricing-page .text-primary          { color: var(--color-primary); }
   .pricing-page .text-on-surface       { color: var(--color-on-surface); }
   .pricing-page .text-on-surface-variant { color: var(--color-on-surface-variant); }
@@ -86,7 +84,6 @@ const styles = `
   .pricing-page .bg-surface-container-lowest { background-color: var(--color-surface-container-lowest); }
   .pricing-page .bg-surface-container-low    { background-color: var(--color-surface-container-low); }
 
-  /* Grid layout */
   .pp-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
   .pp-faq-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
 
@@ -103,7 +100,6 @@ const styles = `
     .pp-col-span-2 { grid-column: span 2; }
   }
 
-  /* Unique component styles */
   .badge-popular {
     position: absolute;
     top: -1rem;
@@ -173,11 +169,6 @@ const styles = `
 const PricingPage = () => {
     const { session } = useAuth();
     const navigate = useNavigate();
-
-
-
-
-
 
     const isLoggedIn = !!session;
 
@@ -251,16 +242,12 @@ const PricingPage = () => {
                                         <p className="text-body-sm text-on-surface-variant">The essentials for independent learners who want smarter study tools.</p>
                                     </div>
                                     <ul style={{ listStyle: "none", padding: 0, margin: 0, flexGrow: 1, marginBottom: "48px" }}>
-                                        {["Standard Course Access", "Basic Exam Prep Tools", "Basic AI Tutoring", "AI Powered Progress Tracking"].map(f => (
+                                        {["Standard Course Access", "Basic Exam Simulator", "Basic AI Tutoring", "AI Powered Progress Tracking"].map(f => (
                                             <li key={f} style={{ display: "flex", alignItems: "flex-start", gap: "8px", marginBottom: "16px" }}>
                                                 <span className="material-symbols-outlined text-primary" style={{ fontSize: "20px" }}>check_circle</span>
                                                 <span className="text-body-md">{f}</span>
                                             </li>
                                         ))}
-                                        <li style={{ display: "flex", alignItems: "flex-start", gap: "8px", marginBottom: "16px", opacity: 0.4 }}>
-                                            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>cancel</span>
-                                            <span className="text-body-md" style={{ textDecoration: "line-through" }}>1-on-1 Mentorship</span>
-                                        </li>
                                     </ul>
                                     <button onClick={() => handleCheckout("self_study")} className="pp-btn-outline">Choose Self-Study</button>
                                 </div>
@@ -293,36 +280,29 @@ const PricingPage = () => {
                                     </button>
                                 </div>
 
-                                {/* Academic Excellence */}
+                                {/* AI & Tutor Support (hybrid, contact-only, no price) */}
                                 <div className="bg-surface-container-lowest" style={{
                                     border: "1px solid rgba(184,202,240,0.5)", padding: "32px",
                                     borderRadius: "0.75rem", display: "flex", flexDirection: "column", height: "100%"
                                 }}>
                                     <div style={{ marginBottom: "48px" }}>
-                                        <h3 className="text-headline-md text-on-surface" style={{ marginBottom: "4px" }}>Academic Excellence</h3>
+                                        <h3 className="text-headline-md text-on-surface" style={{ marginBottom: "4px" }}>AI &amp; Tutor Support</h3>
                                         <div style={{ display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "16px" }}>
-                                            <span className="text-headline-xl text-on-surface">$249</span>
-                                            <span className="text-body-md text-on-surface-variant">/mo</span>
+                                            <span className="text-headline-lg text-on-surface">Custom</span>
                                         </div>
-                                        <p className="text-body-sm text-on-surface-variant">For high-achievers tackling advanced courses and seeking direct expert mentorship.</p>
+                                        <p className="text-body-sm text-on-surface-variant">A hybrid plan combining Mathamagic's AI tools with real tutor support, tailored to your needs.</p>
                                     </div>
                                     <ul style={{ listStyle: "none", padding: 0, margin: 0, flexGrow: 1, marginBottom: "48px" }}>
-                                        {["All Premium Features", "Fast Support"].map(f => (
+                                        {["Everything in Student Pro", "Opt-in Human Tutor Sessions", "Flexible Scheduling", "Personalized Pricing Based on Needs"].map(f => (
                                             <li key={f} style={{ display: "flex", alignItems: "flex-start", gap: "8px", marginBottom: "16px" }}>
                                                 <span className="material-symbols-outlined text-primary" style={{ fontSize: "20px" }}>check_circle</span>
-                                                <span className="text-body-md">{f}</span>
+                                                <span className="text-body-md text-left">{f}</span>
                                             </li>
                                         ))}
-                                        <li style={{ display: "flex", alignItems: "flex-start", gap: "8px", marginBottom: "16px" }}>
-                                            <span className="material-symbols-outlined text-primary" style={{ fontSize: "20px" }}>check_circle</span>
-                                            <span className="text-body-md text-primary" style={{ fontWeight: 700 }}>1-on-1 Weekly Mentorship</span>
-                                        </li>
-                                        <li style={{ display: "flex", alignItems: "flex-start", gap: "8px", marginBottom: "16px" }}>
-                                            <span className="material-symbols-outlined text-primary" style={{ fontSize: "20px" }}>check_circle</span>
-                                            <span className="text-body-md text-left">Unlock Upper-Level Courses (AP Calculus, IB HL Math, Pre-Cal 12 & more)</span>
-                                        </li>
                                     </ul>
-                                    <button onClick={() => handleCheckout("academic_excellent")} className="pp-btn-outline">Contact for Excellence</button>
+                                    <Link to="/contact" style={{ display: "block" }}>
+                                        <button className="pp-btn-outline">Contact Us</button>
+                                    </Link>
                                 </div>
 
                             </div>
@@ -333,28 +313,19 @@ const PricingPage = () => {
                             <div style={{ maxWidth: "80rem", margin: "0 auto", padding: "0 32px" }}>
                                 <div className="pp-faq-header" style={{
                                     display: "flex", flexDirection: "column",
-                                    justifyContent: "space-between", alignItems: "flex-end",
                                     marginBottom: "48px", gap: "24px"
                                 }}>
-                                    <div style={{ maxWidth: "36rem" }}>
-                                        <h2 className="text-headline-lg text-on-surface" style={{ marginBottom: "8px" }}>Common Questions</h2>
+                                    <div className="mx-auto" style={{ maxWidth: "36rem" }}>
+                                        <h2 className="text-headline-lg text-on-surface " style={{ marginBottom: "8px" }}>Common Questions</h2>
                                         <p className="text-body-md text-on-surface-variant">Everything you need to know about navigating your academic journey with Mathamagic.</p>
                                     </div>
-                                    <button style={{
-                                        display: "flex", alignItems: "center", gap: "8px",
-                                        fontWeight: 600, background: "none", border: "none",
-                                        cursor: "pointer", color: "#1a4fd6", fontSize: "16px"
-                                    }}>
-                                        Visit Help Center
-                                        <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>arrow_forward</span>
-                                    </button>
                                 </div>
 
                                 <div className="pp-faq-grid">
                                     {[
                                         { icon: "event_busy", title: "What happens during school breaks?", body: "You can pause your subscription for up to 3 months a year. Your progress, study library, and tutor matches remain saved until you return." },
                                         { icon: "person_search", title: "How does tutor matching work?", body: "Our AI analyzes your learning style and weak points to match you with a tutor specialized in your specific math curriculum (AP, IB, GCSE, etc.)." },
-                                        { icon: "card_giftcard", title: "Is there a free trial?", body: "Yes! Every new student gets a 7-day full access trial to Student Pro. No credit card is required to start exploring the study library." },
+                                        { icon: "card_giftcard", title: "Is there a free trial?", body: "Yes! Every new student gets a 7-day full access trial to Student Pro." },
                                     ].map(({ icon, title, body }) => (
                                         <div key={title} className="bg-surface-container-lowest" style={{
                                             padding: "32px", borderRadius: "0.75rem",
@@ -377,7 +348,14 @@ const PricingPage = () => {
                                             <p className="text-body-sm text-on-surface-variant" style={{ marginBottom: "16px" }}>We offer enterprise pricing for schools and educational institutions. If you're an educator, we can help bring Mathamagic to your entire classroom.</p>
                                             <a style={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#1a4fd6", fontSize: "12px" }} href="#">Learn About EDU Plans →</a>
                                         </div>
-                                        <div className="faq-circle-deco" />
+                                        <div style={{ position: "relative", width: "8rem", height: "8rem", flexShrink: 0 }}>
+                                            <div className="faq-circle-deco" style={{ position: "absolute", inset: 0 }} />
+                                            <School2
+                                                size={48}
+                                                color="#1a4fd6"
+                                                style={{ position: "absolute", inset: 0, margin: "auto" }}
+                                            />
+                                        </div>
                                     </div>
 
                                     {/* CTA card */}
@@ -418,11 +396,11 @@ const PricingPage = () => {
                                 </div>
                                 <div style={{ position: "relative", zIndex: 10, maxWidth: "36rem" }}>
                                     <h2 className="text-headline-lg" style={{ color: "#eef4ff", marginBottom: "16px" }}>Ready to ace your next exam?</h2>
-                                    <p className="text-body-lg" style={{ color: "rgba(238,244,255,0.8)" }}>Join 50,000+ students already using Mathamagic AI to transform their grades.</p>
+                                    <p className="text-body-lg" style={{ color: "rgba(238,244,255,0.8)" }}>Join students already improving their grades with Mathamagic.</p>
                                 </div>
                                 <div style={{ position: "relative", zIndex: 10, display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                     <button
-                                        onClick={() => handleCheckout("pro-trial")}
+                                        onClick={() => handleCheckout("student_pro")}
                                         style={{
                                             padding: "16px 32px", backgroundColor: "#1a4fd6", color: "#ffffff",
                                             borderRadius: "0.5rem", fontWeight: 700, border: "none", cursor: "pointer",
@@ -431,11 +409,6 @@ const PricingPage = () => {
                                     >
                                         {isLoggedIn ? "Activate My Pro Account" : "Start Your Free Trial"}
                                     </button>
-                                    <button style={{
-                                        padding: "16px 32px", border: "1px solid rgba(238,244,255,0.3)",
-                                        color: "#eef4ff", borderRadius: "0.5rem", fontWeight: 600,
-                                        backgroundColor: "transparent", cursor: "pointer"
-                                    }}>View Success Stories</button>
                                 </div>
                                 <div className="cta-glow" />
                             </div>

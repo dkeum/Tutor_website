@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import BackgroundWrapper from "../components/BackgroundWrapper";
-<<<<<<< HEAD
-import { useNavigate } from "react-router-dom";
-=======
 import { Button } from "../components/ui/button";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "../db/supabaseclient";
->>>>>>> ae23d0b89324627ab9f33b25b15a9b5c119c4188
 
 import axios from "axios";
 import Navbar from "../components/Navbar";
@@ -71,8 +67,8 @@ const SurveyPersonalDetails = () => {
   const [answers, setAnswers] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-<<<<<<< HEAD
   const progress = (questionNumber / STATIC_QUESTIONS.length) * 100;
 
   const getCurrentOptions = () => {
@@ -84,8 +80,7 @@ const SurveyPersonalDetails = () => {
         "No classes available for that combination",
       ]
     );
-=======
-  const [searchParams] = useSearchParams();
+  };
 
   useEffect(() => {
     const handleTokenVerification = async () => {
@@ -116,149 +111,6 @@ const SurveyPersonalDetails = () => {
 
     handleTokenVerification();
   }, [searchParams, navigate]);
-
-  const staticQuestions = [
-    {
-      question: "What subjects are you interested in?",
-      options: ["Math", "Science", "Physics", "Chemistry"],
-    },
-    {
-      question: "What is your grade?",
-      options: ["grade 1-5", "grade 6-8", "grade 9-12", "University"],
-    },
-    {
-      question: "Select the class you want",
-      options: [], // dynamic
-    },
-    {
-      question: "What is your grade goal?",
-      options: ["A- to A+", "B- to B+", "C- to C+"],
-    },
-    {
-      question: "How much time are you willing to commit per week?",
-      options: ["0-3 hours", "3-5 hours", "over 5 hours"],
-    },
-  ];
-
-  const getCurrentQuestion = () => {
-    const current = staticQuestions[questionNumber];
-
-    if (questionNumber === 2) {
-      const subject = answers[0];
-      const grade = answers[1];
-
-      // MATH
-      if (subject === "Math") {
-        if (grade === "grade 1-5") {
-          return {
-            ...current,
-            options: ["Math 1", "Math 2", "Math 3", "Math 4", "Math 5"],
-          };
-        } else if (grade === "grade 6-8") {
-          return {
-            ...current,
-            options: ["Math 6", "Math 7", "Math 8"],
-          };
-        } else if (grade === "grade 9-12") {
-          return {
-            ...current,
-            options: [
-              "Math 9",
-              "Precal 10",
-              "Precal 11",
-              "Precal 12",
-              "Calc 12",
-              "AP Calc",
-            ],
-          };
-        } else if (grade === "University") {
-          return {
-            ...current,
-            options: ["Calc I", "Calc II", "Linear Algebra", "Diff Eq"],
-          };
-        }
-      }
-
-      // SCIENCE
-      if (subject === "Science") {
-        if (grade === "grade 1-5") {
-          return {
-            ...current,
-            options: ["Intro to Science", "Environmental Science"],
-          };
-        } else if (grade === "grade 6-8") {
-          return {
-            ...current,
-            options: ["General Science", "Earth Science", "Life Science"],
-          };
-        } else if (grade === "grade 9-12") {
-          return {
-            ...current,
-            options: ["Biology 10", "Chemistry 10", "Physics 10", "Science 10"],
-          };
-        } else if (grade === "University") {
-          return {
-            ...current,
-            options: [
-              "Biochemistry",
-              "Organic Chemistry",
-              "Astrophysics",
-              "Molecular Biology",
-            ],
-          };
-        }
-      }
-
-      // PHYSICS
-      if (subject === "Physics") {
-        if (grade === "grade 9-12") {
-          return {
-            ...current,
-            options: ["Physics 11", "Physics 12", "AP Physics"],
-          };
-        } else if (grade === "University") {
-          return {
-            ...current,
-            options: ["Mechanics", "Electromagnetism", "Thermodynamics"],
-          };
-        } else {
-          return {
-            ...current,
-            options: ["Not available for selected grade level."],
-          };
-        }
-      }
-
-      // CHEMISTRY
-      if (subject === "Chemistry") {
-        if (grade === "grade 9-12") {
-          return {
-            ...current,
-            options: ["Chem 11", "Chem 12", "AP Chemistry"],
-          };
-        } else if (grade === "University") {
-          return {
-            ...current,
-            options: ["Organic Chemistry", "Analytical Chem", "Biochemistry"],
-          };
-        } else {
-          return {
-            ...current,
-            options: ["Not available for selected grade level."],
-          };
-        }
-      }
-
-      // fallback
-      return {
-        ...current,
-        options: ["No available classes for selected subject and grade"],
-      };
-    }
-
-    return current;
->>>>>>> ae23d0b89324627ab9f33b25b15a9b5c119c4188
-  };
 
   const handleClick = async (selectedOption) => {
     const updatedAnswers = [...answers, selectedOption];
@@ -296,7 +148,7 @@ const SurveyPersonalDetails = () => {
 
   return (
     <div>
-      <Navbar/>
+      <Navbar />
       <BackgroundWrapper className="opacity-10">
         <div className="flex flex-col gap-y-8 w-full max-w-xl mx-auto px-4 py-12">
           {/* Step indicator + question */}

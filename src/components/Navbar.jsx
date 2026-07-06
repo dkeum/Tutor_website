@@ -29,7 +29,7 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Read environment variable cleanly from Vite engine
-  const isDevelopment = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT";
+  const isDevelopment = import.meta.env.VITE_ENVIRONMENT === "PRODUCTION";
 
   // Compute CTA settings based on the current environment profile
   const ctaLink = isDevelopment ? "/login" : "/waitlist";
