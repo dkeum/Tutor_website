@@ -125,7 +125,7 @@ const SurveyPersonalDetails = () => {
       try {
         const response = await axios.post(
           import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-            ? "http://localhost:3000/update-user"
+            ? "http://localhost:3000/update-userprofile"
             : "https://mathamagic-backend.vercel.app/update-userprofile",
           { answers: updatedAnswers },
           { withCredentials: true }
