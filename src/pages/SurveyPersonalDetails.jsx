@@ -68,6 +68,7 @@ const SurveyPersonalDetails = () => {
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [accessToken, setAccessToken] = useState(null); // add this
 
   const progress = (questionNumber / STATIC_QUESTIONS.length) * 100;
 
@@ -82,10 +83,10 @@ const SurveyPersonalDetails = () => {
     );
   };
 
-  console.log("from the app")
+  // console.log("from the app")
 
   useEffect(() => {
-    console.log("effect ran, token param:", searchParams.get("token"));
+    // console.log("effect ran, token param:", searchParams.get("token"));
     const handleTokenVerification = async () => {
       const token = searchParams.get("token");
       if (!token) return;
@@ -101,13 +102,14 @@ const SurveyPersonalDetails = () => {
           withCredentials: true,
         });
 
-        console.log(response)
+        // console.log(response)
 
         if (response.data.access_token && response.data.refresh_token) {
           await supabase.auth.setSession({
             access_token: response.data.access_token,
             refresh_token: response.data.refresh_token,
           });
+           setAccessToken(response.data.access_token); // store it in state
         }
       } catch (verifyErr) {
         console.error("Email verification failed:", verifyErr);
@@ -133,7 +135,7 @@ const SurveyPersonalDetails = () => {
           import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
             ? "http://localhost:3000/update-userprofile"
             : "https://mathamagic-backend.vercel.app/update-userprofile",
-          { answers: updatedAnswers },
+          { answers: updatedAnswers , access_token: accessToken },
           { withCredentials: true }
         );
         if (response.status === 200) {
