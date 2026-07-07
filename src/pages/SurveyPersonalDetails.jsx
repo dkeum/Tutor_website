@@ -82,6 +82,8 @@ const SurveyPersonalDetails = () => {
     );
   };
 
+  console.log("from the app")
+
   useEffect(() => {
     console.log("effect ran, token param:", searchParams.get("token"));
     const handleTokenVerification = async () => {
@@ -114,7 +116,7 @@ const SurveyPersonalDetails = () => {
     };
 
     handleTokenVerification();
-  }, []);
+  }, [searchParams, navigate]);
 
   const handleClick = async (selectedOption) => {
     const updatedAnswers = [...answers, selectedOption];
