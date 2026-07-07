@@ -83,6 +83,7 @@ const SurveyPersonalDetails = () => {
   };
 
   useEffect(() => {
+    console.log("effect ran, token param:", searchParams.get("token"));
     const handleTokenVerification = async () => {
       const token = searchParams.get("token");
       if (!token) return;
@@ -91,11 +92,14 @@ const SurveyPersonalDetails = () => {
         ? "http://localhost:3000"
         : "https://mathamagic-backend.vercel.app";
 
+        console.log("makeing the call now")
       try {
         const response = await axios.get(`${base}/verify-email`, {
           params: { token },
           withCredentials: true,
         });
+
+        console.log(response)
 
         if (response.data.access_token && response.data.refresh_token) {
           await supabase.auth.setSession({
@@ -110,7 +114,7 @@ const SurveyPersonalDetails = () => {
     };
 
     handleTokenVerification();
-  }, [searchParams, navigate]);
+  }, []);
 
   const handleClick = async (selectedOption) => {
     const updatedAnswers = [...answers, selectedOption];
