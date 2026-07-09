@@ -95,7 +95,7 @@ const SurveyPersonalDetails = () => {
         ? "http://localhost:3000"
         : "https://mathamagic-backend.vercel.app";
 
-        console.log("makeing the call now")
+        // console.log("makeing the call now")
       try {
         const response = await axios.get(`${base}/verify-email`, {
           params: { token },

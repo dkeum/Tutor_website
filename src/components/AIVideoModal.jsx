@@ -47,18 +47,24 @@ function AIVideoModal({ isOpen, onClose, videoStreamUrl, questionText }) {
 
         {/* Video player */}
         <div style={{ padding: "20px", background: "#000" }}>
-          <video
-            src={videoStreamUrl}
-            controls
-            autoPlay
-            style={{
-              width: "100%",
-              borderRadius: 12,
-              display: "block",
-              maxHeight: "460px",
-              background: "#000",
-            }}
-          />
+          {videoStreamUrl ? (
+            <video
+              src={videoStreamUrl}
+              controls
+              autoPlay
+              style={{
+                width: "100%",
+                borderRadius: 12,
+                display: "block",
+                maxHeight: "460px",
+                background: "#000",
+              }}
+            />
+          ) : (
+            <div style={{ color: "rgba(255,255,255,0.5)", textAlign: "center", padding: "40px 0" }}>
+              Loading video…
+            </div>
+          )}
         </div>
 
         {/* Footer */}

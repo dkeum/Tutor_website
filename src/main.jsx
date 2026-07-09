@@ -5,6 +5,7 @@ import "./index.css";
 import App from "./App.jsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { Toaster } from "@/components/ui/sonner"
 
 import store from "./app/store";
 import { Provider } from "react-redux";
@@ -166,6 +167,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="/terms-of-service" element={<TermsOfService />} />
             </Routes>
           </Suspense>
+          <Toaster/>
         </BrowserRouter>
       </AuthProvider>
     </Provider>

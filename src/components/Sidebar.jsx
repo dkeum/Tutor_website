@@ -26,16 +26,12 @@ const dashboardSubItems = [
 
 const PLAN_LABELS = {
   free: "Free",
-  self_study: "Self Study",
-  student_pro: "Student Pro",
-  academic_excellence: "Academic Excellence",
+  pro: "Pro",
 };
 
 const PLAN_CREDIT_TOTALS = {
   free: 50,
-  self_study: 200,
-  student_pro: 500,
-  academic_excellence: 1500,
+  pro: 500, // adjust to whatever your actual Pro-tier monthly credit allotment is
 };
 
 const Sidebar = () => {
@@ -52,12 +48,12 @@ const Sidebar = () => {
   const subscription_status = useSelector(s => s.personDetail?.subscription_status) ?? "inactive";
   const className = useSelector(s => s.personDetail?.class)
   const profile_picture = useSelector((state) => state.personDetail.profile_pic);
-  const userInitials = name ? name[0].toUpperCase() : "?";
+  const userInitials = studentName ? studentName[0].toUpperCase() : "?";
 
   const planLabel = PLAN_LABELS[plan_type] ?? "Free";
   const creditTotal = PLAN_CREDIT_TOTALS[plan_type] ?? 50;
   const creditPct = Math.min(100, Math.round((ai_credits / creditTotal) * 100));
-  const isMaxPlan = plan_type === "academic_excellence";
+  const isMaxPlan = plan_type === "pro";
 
   const isPathActive = (path) => location.pathname === path;
   const isDashboardActive =
@@ -101,7 +97,7 @@ const Sidebar = () => {
       >
         <AvatarImage
           src={profile_picture}
-          alt={name || "Student profile"}
+          alt={studentName || "Student profile"}
           className="object-cover w-full h-full"
         />
         {/* Dynamic structural substitution fallback handler inheriting old design typography markup */}

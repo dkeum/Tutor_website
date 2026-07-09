@@ -13,7 +13,7 @@ export const personDetailSlice = createSlice({
     current_module: null,
     time_logged_pct: 0,
     total_minutes_logged: 0,
-    hasActivityHistory: true, // 💡 NEW: Default fallback state for new user tracking
+    hasActivityHistory: true,
     class_ID: "",
 
     // subscription & plan
@@ -23,12 +23,22 @@ export const personDetailSlice = createSlice({
     is_on_trial: false,
     days_remaining: 0,
 
+    // daily free-usage tracking (video / homework / step-by-step)
+    last_free_video_at: null,
+    video_free_available_today: true,
+
+    homework_free_uploads_used_today: 0,
+    homework_free_uploads_remaining_today: 3,
+
+    last_free_step_by_step_at: null,
+    step_by_step_free_available_today: true,
+
     // progress
     loginInfo: [],
     progressArray: [],
     completionProgress: 0,
     current_grade: 0,
-    timeGoals: 0,        // weekly goal % — feeds sidebar goal tracker
+    timeGoals: 0,
     actual_time_goal: 0,
     wrong_count: 0,
   },
@@ -87,9 +97,25 @@ export const personDetailSlice = createSlice({
       state.days_remaining = p.days_remaining ?? 0;
       state.class = p.class ?? '';
 
-      
+
+            // daily free-usage tracking (video / homework / step-by-step)
+      state.last_free_video_at = p.last_free_video_at ?? null;
+      state.video_free_available_today = p.video_free_available_today ?? true;
+
+      state.homework_free_uploads_used_today = p.homework_free_uploads_used_today ?? 0;
+      state.homework_free_uploads_remaining_today = p.homework_free_uploads_remaining_today ?? 3;
+
+      state.last_free_step_by_step_at = p.last_free_step_by_step_at ?? null;
+      state.step_by_step_free_available_today = p.step_by_step_free_available_today ?? true;
+
       state.class_ID = p.Class_ID ?? 1;
+
+    
       // console.log(state.class_ID)
+    },
+
+    setCredits: (state,action) =>{
+      state.ai_credits = action.payload.ai_credits
     },
 
     setQuestions: (state, action) => {
@@ -98,7 +124,7 @@ export const personDetailSlice = createSlice({
   },
 });
 
-export const { initializeState, setName, setProfileInfo, setQuestions } =
+export const { initializeState, setName, setProfileInfo, setQuestions, setCredits } =
   personDetailSlice.actions;
 
 export default personDetailSlice.reducer;

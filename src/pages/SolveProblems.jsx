@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { addStyles, EditableMathField } from "react-mathquill";
 import normalizeLatex from "../helperFunctions/normalizeLatex";
@@ -22,11 +22,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+
+
+
 
 import SolveProblems_stepbystep from "../components/solveProblems/SolveProblems_stepbystep";
 import Sidebar from "../components/Sidebar";
-import { Loader2, X, PlayCircle } from "lucide-react";
+import { Loader2, X, PlayCircle, Hammer } from "lucide-react";
 
 import LoggedInLayout from "../components/LoggedInLayout";
 import TimerBox from "../components/TimerBox";
@@ -34,6 +36,15 @@ import AIVideoModal from "../components/AIVideoModal";
 import ResultsScreen from "../components/ResultScreen";
 import AISidebar from "../components/AISidebar";
 import MathQuestion from "../components/MathQuestion";
+
+
+import { toast } from "sonner"
+import DropDownTool from "../components/solveProblems/DropDownTool";
+import { Button } from "../components/ui/button";
+import { TOOL_REGISTRY } from "../components/solveProblems/toolRegistry";
+import AnswerField from "../components/solveProblems/AnswerField";
+import usePuter from "../hook/usePuter";
+
 
 addStyles();
 
@@ -156,6 +167,7 @@ export const styles = `
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 const SolveProblems = () => {
+  const dispatch = useDispatch();
   const { topic } = useParams();
   const [searchParams] = useSearchParams();
   const section = searchParams.get("section");
@@ -185,6 +197,10 @@ const SolveProblems = () => {
   const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [videoStreamUrl, setVideoStreamUrl] = useState(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [cachedVideo, setCachedVideo] = useState({ questionId: null, url: null });
+
+  const [chatAttachments, setChatAttachments] = useState([]);
+
 
   const [muted, setMuted] = useState(false);
   const toggleMute = () => setMuted((m) => !m);
@@ -194,10 +210,38 @@ const SolveProblems = () => {
     window.speechSynthesis.speak(utterance);
   };
 
+
+  const MAX_ACTIVE_TOOLS = 1;
+  const [activeTools, setActiveTools] = useState([]); // array of tool ids, e.g. ["draw", "graph"]
+
+  const toggleTool = (toolId) => {
+    setActiveTools((prev) => {
+      if (prev.includes(toolId)) {
+        return prev.filter((t) => t !== toolId);
+      }
+      if (prev.length >= MAX_ACTIVE_TOOLS) {
+        // FIFO: swap out the oldest active tool to make room
+        const [, ...rest] = prev;
+        toast(`Swapped out ${TOOL_REGISTRY[prev[0]].label}`, {
+          description: `Only ${MAX_ACTIVE_TOOLS} tools can be active at once.`,
+        });
+        return [...rest, toolId];
+      }
+      return [...prev, toolId];
+    });
+  };
+
   const handleGenerateAndStreamVideo = async () => {
     if (!currentQuestion || isVideoLoading) return;
 
     setUsedAIVideo(true);
+
+    if (cachedVideo.questionId === currentQuestion.id && cachedVideo.url) {
+      setVideoStreamUrl(cachedVideo.url);
+      setIsVideoModalOpen(true);
+      return;
+    }
+
     setIsVideoLoading(true);
     setVideoStreamUrl(null);
 
@@ -217,11 +261,52 @@ const SolveProblems = () => {
       questionText
     )}&topicName=${encodeURIComponent(topicName)}&sectionName=${encodeURIComponent(sectionName)}`;
 
-    await new Promise((res) => setTimeout(res, 800));
+    try {
+      const res = await axios.get(streamUrl, {
+        withCredentials: true,
+        responseType: "blob",
+      });
 
-    setVideoStreamUrl(streamUrl);
-    setIsVideoLoading(false);
-    setIsVideoModalOpen(true);
+      const remainingCredits = res.headers["x-ai-credits-remaining"];
+
+      if (remainingCredits !== undefined) {
+        dispatch(setCredits({ ai_credits: Number(remainingCredits) }));
+      }
+
+      const objectUrl = URL.createObjectURL(res.data);
+
+      setCachedVideo({ questionId, url: objectUrl });
+      setVideoStreamUrl(objectUrl);
+      setIsVideoModalOpen(true);
+    } catch (err) {
+      console.error("Video generation failed:", err?.response?.data || err.message);
+      const status = err?.response?.status;
+      const backendMessage = err?.response?.data?.message;
+
+      if (status === 403 && backendMessage === "Not Enough Credits") {
+        const creditsAvailable = err.response.data.ai_credits ?? 0;
+        const creditsRequired = err.response.data.required ?? 10;
+
+        toast("Not Enough Credits", {
+          description: `You have ${creditsAvailable} credit${creditsAvailable === 1 ? "" : "s"}, but this video costs ${creditsRequired}. Upgrade your plan or wait for tomorrow's free video.`,
+          action: {
+            label: "Upgrade",
+            onClick: () => navigate("/pricing"),
+          },
+        });
+      } else {
+        toast("AI Video Generation Failed", {
+          description: "Something went wrong while generating your video. Try again?",
+          action: {
+            label: "Retry",
+            onClick: () => handleGenerateAndStreamVideo(),
+          },
+        });
+      }
+      // surface an error state to the user here
+    } finally {
+      setIsVideoLoading(false);
+    }
   };
 
   const perQuestionTimerRef = useRef(null);
@@ -245,6 +330,9 @@ const SolveProblems = () => {
       1000
     );
   };
+
+  //puter auth temporary user sign up
+  usePuter();
 
   useEffect(() => {
     startTimers();
@@ -392,6 +480,10 @@ const SolveProblems = () => {
     const correctAnswer = currentQuestion?.answers?.[0]?.answer || "";
     const isCorrect = normalizeLatex(latex) === normalizeLatex(correctAnswer);
 
+    if (videoStreamUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(videoStreamUrl);
+    }
+
     const newAttempt = {
       question_id: currentQuestion.id,
       answer_given: latex,
@@ -422,6 +514,10 @@ const SolveProblems = () => {
 
   const handleNextOrSubmit_solvetab = async () => {
     const correctAnswer = currentQuestion?.answers?.[0]?.answer || "";
+
+    if (videoStreamUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(videoStreamUrl);
+    }
 
     const newAnswer = {
       questionId: currentQuestion.id,
@@ -465,7 +561,9 @@ const SolveProblems = () => {
 
   return (
     <LoggedInLayout>
-      <div className="sp-root">
+      <div className="sp-root overflow-y-hidden "
+
+      >
         <style>{styles}</style>
 
         {/* ── AI Video Modal ── */}
@@ -479,7 +577,11 @@ const SolveProblems = () => {
           questionText={currentQuestion?.question}
         />
 
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          height: "calc(100vh - 64px)", // ← NEW: anchors the whole layout to the viewport
+        }}>
           {showResults ? (
             <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
               <ResultsScreen
@@ -612,6 +714,18 @@ const SolveProblems = () => {
                       </>
                     )}
                   </button>
+
+
+
+
+                  <DropDownTool
+                    activeTools={activeTools}
+                    onToggleTool={toggleTool}
+                    onOpenAIChat={() => {
+                      // if AISidebar exposes a ref/prop to scroll-into-view or focus its chat input, call it here
+                    }}
+                  />
+
                 </div>
 
                 {/* Question card */}
@@ -766,75 +880,122 @@ const SolveProblems = () => {
                   </div>
 
                   {/* Answer area */}
-                  <div
-                    style={{
-                      padding: "16px 24px 20px 32px",
-                      borderTop: `1px solid ${TOKEN.outlineVariant}`,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 16,
-                      background: TOKEN.surfaceContainerLow,
-                    }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <label
-                        style={{
-                          fontSize: 11,
-                          fontWeight: 600,
-                          color: TOKEN.onSurfaceVariant,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                          display: "block",
-                          marginBottom: 6,
-                          fontFamily: "'JetBrains Mono', monospace",
-                        }}
-                      >
-                        Your Answer
-                      </label>
-                      <EditableMathField
-                        latex={latex}
-                        onChange={(mf) => setLatex(mf.latex())}
-                        style={{
-                          minWidth: 280,
-                          minHeight: 44,
-                          textAlign: "left",
-                        }}
-                      />
-                    </div>
-                    <button
-                      className="sp-btn-primary"
-                      onClick={handleNextOrSubmit}
-                      style={{ flexShrink: 0, marginTop: 20 }}
-                    >
-                      {isLastQuestion ? "Submit" : "Next"}
-                      {!isLastQuestion && (
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                          <polyline points="12 5 19 12 12 19" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
+                  <AnswerField
+                    handleNextOrSubmit={handleNextOrSubmit}
+                    isLastQuestion={isLastQuestion}
+                    latex={latex}
+                    setLatex={setLatex}
+                  />
+
+
                 </div>
               </section>
 
-              {/* ── AI Sidebar ── */}
-              <AISidebar
-                topic={topic}
-                section={section}
-                currentQuestion={currentQuestion}
-                onOpenStepByStep={() => setIsDialogOpen(true)}
-                setUsedAIChat={setUsedAIChat}
-              />
+              {/* ── Right Panel: Tools (top half, max 2) + AI Sidebar (bottom half) ── */}
+              <div
+                className="sp-ai-sidebar"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "100%",
+                  maxHeight: "90vh",
+                  overflow: "hidden",
+                }}
+              >
+                {activeTools.length > 0 && (
+                  <div
+                    style={{
+                      flex: "0 0 25%",
+                      display: "flex",
+                      overflow: "hidden",
+                      borderBottom: `1px solid ${TOKEN.outlineVariant}`,
+                    }}
+                  >
+                    {activeTools.map((toolId) => {
+                      const tool = TOOL_REGISTRY[toolId];
+                      if (!tool) return null;
+                      const ToolComponent = tool.component;
+                      const ToolIcon = tool.icon;
+                      return (
+                        <div
+                          key={toolId}
+                          style={{
+                            flex: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                            overflow: "hidden",
+                            borderRight:
+                              activeTools.length > 1 ? `1px solid ${TOKEN.outlineVariant}` : "none",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              padding: "8px 12px",
+                              borderBottom: `1px solid ${TOKEN.outlineVariant}`,
+                              fontSize: 12,
+                              fontWeight: 700,
+                              color: TOKEN.onSurfaceVariant,
+                              flexShrink: 0,
+                            }}
+                          >
+                            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                              <ToolIcon size={14} />
+                              {tool.label}
+                            </span>
+                            <button
+                              onClick={() => toggleTool(toolId)}
+                              style={{
+                                background: "none",
+                                border: "none",
+                                cursor: "pointer",
+                                color: TOKEN.onSurfaceVariant,
+                                display: "flex",
+                              }}
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                          <div style={{ flex: 1, overflow: "auto", minHeight: 0 }}>
+                            <ToolComponent
+                              onAddToAIChat={(imageDataUrl) => {
+                                setChatAttachments((prev) => {
+                                  // If the image is exactly the same as one already in the array, do nothing
+                                  if (prev.includes(imageDataUrl)) {
+                                    return prev;
+                                  }
+                                  // Otherwise, add it
+                                  return [...prev, imageDataUrl];
+                                });
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                <div style={{ flex: activeTools.length > 0 ? "0 0 75%" : "1 1 auto", overflow: "hidden", minHeight: 0 }}>
+                  <AISidebar
+                    topic={topic}
+                    section={section}
+                    currentQuestion={currentQuestion}
+                    onOpenStepByStep={() => setIsDialogOpen(true)}
+                    setUsedAIChat={setUsedAIChat}
+
+                    compact={activeTools.length > 0}
+                    attachments={chatAttachments}
+                    onRemoveAttachment={(indexToRemove) => {
+                      setChatAttachments((prev) => prev.filter((_, i) => i !== indexToRemove));
+                    }}
+                    onClearAttachments={() => setChatAttachments([])}
+
+                  />
+                </div>
+              </div>
             </div>
           )}
         </div>

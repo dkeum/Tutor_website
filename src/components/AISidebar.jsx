@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
+import { X } from "lucide-react"; // ← NEW: Import X icon for deleting images
 
 // ─── AI Chat Sidebar ──────────────────────────────────────────────────────────
 function AISidebar({
@@ -12,6 +13,10 @@ function AISidebar({
   currentQuestion,
   onOpenStepByStep,
   setUsedAIChat,
+  compact = false,
+  attachments = [], // ← NEW: Receive attachments from parent
+  onRemoveAttachment, // ← NEW: Callback to delete a specific attachment
+  onClearAttachments, // ← NEW: Callback to clear all after sending
 }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -50,16 +55,26 @@ function AISidebar({
   const quickPrompts = ["Explain step-by-step", "Give me a hint"];
 
   const sendMessage = async (text) => {
-    if (!text.trim()) return;
+    // Prevent sending if both text and attachments are empty
+    if (!text.trim() && attachments.length === 0) return;
 
     if (setUsedAIChat) setUsedAIChat(true);
 
-    const userMsg = { role: "user", text };
+    const currentAttachments = [...attachments]; // Snapshot attachments
+    const userMsg = { role: "user", text, attachments: currentAttachments };
+    
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
+    if (onClearAttachments) onClearAttachments(); // Clear parent attachment state
     setLoading(true);
 
     try {
+
+
+      if (!window.puter || !window.puter.ai) {
+        throw new Error("Puter is not loaded or initialized yet.");
+      }
+      
       const questionText = currentQuestion?.question || "Not available";
       const formulaContext = currentQuestion?.formula
         ? `Formula: ${currentQuestion.formula}`
@@ -69,9 +84,7 @@ function AISidebar({
         : "No specific hint provided.";
 
       const systemInstruction = `You are a helpful, encouraging math tutor for grade 10 students. 
-  The student is working on "${decodeURIComponent(
-        topic || ""
-      )}" — specifically "${decodeURIComponent(section || "")}".
+  The student is working on "${decodeURIComponent(topic || "")}" — specifically "${decodeURIComponent(section || "")}".
   
   [CONTEXT]
   Current Question: "${questionText}"
@@ -82,20 +95,50 @@ function AISidebar({
   1. Be concise, clear, and highly encouraging.
   2. Guide the student step-by-step without giving away the direct answer explicitly.
   3. You MUST break down your explanation using clear, sequentially numbered steps strictly matching the pattern: "Step 1:", "Step 2:", etc.
-  4. DO NOT use raw LaTeX format like \\( ... \\) or \\frac{}{}. Instead, use clean, readable Markdown math notation that looks great in plaintext (e.g., use "25 / 100" for fractions, Bold text, and standard operators like +, -, ×, ÷, =).`;
+  4. DO NOT use raw LaTeX format like \\( ... \\) or \\frac{}{}. Instead, use clean, readable Markdown math notation that looks great in plaintext (e.g., use "25 / 100" for fractions, Bold text, and standard operators like +, -, ×, ÷, =).
+  5. If the user attached an image, analyze it closely to help them with their specific work.`;
 
+      // Format previous message history for Puter
       const messageHistory = [
         { role: "system", content: systemInstruction },
-        ...messages.map((msg) => ({
-          role: msg.role === "ai" ? "assistant" : "user",
-          content: msg.text,
-        })),
-        { role: "user", content: text },
+        ...messages.map((msg) => {
+          let content = msg.text;
+          // If a previous user message had images, format it as a multimodal array
+          if (msg.role === "user" && msg.attachments?.length > 0) {
+            content = [
+              { type: "text", text: msg.text || "Here are some images." },
+              ...msg.attachments.map((url) => ({
+                type: "image_url",
+                image_url: { url },
+              })),
+            ];
+          }
+          return {
+            role: msg.role === "ai" ? "assistant" : "user",
+            content: content,
+          };
+        }),
       ];
 
-      const response = await window.puter.ai.chat(messageHistory);
-      const aiText =
-        response.toString() || "I couldn't process that. Try again!";
+      // Format the current message
+      let finalContent = text || "Check out this image.";
+      if (currentAttachments.length > 0) {
+        finalContent = [
+          { type: "text", text: finalContent },
+          ...currentAttachments.map((url) => ({
+            type: "image_url",
+            image_url: { url },
+          })),
+        ];
+      }
+      messageHistory.push({ role: "user", content: finalContent });
+
+      // Request chat with a vision-capable model
+      const response = await window.puter.ai.chat(messageHistory, {
+        model: "google/gemini-3.5-flash", // Ensure a multimodal model is used
+      });
+      
+      const aiText = response?.message?.content || response.toString() || "I couldn't process that. Try again!";
       setMessages((prev) => [...prev, { role: "ai", text: aiText }]);
     } catch (error) {
       console.error("Puter AI Error:", error);
@@ -122,7 +165,7 @@ function AISidebar({
         borderRight: `1px solid ${TOKEN.outlineVariant}`,
         display: "flex",
         flexDirection: "column",
-        height: "calc(100vh - 145px)",
+        height: "100%",
         overflow: "hidden",
         flexShrink: 0,
         boxShadow: "-4px 0 24px rgba(0,0,0,0.02)",
@@ -139,6 +182,7 @@ function AISidebar({
           display: "flex",
           alignItems: "center",
           gap: 12,
+          flexShrink: 0,
         }}
       >
         <div style={{ position: "relative" }}>
@@ -188,6 +232,7 @@ function AISidebar({
         className="chat-scroll"
         style={{
           flex: 1,
+          minHeight: 0,
           overflowY: "auto",
           padding: "16px 20px",
           display: "flex",
@@ -245,18 +290,42 @@ function AISidebar({
                   background: TOKEN.primary,
                   borderRadius: 16,
                   padding: "12px 14px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
                 }}
               >
-                <p
-                  style={{
-                    fontSize: 14,
-                    lineHeight: 1.6,
-                    color: "#fff",
-                    margin: 0,
-                  }}
-                >
-                  {msg.text}
-                </p>
+                {/* Display Sent Images in the Chat Bubble */}
+                {msg.attachments?.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {msg.attachments.map((imgUrl, idx) => (
+                      <img
+                        key={idx}
+                        src={imgUrl}
+                        alt="Sent attachment"
+                        style={{
+                          width: 80,
+                          height: 80,
+                          objectFit: "cover",
+                          borderRadius: 8,
+                          border: "1px solid rgba(255,255,255,0.3)",
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+                {msg.text && (
+                  <p
+                    style={{
+                      fontSize: 14,
+                      lineHeight: 1.6,
+                      color: "#fff",
+                      margin: 0,
+                    }}
+                  >
+                    {msg.text}
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -281,7 +350,7 @@ function AISidebar({
       {/* Quick prompts */}
       <div
         className="pb-3 pl-7"
-        style={{ display: "flex", gap: 6, overflowX: "auto" }}
+        style={{ display: "flex", gap: 6, overflowX: "auto", flexShrink: 0 }}
       >
         {quickPrompts.map((p) => (
           <button
@@ -304,14 +373,74 @@ function AISidebar({
         ))}
       </div>
 
+      {/* NEW: Attachments Preview Strip */}
+      {attachments?.length > 0 && (
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            padding: "8px 20px 0 20px",
+            background: "#fff",
+            overflowX: "auto",
+            flexShrink: 0,
+          }}
+        >
+          {attachments.map((imgUrl, idx) => (
+            <div
+              key={idx}
+              style={{
+                position: "relative",
+                width: 60,
+                height: 60,
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src={imgUrl}
+                alt="Preview"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: 8,
+                  border: `1px solid ${TOKEN.outlineVariant}`,
+                }}
+              />
+              <button
+                onClick={() => onRemoveAttachment?.(idx)}
+                style={{
+                  position: "absolute",
+                  top: -6,
+                  right: -6,
+                  background: "#ef4444",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: 20,
+                  height: 20,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                }}
+              >
+                <X size={12} strokeWidth={3} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Input */}
       <div
-        className="pb-5 px-5"
+        className="pb-5 pt-3 px-5"
         style={{
           background: "#fff",
           display: "flex",
           gap: 8,
           alignItems: "flex-end",
+          flexShrink: 0,
         }}
       >
         <textarea
@@ -375,4 +504,4 @@ function AISidebar({
   );
 }
 
-export default AISidebar
+export default AISidebar;
