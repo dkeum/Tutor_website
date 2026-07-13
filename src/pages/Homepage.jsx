@@ -32,10 +32,11 @@ const Homepage = () => {
 
 
   return (
-    <div className="max-w-6xl overflow-x-hidden">
+    <div className="max-w-6xl mx-auto overflow-x-hidden">
       <Navbar />
 
-      <div className="relative flex h-[44rem] w-full  justify-center bg-white dark:bg-black mt-3">
+      {/* ── HERO ── */}
+      <div className="relative flex min-h-[44rem] md:h-[44rem] w-full justify-center bg-white dark:bg-black mt-3 overflow-hidden">
         <div
           className={cn(
             "absolute inset-0",
@@ -50,7 +51,7 @@ const Homepage = () => {
                 [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] 
                 [-webkit-mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"
         />
-        <section className="flex flex-row pt-20 ml-20 justify-items-center px-8 w-full h-[700px]">
+        <section className="flex flex-col md:flex-row pt-16 md:pt-20 md:ml-20 justify-items-center px-6 md:px-8 w-full">
           <motion.h1
             initial={{
               opacity: 0,
@@ -59,32 +60,32 @@ const Homepage = () => {
               opacity: 1,
             }}
             className={cn(
-              "flex flex-col gap-y-10 pt-10 relative mb-6 max-w-2xl text-left text-4xl leading-normal font-bold tracking-tight text-zinc-700 md:text-7xl dark:text-zinc-100"
+              "flex flex-col gap-y-6 md:gap-y-10 pt-6 md:pt-10 relative mb-6 max-w-2xl text-left text-3xl leading-tight md:leading-normal font-bold tracking-tight text-zinc-700 md:text-7xl dark:text-zinc-100"
             )}
             layout
           >
 
-            <div className="flex flex-col min-h-[300px] ">
-              <Badge className=" w-max text-[16px] tracking-normal bg-blue-200 text-blue-500 font-semibold " variant="outline">
+            <div className="flex flex-col min-h-0 md:min-h-[250px] ">
+              <Badge className=" w-max text-sm md:text-[16px] tracking-normal bg-blue-200 text-blue-500 font-semibold " variant="outline">
 
-                <BadgeCheck className="w-10 h-10" />
-                Serving Lower Mainland and MetroVancouver
+                <BadgeCheck className="w-6 h-6 md:w-10 md:h-10" />
+                Available Now with AI Support
               </Badge>
               <div>
                 Achieve Better <ContainerTextFlip words={words} />
               </div>
 
-              <p className=" font-medium text-3xl w-2/3 h-[70px] mt-5">
-                Mathmagik have been teaching students close to a decade
+              <p className=" font-medium text-xl md:text-3xl w-full md:w-2/3 h-auto mt-5">
+                We've been teaching students close to a decade
               </p>
 
             </div>
 
 
-            <div className="flex flex-wrap gap-5 mt-10">
+            <div className="flex flex-wrap gap-2">
 
               <Link to="/contact">
-                <Button1 className="w-[180px] h-[50px] text-center text-2xl p-3 bg-[#004ac6] text-white hover:bg-blue-500 cursor-pointer border-neutral-200 dark:border-slate-800 tracking-normal" >
+                <Button1 className="w-full sm:w-[180px] h-[50px] text-center text-xl md:text-2xl p-3 bg-[#004ac6] text-white hover:bg-blue-500 cursor-pointer border-neutral-200 dark:border-slate-800 tracking-normal" >
                   Let's Chat
                 </Button1>
               </Link>
@@ -97,9 +98,10 @@ const Homepage = () => {
 
           </motion.h1>
 
-          <div className="absolute ml-[400px]">
+          {/* Lottie: normal flow + centered on mobile, absolute-positioned like the original on desktop */}
+          <div className="relative md:absolute md:ml-[400px] w-full md:w-auto flex justify-center mt-4 md:mt-0">
             <DotLottieReact
-              className="w-[750px] max-h-[500px] h-[450px] scale-x-[-1] "
+              className="w-[240px] h-[240px] sm:w-[360px] sm:h-[320px] md:w-[750px] md:max-h-[500px] md:h-[450px] scale-x-[-1] "
               src="https://lottie.host/b4821088-6c05-4728-b189-ed6679fddbed/KkX2iSjVeC.lottie"
               loop
               autoplay
@@ -108,13 +110,13 @@ const Homepage = () => {
         </section>
       </div>
 
-      <section className="h-[30rem] mt-30 ml-20">
-        <h1 className="sm:text-xl first-letter md:text-4xl font-bold w-2/3 font-[family-name:var(--font-sans)] text-left">
-          Finding the right tutor, learning style <br /> and academic support
+      <section className="min-h-[30rem] mt-16 md:mt-30 px-6 md:px-0 md:ml-20">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold w-full md:w-2/3 font-[family-name:var(--font-sans)] text-left">
+          Finding the right tutor, learning style <br className="hidden md:block" /> and academic support
           shouldn’t be a struggle
         </h1>
-        <div className="mt-10 flex flex-row justify-start items-start ">
-          <div className="text-start w-1/2 flex flex-col gap-y-8">
+        <div className="mt-8 md:mt-10 flex flex-col md:flex-row justify-start items-center md:items-start gap-8 md:gap-0 ">
+          <div className="text-start w-full md:w-1/2 flex flex-col gap-y-6 md:gap-y-8">
             <p>
               To produce the right outcomes, you need a person you can trust.{" "}
               <br />
@@ -131,28 +133,28 @@ const Homepage = () => {
             </a>
           </div>
           <DotLottieReact
-            className=" w-[700px] h-auto 2xl:-mt-20 "
+            className=" w-full max-w-[320px] sm:max-w-[500px] md:max-w-[700px] h-auto 2xl:-mt-20 "
             src="https://lottie.host/83b0c885-27f9-499a-9d46-46e495cc7a90/cAM12iHmA3.lottie"
             loop
             autoplay
           />
         </div>
       </section>
-      <hr className="w-2/3 max-w-9xl mx-auto my-20" />
+      <hr className="w-2/3 max-w-9xl mx-auto my-16 md:my-20" />
 
-      <section className="h-[30rem] sm:mt-50 md:mt-0">
-        <header className="text-4xl font-bold mx-auto font-[family-name:var(--font-sans)]">
+      <section className="min-h-[30rem] px-6 md:px-0 sm:mt-10 md:mt-0">
+        <header className="text-2xl sm:text-3xl md:text-4xl font-bold mx-auto font-[family-name:var(--font-sans)]">
           🎖️ The Results
         </header>
-        <h1 className="mt-5">
+        <h1 className="mt-5 text-base sm:text-lg">
           After 5-10 Tutoring Sessions, Our Students Typically Experience...
         </h1>
 
 
 
 
-        <ul className="flex flex-row gap-x-10  text-extrabold items-center justify-center my-10 overflow-x-auto min-w-fit sm:text-3xl">
-          <li className="flex flex-col justify-center gap-y-4 border border-slate-300 rounded-md p-5 md:min-h-[300px] w-[320px]">
+        <ul className="flex flex-col sm:flex-row gap-6 sm:gap-x-10 text-extrabold items-center justify-center my-10 sm:overflow-x-auto sm:min-w-fit text-2xl sm:text-3xl">
+          <li className="flex flex-col justify-center gap-y-4 border border-slate-300 rounded-md p-5 min-h-[260px] md:min-h-[300px] w-full max-w-[320px]">
 
             <Badge className="mx-auto  text-[16px] tracking-normal bg-blue-200 border-blue-400 border-[1.5px] text-blue-500 font-semibold w-20 h-20 " variant="outline">
               <TrendingUp className="!w-10 !h-10" />
@@ -162,7 +164,7 @@ const Homepage = () => {
             <p className="font-semibold">Average Grade</p>
             <p className="text-lg text-slate-600">That's a whole letter grade!</p>
           </li>
-          <li className="flex flex-col justify-center gap-y-4 border border-slate-300 rounded-md p-5 md:min-h-[300px] w-[320px]">
+          <li className="flex flex-col justify-center gap-y-4 border border-slate-300 rounded-md p-5 min-h-[260px] md:min-h-[300px] w-full max-w-[320px]">
 
             <Badge className="mx-auto  text-[16px] tracking-normal border-green-400 border-[1.5px] bg-green-200 text-green-500 font-semibold w-20 h-20 " variant="outline">
               <img
@@ -177,7 +179,7 @@ const Homepage = () => {
               Students complete work faster with better focus
             </p>
           </li>
-          <li className="flex flex-col justify-center gap-y-4 border border-slate-300 rounded-md p-5 md:min-h-[300px] w-[320px]">
+          <li className="flex flex-col justify-center gap-y-4 border border-slate-300 rounded-md p-5 min-h-[260px] md:min-h-[300px] w-full max-w-[320px]">
             <Badge
               className="mx-auto bg-[#FAEEDA] border-[#EF9F27] border-[1.5px] text-[#854F0B] w-20 h-20 rounded-full"
               variant="outline"
@@ -210,8 +212,47 @@ const Homepage = () => {
       </section>
 
 
+      <hr className="w-2/3 max-w-9xl mx-auto my-16 md:my-20" />
 
-      <section className="items-center justify-center">
+      <section className="min-h-[30rem] mt-10 px-6 md:px-0 md:ml-20">
+        <header className="text-2xl sm:text-3xl md:text-4xl font-bold mx-auto font-[family-name:var(--font-sans)]">
+          From the Tutoring Room to Your Screen
+        </header>
+
+        <div className="mt-8 md:mt-10 flex flex-col md:flex-row justify-start items-center md:items-start gap-8 md:gap-0">
+          <div className="text-start w-full md:w-1/2 flex flex-col gap-y-6 md:gap-y-8">
+            <h1 className="text-2xl sm:text-xl md:text-2xl font-bold font-[family-name:var(--font-sans)]">
+              8+ years of tutoring, distilled into an AI that teaches like I do
+            </h1>
+            <p>
+              Every hint, every step-by-step breakdown, every "let's try that a
+              different way" moment — built from real sessions with real students.{" "}
+              <br />
+              <br />
+              The AI tutor doesn't replace that experience. It's trained on it, so
+              you get the same guidance whether you're booking a session or
+              practicing on your own at 11pm before a test.
+            </p>
+            <Link to="/pricing">
+              <Button
+                borderRadius="1.75rem"
+                className="bg-white dark:bg-slate-900 text-black dark:text-white cursor-pointer border-neutral-200 dark:border-slate-800"
+              >
+                ➜ Try the AI Tutor
+              </Button>
+            </Link>
+          </div>
+          <DotLottieReact
+            className="w-full max-w-[320px] sm:max-w-[500px] md:max-w-[700px] h-auto 2xl:-mt-20"
+            src="https://lottie.host/86969d74-7fb6-4a0e-8970-b3818e90b159/9PCglkrRD7.lottie"
+            loop
+            autoplay
+          />
+        </div>
+      </section>
+
+
+      <section className="items-center justify-center px-6 md:px-0">
         {/* <h3 className="mt-10  w-full flex justify-center sm:text-xl xl:text-4xl font-extrabold ">
           Previous Student's Testimonials
         </h3> */}
@@ -228,16 +269,16 @@ const Homepage = () => {
 
 
 
-      <section className="xl:ml-20 my-30 text-start">
-        <div className="flex flex-row items-center w-full justify-start gap-x-5 xl:gap-x-30">
+      <section className="px-6 md:px-0 md:xl:ml-20 my-16 md:my-30 text-start">
+        <div className="flex flex-col md:flex-row items-center w-full justify-start gap-x-5 xl:gap-x-30 gap-y-8 md:gap-y-0">
           <div>
             <p className="text-lg font-semibold text-blue-700">Act now</p>
             <br />
-            <h1 className="text-4xl font-bold font-[family-name:var(--font-sans)] ">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-[family-name:var(--font-sans)] ">
               Be Better than Good Enough
             </h1>
             <br />
-            <p className="text-xl">
+            <p className="text-lg md:text-xl">
               You have an amazing opportunity — don't settle for a sub-optimal
               grades.
               <br />
@@ -245,9 +286,9 @@ const Homepage = () => {
             </p>
           </div>
           <div className="flex flex-row items-center justify-center">
-            <img className="w-40 h-40" src="/exam.svg" />
+            <img className="w-28 h-28 md:w-40 md:h-40" src="/exam.svg" />
             <div
-              className="-ml-20"
+              className="-ml-14 md:-ml-20"
               style={{
                 width: "150px", // control the length of the pencil
                 height: "40px",
@@ -401,8 +442,8 @@ const Homepage = () => {
         </Accordion>
       </section> */}
 
-      <section className="px-6 py-10 mt-10">
-        <div className="max-w-5xl mx-auto bg-[#1a4fd6] rounded-2xl px-10 py-12 relative overflow-hidden shadow-xl flex flex-col md:flex-row justify-between items-center gap-8">
+      <section className="px-4 sm:px-6 py-10 mt-10">
+        <div className="max-w-5xl mx-auto bg-[#1a4fd6] rounded-2xl px-6 sm:px-10 py-10 sm:py-12 relative overflow-hidden shadow-xl flex flex-col md:flex-row justify-between items-center gap-8">
 
           {/* Background grid pattern */}
           <div className="absolute inset-0 opacity-10 pointer-events-none">
@@ -448,4 +489,3 @@ const Homepage = () => {
 };
 
 export default Homepage;
-

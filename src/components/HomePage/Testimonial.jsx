@@ -145,7 +145,7 @@ export default function TrustedCreators() {
       </div>
 
       {/* Trust text */}
-      <p className="text-sm text-neutral-400">Trusted by 1000+ Students</p>
+      <p className="text-sm text-neutral-400">Trusted by 1000+ Students & Parents</p>
     </div>
   );
 }

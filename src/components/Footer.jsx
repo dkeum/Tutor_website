@@ -57,9 +57,9 @@ const Footer = () => {
                 <img
                   className="w-10 h-8"
                   src="/mathamagic_m_blue_star.svg"
-                  alt="Mathamagic logo"
+                  alt="Mathmagick logo"
                 />
-                <span className="font-bold -ml-[11px] mt-[1px] text-2xl" >athamagic</span>
+                <span className="font-bold -ml-[11px] mt-[1px] text-2xl" >athmagick</span>
               </div>
 
               <p className="mt-4 text-muted-foreground text-sm leading-relaxed">
