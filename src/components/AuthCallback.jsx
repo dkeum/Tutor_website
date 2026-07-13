@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { supabaseBrowser } from "../lib/supabaseBrowserClient";
+import { supabase } from "../db/supabaseclient"; 
 // import { setProfileInfo } from "../store/personDetailSlice"; // wire up if you dispatch profile info here
 
 const getBaseUrl = () =>
@@ -19,7 +19,7 @@ const AuthCallback = () => {
     const finishLogin = async () => {
       // supabase-js already parsed the redirect URL (detectSessionInUrl: true)
       // by the time this component mounts — just read the session it found.
-      const { data, error } = await supabaseBrowser.auth.getSession();
+      const { data, error } = await supabase.auth.getSession();
 
       if (error || !data?.session) {
         console.error("No session after Google redirect:", error?.message);
