@@ -6,6 +6,7 @@ import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import NavbarLoggedIn from "../components/NavbarLoggedIn";
 import LoggedInLayout from "../components/LoggedInLayout";
+import { supabase } from "../db/supabaseclient";
 
 const BASE =
   import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
@@ -111,9 +112,8 @@ const SectionRow = ({ section, onClick }) => {
   return (
     <div
       onClick={() => onClick(section)}
-      className={`p-4 flex items-center gap-4 transition-all duration-150 cursor-pointer border-b border-gray-100 last:border-b-0 active:scale-[0.99] ${
-        section.video_watched && !section.quiz_completed ? "bg-[#3525cd]/5" : "hover:bg-gray-50"
-      }`}
+      className={`p-4 flex items-center gap-4 transition-all duration-150 cursor-pointer border-b border-gray-100 last:border-b-0 active:scale-[0.99] ${section.video_watched && !section.quiz_completed ? "bg-[#3525cd]/5" : "hover:bg-gray-50"
+        }`}
     >
       {/* Icon Status Indicator */}
       <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center">
@@ -128,9 +128,8 @@ const SectionRow = ({ section, onClick }) => {
 
       {/* Title & Metadata Group - ADDED text-left and items-start HERE */}
       <div className="flex-1 min-w-0 flex flex-col items-start text-left">
-        <h4 className={`block w-full text-left text-sm font-semibold tracking-tight ${
-          section.video_watched ? "text-[#3525cd] font-bold" : "text-[#191c1d]"
-        }`}>
+        <h4 className={`block w-full text-left text-sm font-semibold tracking-tight ${section.video_watched ? "text-[#3525cd] font-bold" : "text-[#191c1d]"
+          }`}>
           {section.name}
         </h4>
         <span className="block w-full text-left text-xs text-gray-500 font-medium mt-0.5">
@@ -203,12 +202,26 @@ const Lessons = () => {
     if (!classID) return;
     const fetchTopics = async () => {
       try {
-        const res = await axios.get(`${BASE}/${classID}/topics-with-sections`, { withCredentials: true });
+
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session?.user) {
 
 
-        setTopics(res.data?.topics ?? []);
-        setMinutesThisWeek(res.data?.minutes_this_week ?? 0);
-        setResumeTarget(res.data?.resume_target ?? null);
+          const res = await axios.get(`${BASE}/${classID}/topics-with-sections`, {
+
+            headers: {
+              Authorization: `Bearer ${session.access_token}`, // Inject the fresh token
+            },
+            withCredentials: true
+          });
+
+
+          setTopics(res.data?.topics ?? []);
+          setMinutesThisWeek(res.data?.minutes_this_week ?? 0);
+          setResumeTarget(res.data?.resume_target ?? null);
+        }
       } catch (err) {
         console.error("Failed to load topics:", err);
         setError(err.response?.data?.error ?? err.message);

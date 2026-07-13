@@ -32,131 +32,10 @@ import { useSelector } from "react-redux";
 import NavbarLoggedIn from "../components/NavbarLoggedIn";
 import Sidebar from "../components/Sidebar";
 import LoggedInLayout from "../components/LoggedInLayout";
+import HomeWorkSolveProblems from "../components/HomeworkHelp/HomeWorkSolveProblems";
 
-// ── Filler data for recent submissions ──────────────────────────────────────
-const FILLER_SUBMISSIONS = [
-  {
-    id: 1,
-    name: "Calculus_HW_Ch3.pdf",
-    type: "pdf",
-    date: "Oct 24, 2023",
-    size: "4.2 MB",
-    status: "processing",
-  },
-  {
-    id: 2,
-    name: "Geometry_Proof_12.png",
-    type: "image",
-    date: "Oct 22, 2023",
-    size: "1.8 MB",
-    status: "completed",
-  },
-  {
-    id: 3,
-    name: "Algebra_Midterm_Prep.pdf",
-    type: "pdf",
-    date: "Oct 20, 2023",
-    size: "12.5 MB",
-    status: "completed",
-  },
-];
 
-// ── Status badge ─────────────────────────────────────────────────────────────
-const StatusBadge = ({ status }) => {
-  if (status === "processing") {
-    return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-50 text-cyan-700 text-[10px] font-bold uppercase tracking-wider">
-        <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
-        Processing
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 text-green-700 text-[10px] font-bold uppercase tracking-wider">
-      <CheckCircle2 className="w-3.5 h-3.5" />
-      Completed
-    </span>
-  );
-};
 
-// ── Recent Submissions Table ──────────────────────────────────────────────────
-const RecentSubmissionsTable = ({ submissions = FILLER_SUBMISSIONS }) => (
-  <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-outline-variant/20">
-    {/* Header */}
-    <div className="px-6 py-5 border-b border-outline-variant/20 flex items-center justify-between">
-      <h3
-        className="text-xl font-bold text-on-surface tracking-tight"
-        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-      >
-        Recent Submissions
-      </h3>
-      <button className="text-primary font-semibold text-sm hover:underline flex items-center gap-1.5">
-        View All History <History className="w-4 h-4" />
-      </button>
-    </div>
-
-    <table className="w-full text-left table-fixed">
-      <thead className="bg-surface-container-low text-on-surface-variant text-[10px] font-bold uppercase tracking-wider">
-        <tr>
-          <th className="px-6 py-3 w-[40%]">File Name</th>
-          <th className="px-6 py-3 w-[20%]">Date</th>
-          <th className="px-6 py-3 w-[12%]">Size</th>
-          <th className="px-6 py-3 w-[16%]">Status</th>
-          <th className="px-6 py-3 w-[12%] text-right">Actions</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-outline-variant/10">
-        {submissions.map((row) => (
-          <tr
-            key={row.id}
-            className="hover:bg-lavender-tint/10 transition-colors group"
-          >
-            {/* File name */}
-            <td className="px-6 py-4">
-              <div className="flex items-center gap-2 min-w-0">
-                {row.type === "pdf" ? (
-                  <FileText className="w-4 h-4 text-primary flex-shrink-0 group-hover:scale-110 transition-transform" />
-                ) : (
-                  <ImageIcon className="w-4 h-4 text-primary flex-shrink-0 group-hover:scale-110 transition-transform" />
-                )}
-                <span className="font-bold text-sm text-on-surface truncate">
-                  {row.name}
-                </span>
-              </div>
-            </td>
-
-            {/* Date */}
-            <td className="px-6 py-4 text-sm text-on-surface-variant">
-              {row.date}
-            </td>
-
-            {/* Size */}
-            <td className="px-6 py-4 text-sm text-on-surface-variant">
-              {row.size}
-            </td>
-
-            {/* Status */}
-            <td className="px-6 py-4">
-              <StatusBadge status={row.status} />
-            </td>
-
-            {/* Actions */}
-            <td className="px-6 py-4">
-              <div className="flex justify-end gap-1">
-                <button className="p-2 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors">
-                  <Eye className="w-4 h-4" />
-                </button>
-                <button className="p-2 hover:bg-surface-container-high rounded-lg text-on-surface-variant transition-colors">
-                  <Download className="w-4 h-4" />
-                </button>
-              </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 const HomeworkHelp = () => {
@@ -185,7 +64,7 @@ const HomeworkHelp = () => {
     if (files && files.length > 0) {
       setFile(files[0]);
       setCurrentPage(1);
-      console.log("Selected file:", files[0]);
+      // console.log("Selected file:", files[0]);
     }
   };
 
@@ -196,55 +75,48 @@ const HomeworkHelp = () => {
     return () => api.off("select", onSelect);
   }, [api]);
 
-  useEffect(() => {
-    const uploadPDF = async () => {
-      if (file && file.type === "application/pdf") {
-        try {
-          const formData = new FormData();
-          formData.append("file", file);
-          const response = await axios.post(
-            import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-              ? "http://localhost:3000/homework-help/upload-pdf"
-              : "https://mathamagic-backend.vercel.app/homework-help/upload-pdf",
-            formData,
-            {
-              withCredentials: true,
-              headers: { "Content-Type": "multipart/form-data" },
-            }
-          );
-          setFileURL(response.data?.githubUrls);
-        } catch (error) {
-          console.error("Error uploading PDF:", error);
-        }
-      }
-    };
+  // useEffect(() => {
 
-    const uploadImage = async () => {
-      if (file && file.type.startsWith("image/")) {
-        try {
-          const formData = new FormData();
-          formData.append("file", file);
-          const response = await axios.post(
-            import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-              ? "http://localhost:3000/homework-help/upload-image"
-              : "https://mathamagic-backend.vercel.app/homework-help/upload-image",
-            formData,
-            {
-              withCredentials: true,
-              headers: { "Content-Type": "multipart/form-data" },
-            }
-          );
-          setFileURL(response.data?.githubUrls);
-        } catch (error) {
-          console.error("Error uploading image:", error);
-        }
-      }
-    };
 
-    uploadPDF();
-    uploadImage();
-  }, [file]);
+  //   const uploadImage = async () => {
+  //     if (file && file.type.startsWith("image/")) {
+  //       try {
+  //         const formData = new FormData();
+  //         formData.append("file", file);
+  //         const response = await axios.post(
+  //           import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+  //             ? "http://localhost:3000/homework-help/upload-image"
+  //             : "https://mathamagic-backend.vercel.app/homework-help/upload-image",
+  //           formData,
+  //           {
+  //             withCredentials: true,
+  //             headers: { "Content-Type": "multipart/form-data" },
+  //           }
+  //         );
+  //         console.log("FULL upload response:", response); // NEW
+  //         console.log("response.data:", response.data);   // NEW
+  //         setFileURL(response.data?.githubUrls);
+  //       } catch (error) {
+  //         console.error("Error uploading image — FULL:", error); // NEW
+  //         console.error("Error response:", error?.response?.data); // NEW
+  //         console.error("Error status:", error?.response?.status); // NEW
+  //       }
+  //     }
+  //   };
 
+
+  //   uploadImage();
+  // }, [file]);
+
+
+
+  if (file?.type.startsWith("image/")) {
+    return (
+      <LoggedInLayout>
+        <HomeWorkSolveProblems file={file} />
+      </LoggedInLayout>
+    );
+  }
   return (
     <div className="bg-background text-on-background min-h-screen antialiased flex flex-col">
       <LoggedInLayout>
@@ -256,7 +128,7 @@ const HomeworkHelp = () => {
                 className="font-display-lg text-4xl font-bold text-primary mb-2 tracking-tight text-left"
                 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
               >
-                Submit Your Work.
+                Get Help with Homework
               </h2>
               <p className="font-body-lg text-on-surface-variant max-w-2xl text-base opacity-90 text-left">
                 Upload your math problems for expert review or AI-assisted
@@ -383,8 +255,7 @@ const HomeworkHelp = () => {
               </aside>
             </div>
 
-            {/* Full-width submissions table */}
-            <RecentSubmissionsTable />
+
           </div>
         </main>
       </LoggedInLayout>

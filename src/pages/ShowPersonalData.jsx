@@ -24,8 +24,7 @@ import exam_icon from "../assets/exam-svgrepo-com.svg";
 import { BookAlert, BookOpenText, ChartNoAxesColumnIncreasingIcon, LibraryBig, SquareDashed, X } from 'lucide-react';
 
 import Footer from "../components/Footer";
-import Sidebar from "../components/Sidebar";
-import NavbarLoggedIn from "../components/NavbarLoggedIn";
+
 
 import { supabase } from "../db/supabaseclient";
 import LoggedInLayout from "../components/LoggedInLayout";
@@ -53,16 +52,21 @@ const ShowPersonalData = () => {
 
 
 
-  
+
         // 1. Check Supabase for an existing local session
         const { data: { session } } = await supabase.auth.getSession();
 
-        console.log("Supabase session:", session);
+        // console.log("Supabase session:", session);
         if (session?.user) {
           const userEmail = session.user.email;
 
           // 2. Fetch complete profile from backend
-          const res = await axios.get(`${base}/${userEmail}/getprofile`, { withCredentials: true });
+          const res = await axios.get(`${base}/${userEmail}/getprofile`, {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`, // Inject the fresh token
+            },
+            withCredentials: true
+          });
           // console.log("Profile data fetched:", res.data);
 
           // 3. Hydrate Redux store
@@ -87,19 +91,19 @@ const ShowPersonalData = () => {
   // 4. Guard layout until session validation finishes
   if (loadingSession) {
     return (
-      <div className="min-h-screen flex items-center justify-center ">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
-      </div>
+      <LoggedInLayout>
+        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-indigo-600"></div>
+        </div>
+      </LoggedInLayout>
     );
   }
 
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="min-h-[calc(100vh-64px)] flex flex-col"
     >
       <LoggedInLayout>
-
-
         {/* ── Main Content Container ── */}
         <div className="flex-1 min-w-0 overflow-x-hidden flex justify-center">
           <main className="w-full max-w-7xl p-6 md:p-10 flex flex-col gap-8">
@@ -120,7 +124,7 @@ const ShowPersonalData = () => {
                       Login Activity
                     </h3>
                     <span className="text-xs text-gray-400 font-semibold tracking-widest uppercase">
-                      Last 3 Months
+                      Last 6 Months
                     </span>
                   </div>
 
@@ -161,85 +165,86 @@ const ShowPersonalData = () => {
             </div>
 
             {/* Row 3: Action cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full text-left">
-              <ActionCard
-                icon={<ChartNoAxesColumnIncreasingIcon size={20} />}
-                iconBg="#ede9ff"
-                iconColor="#451ebb"
-                title="Track Improvement"
-                footer="View Grade Trends →"
-                footerHoverColor="#451ebb"
-                path="/track-improvement"
-                navigate={navigate}
-              >
-                <div className="flex items-end justify-around h-24 px-4 bg-gray-50 rounded-lg py-2 mt-2">
-                  {["33%", "50%", "66%", "100%"].map((h, i) => (
-                    <div
-                      key={i}
-                      className="w-4 rounded-t"
-                      style={{ height: h, background: `rgba(69,30,187,${0.2 + i * 0.2})` }}
-                    />
-                  ))}
-                </div>
-              </ActionCard>
+            <section>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full text-left">
+                <ActionCard
+                  icon={<ChartNoAxesColumnIncreasingIcon size={20} />}
+                  iconBg="#ede9ff"
+                  iconColor="#451ebb"
+                  title="Track Improvement"
+                  footer="View Grade Trends →"
+                  footerHoverColor="#451ebb"
+                  path="/track-improvement"
+                  navigate={navigate}
+                >
+                  <div className="flex items-end justify-around h-24 px-4 bg-gray-50 rounded-lg py-2 mt-2">
+                    {["33%", "50%", "66%", "100%"].map((h, i) => (
+                      <div
+                        key={i}
+                        className="w-4 rounded-t"
+                        style={{ height: h, background: `rgba(69,30,187,${0.2 + i * 0.2})` }}
+                      />
+                    ))}
+                  </div>
+                </ActionCard>
 
-              <ActionCard
-                icon={<BookAlert size={20} />}
-                iconBg="#ffdad6"
-                iconColor="#ba1a1a"
-                title="Correct Mistakes"
-                footer={wrong_count === 0
-                  ? "All caught up! 🎉"
-                  : `${wrong_count} mistake${wrong_count !== 1 ? "s" : ""} to review`
-                }
-                footerHoverColor="#ba1a1a"
-                path="/correct-mistakes"
-                navigate={navigate}
-              >
-                <div className="flex flex-col gap-2 w-full h-24 justify-center mt-2">
-                  {["100%", "75%", "50%"].map((w, i) => (
-                    <div key={i} className="flex items-center gap-2 w-full ">
-                      <span className="relative inline-flex items-center justify-center flex-shrink-0">
-                        <SquareDashed style={{ color: "#ba1a1a" }} size={20} />
-                        <X size={10} className="absolute" style={{ color: "#ba1a1a" }} />
-                      </span>
-                      <div className="h-2 bg-gray-100 rounded-full flex-1" style={{ maxWidth: w }} />
-                    </div>
-                  ))}
-                </div>
-              </ActionCard>
+                <ActionCard
+                  icon={<BookAlert size={20} />}
+                  iconBg="#ffdad6"
+                  iconColor="#ba1a1a"
+                  title="Correct Mistakes"
+                  footer={wrong_count === 0
+                    ? "All caught up! 🎉"
+                    : `${wrong_count} mistake${wrong_count !== 1 ? "s" : ""} to review`
+                  }
+                  footerHoverColor="#ba1a1a"
+                  path="/correct-mistakes"
+                  navigate={navigate}
+                >
+                  <div className="flex flex-col gap-2 w-full h-24 justify-center mt-2">
+                    {["100%", "75%", "50%"].map((w, i) => (
+                      <div key={i} className="flex items-center gap-2 w-full ">
+                        <span className="relative inline-flex items-center justify-center flex-shrink-0">
+                          <SquareDashed style={{ color: "#ba1a1a" }} size={20} />
+                          <X size={10} className="absolute" style={{ color: "#ba1a1a" }} />
+                        </span>
+                        <div className="h-2 bg-gray-100 rounded-full flex-1" style={{ maxWidth: w }} />
+                      </div>
+                    ))}
+                  </div>
+                </ActionCard>
 
-              <ActionCard
-                icon={<BookOpenText size={20} />}
-                iconBg="#ffdcc3"
-                iconColor="#904d00"
-                title="Homework Help"
-                footer="Ask a question"
-                footerHoverColor="#904d00"
-                path="/homework-help"
-                navigate={navigate}
-              >
-                <div className="flex justify-center py-2 h-24 items-center mt-2">
-                  <img src={homework_icon} alt="Homework" className="max-h-20 object-contain mx-auto" />
-                </div>
-              </ActionCard>
+                <ActionCard
+                  icon={<BookOpenText size={20} />}
+                  iconBg="#ffdcc3"
+                  iconColor="#904d00"
+                  title="Homework Help"
+                  footer="Ask a question"
+                  footerHoverColor="#904d00"
+                  path="/homework-help"
+                  navigate={navigate}
+                >
+                  <div className="flex justify-center py-2 h-24 items-center mt-2">
+                    <img src={homework_icon} alt="Homework" className="max-h-20 object-contain mx-auto" />
+                  </div>
+                </ActionCard>
 
-              <ActionCard
-                icon={<LibraryBig size={20} />}
-                iconBg="#6bfe9c33"
-                iconColor="#004f26"
-                title="Final Exam Prep"
-                footer="3 weeks remaining"
-                footerHoverColor="#004f26"
-                path="/final-exam-prep"
-                navigate={navigate}
-              >
-                <div className="flex justify-center py-2 h-24 items-center mt-2">
-                  <img src={exam_icon} alt="Exam" className="max-h-20 object-contain mx-auto" />
-                </div>
-              </ActionCard>
-            </div>
-
+                <ActionCard
+                  icon={<LibraryBig size={20} />}
+                  iconBg="#6bfe9c33"
+                  iconColor="#004f26"
+                  title="Final Exam Prep"
+                  footer="Test your Knowledge"
+                  footerHoverColor="#004f26"
+                  path="/final-exam-prep"
+                  navigate={navigate}
+                >
+                  <div className="flex justify-center py-2 h-24 items-center mt-2">
+                    <img src={exam_icon} alt="Exam" className="max-h-20 object-contain mx-auto" />
+                  </div>
+                </ActionCard>
+              </div>
+            </section>
           </main>
         </div>
 

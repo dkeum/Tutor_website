@@ -57,6 +57,7 @@ const PrivatePolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 
 const FinalExamTest = lazy(() => import("./pages/FinalExamTest"));
+const AuthCallback = lazy(() => import("./components/AuthCallback"));
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -71,6 +72,10 @@ createRoot(document.getElementById("root")).render(
         <BrowserRouter>
           <Suspense fallback={<Loader />}>
             <Routes>
+              <Route path="/auth/callback" element={<AuthCallback />} />
+
+
+
               <Route path="/" element={<App />} />
               <Route path="/contact" element={<Contactme />} />
               <Route path="/about" element={<About />} />
@@ -167,7 +172,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="/terms-of-service" element={<TermsOfService />} />
             </Routes>
           </Suspense>
-          <Toaster/>
+          <Toaster />
         </BrowserRouter>
       </AuthProvider>
     </Provider>

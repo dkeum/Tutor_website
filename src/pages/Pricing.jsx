@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar";
 import NavbarLoggedIn from "../components/NavbarLoggedIn";
 import Sidebar from "../components/Sidebar";
 import { School2 } from "lucide-react";
+import LoggedInLayout from "../components/LoggedInLayout";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap');
@@ -200,10 +201,7 @@ const PricingPage = () => {
             <style>{styles}</style>
 
             <div className="pricing-page-container">
-                {isLoggedIn && <Sidebar />}
-
-                <div className="pricing-content-fluid">
-                    {isLoggedIn ? <NavbarLoggedIn /> : <Navbar />}
+                <LoggedInLayout>
 
                     <main className="pricing-page" style={{ minHeight: "100vh" }}>
 
@@ -417,7 +415,8 @@ const PricingPage = () => {
                     </main>
 
                     {!isLoggedIn && <Footer />}
-                </div>
+                </LoggedInLayout>
+
             </div>
         </>
     );

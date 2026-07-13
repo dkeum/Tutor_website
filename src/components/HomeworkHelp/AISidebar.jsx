@@ -1,20 +1,14 @@
 import { useState, useRef, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import axios from "axios";
-import { TOKEN } from "../pages/SolveProblems";
+import { TOKEN } from "./HomeWorkSolveProblems";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
-import { X } from "lucide-react";
-import { supabase } from "../db/supabaseclient";
-import { setCredits } from "../features/auth/personDetails";
+import { X } from "lucide-react"; // ← NEW: Import X icon for deleting images
+import { puter } from "@heyputer/puter.js";
 
-const getBaseUrl = () =>
-  import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-    ? "http://localhost:3000"
-    : "https://mathamagic-backend.vercel.app";
 
+// ─── AI Chat Sidebar ──────────────────────────────────────────────────────────
 function AISidebar({
   topic,
   section,
@@ -22,16 +16,14 @@ function AISidebar({
   onOpenStepByStep,
   setUsedAIChat,
   compact = false,
-  attachments = [],
-  onRemoveAttachment,
-  onClearAttachments,
+  attachments = [], // ← NEW: Receive attachments from parent
+  onRemoveAttachment, // ← NEW: Callback to delete a specific attachment
+  onClearAttachments, // ← NEW: Callback to clear all after sending
 }) {
-  const dispatch = useDispatch();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef(null);
-  const studentPlanType = useSelector((s) => s.personDetail?.plan_type);
 
   useEffect(() => {
     setMessages([
@@ -43,117 +35,124 @@ function AISidebar({
   }, [currentQuestion]);
 
   useEffect(() => {
+    const initPuter = async () => {
+      if (window.puter && !window.puter.auth.isSignedIn()) {
+        try {
+          await window.puter.auth.signIn();
+        } catch (err) {
+          console.warn(
+            "Puter silent sign-in skipped or using anonymous mode:",
+            err
+          );
+        }
+      }
+    };
+    initPuter();
+  }, []);
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const quickPrompts = ["Explain step-by-step", "Give me a hint"];
 
   const sendMessage = async (text) => {
+    // Prevent sending if both text and attachments are empty
     if (!text.trim() && attachments.length === 0) return;
 
     if (setUsedAIChat) setUsedAIChat(true);
 
-    const currentAttachments = [...attachments];
-    // Keep local attachments for immediate UI rendering
+    const currentAttachments = [...attachments]; // Snapshot attachments
     const userMsg = { role: "user", text, attachments: currentAttachments };
 
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
-    if (onClearAttachments) onClearAttachments();
+    if (onClearAttachments) onClearAttachments(); // Clear parent attachment state
     setLoading(true);
 
     try {
-      const history = messages.map((msg) => ({
-        role: msg.role,
-        text: msg.text,
-      }));
 
-      let payloadAttachments = [...currentAttachments];
-      let uploadedFilePath = null; // Track the file path for cleanup
 
-      // 1. Get the session FIRST so we have the user's ID for the folder path
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      if (!window.puter || !window.puter.ai) {
+        throw new Error("Puter is not loaded or initialized yet.");
+      }
 
-      if (!session?.user) throw new Error("User must be logged in to chat.");
+      const questionText = currentQuestion?.question || "Not available";
+      const formulaContext = currentQuestion?.formula
+        ? `Formula: ${currentQuestion.formula}`
+        : "No specific formula provided.";
+      const hintContext = currentQuestion?.hint
+        ? `Hint: ${currentQuestion.hint}`
+        : "No specific hint provided.";
 
-      // Upload the last attachment to Supabase if one exists
+
+      const topicLine = topic
+        ? `The student is working on "${decodeURIComponent(topic || "")}"${section ? ` — specifically "${decodeURIComponent(section)}"` : ""}.`
+        : "";
+
+      const systemInstruction = `You are a helpful, encouraging math tutor for grade 10 students. 
+${topicLine}
+
+[CONTEXT]
+Current Question: "${questionText}"
+${formulaContext}
+${hintContext}
+
+[RULES]
+1. Be concise, clear, and highly encouraging.
+2. Guide the student step-by-step without giving away the direct answer explicitly.
+3. You MUST break down your explanation using clear, sequentially numbered steps strictly matching the pattern: "Step 1:", "Step 2:", etc.
+4. DO NOT use raw LaTeX format like \\( ... \\) or \\frac{}{}. Instead, use clean, readable Markdown math notation that looks great in plaintext (e.g., use "25 / 100" for fractions, Bold text, and standard operators like +, -, ×, ÷, =).
+5. If the user attached an image, analyze it closely to help them with their specific work.`;
+
+
+
+
+
+      // Format previous message history for Puter
+      const messageHistory = [
+        { role: "system", content: systemInstruction },
+        ...messages.map((msg) => {
+          let content = msg.text;
+          // If a previous user message had images, format it as a multimodal array
+          if (msg.role === "user" && msg.attachments?.length > 0) {
+            content = [
+              { type: "text", text: msg.text || "Here are some images." },
+              ...msg.attachments.map((url) => ({
+                type: "image_url",
+                image_url: { url },
+              })),
+            ];
+          }
+          return {
+            role: msg.role === "ai" ? "assistant" : "user",
+            content: content,
+          };
+        }),
+      ];
+
+      // Format the current message
+      let finalContent = text || "Check out this image.";
       if (currentAttachments.length > 0) {
-        const lastAttachmentIndex = currentAttachments.length - 1;
-        const lastAttachment = currentAttachments[lastAttachmentIndex];
-
-        const response = await fetch(lastAttachment);
-        const blob = await response.blob();
-
-        const fileExt = blob.type.split("/")[1] || "jpeg";
-
-        // 2. Prepend the user ID to the file path to match the RLS policy
-        uploadedFilePath = `${session.user.id}/image-${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(7)}.${fileExt}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("Mathmagick image attachments")
-          .upload(uploadedFilePath, blob, {
-            contentType: blob.type,
-          });
-
-        if (uploadError) {
-          console.error("Supabase upload error:", uploadError);
-          throw new Error("Failed to upload image attachment.");
-        }
-
-        const { data: publicUrlData } = supabase.storage
-          .from("Mathmagick image attachments")
-          .getPublicUrl(uploadedFilePath);
-
-        payloadAttachments[lastAttachmentIndex] = publicUrlData.publicUrl;
+        finalContent = [
+          { type: "text", text: finalContent },
+          ...currentAttachments.map((url) => ({
+            type: "image_url",
+            image_url: { url },
+          })),
+        ];
       }
+      messageHistory.push({ role: "user", content: finalContent });
 
-      const res = await axios.post(
-        `${getBaseUrl()}/ai/chat`,
-        {
-          topic: decodeURIComponent(topic || ""),
-          section: decodeURIComponent(section || ""),
-          currentQuestion,
-          history,
-          message: text,
-          attachments: payloadAttachments,
-          plan_type: studentPlanType,
-        },
-        {
-          withCredentials: true,
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        }
-      );
+      // Request chat with a vision-capable model
+      const response = await window.puter.ai.chat(messageHistory, {
+        model: "google/gemini-3.5-flash", // Ensure a multimodal model is used
+      });
 
-      // 3. Temporarily stored: Delete the image immediately after the backend AI processes it
-      if (uploadedFilePath) {
-        const { error: deleteError } = await supabase.storage
-          .from("Mathmagick image attachments")
-          .remove([uploadedFilePath]);
-
-        if (deleteError) {
-          console.error("Failed to clean up temporary image:", deleteError);
-        }
-      }
-
-      const remainingHeader = res.headers["x-ai-credits-remaining"];
-      if (remainingHeader !== undefined) {
-        const remaining = Number(remainingHeader);
-        if (!Number.isNaN(remaining)) {
-          dispatch(setCredits({ ai_credits: remaining }));
-        }
-      }
-
-      const aiText = res.data?.text || "I couldn't process that. Try again!";
+      const aiText = response?.message?.content || response.toString() || "I couldn't process that. Try again!";
       setMessages((prev) => [...prev, { role: "ai", text: aiText }]);
     } catch (error) {
-      console.error(
-        "AI chat request failed:",
-        error?.response?.data || error.message
-      );
+      console.error("Puter AI Error:", error);
       setMessages((prev) => [
         ...prev,
         {
@@ -233,9 +232,7 @@ function AISidebar({
           >
             AI Tutor
           </div>
-          <div className="sp-mono" style={{ color: TOKEN.tertiary }}>
-            {decodeURIComponent(topic || "")}
-          </div>
+  
         </div>
       </div>
 
@@ -307,6 +304,7 @@ function AISidebar({
                   gap: 8,
                 }}
               >
+                {/* Display Sent Images in the Chat Bubble */}
                 {msg.attachments?.length > 0 && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {msg.attachments.map((imgUrl, idx) => (
@@ -384,6 +382,7 @@ function AISidebar({
         ))}
       </div>
 
+      {/* NEW: Attachments Preview Strip */}
       {attachments?.length > 0 && (
         <div
           style={{

@@ -1,16 +1,20 @@
 import React, { useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import * as d3 from "d3";
+import { AlertCircle } from "lucide-react";
 
 const QuadrantScatterPlot = ({ topics = [], width = 600, filterType = "month" }) => {
   const d3Ref = useRef();
-  const height = 480; // ← taller
+  const height = 480;
 
   const badgeMap = {
-    week:  "This Week",
+    week: "This Week",
     month: "This Month",
-    year:  "This Year",
+    year: "This Year",
   };
+
+  // Check if any topics are below the 50% threshold
+  const hasSub50 = topics.some((t) => t.numericGrade < 50);
 
   useEffect(() => {
     if (!d3Ref.current || !width || !topics.length) return;
@@ -18,25 +22,28 @@ const QuadrantScatterPlot = ({ topics = [], width = 600, filterType = "month" })
     d3.select(d3Ref.current).selectAll("*").remove();
 
     const margin = { top: 50, right: 60, bottom: 65, left: 70 };
-    const plotWidth  = width - margin.left - margin.right;
+    const plotWidth = width - margin.left - margin.right;
     const plotHeight = height - margin.top - margin.bottom;
 
-    const svg = d3.select(d3Ref.current)
-      .attr("width", width)
-      .attr("height", height)
+    const svg = d3
+      .select(d3Ref.current)
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "xMidYMid meet")
+      .attr("width", "100%")
+      .attr("height", "100%")
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
     // ─── Scales ───────────────────────────────────────────────────────────────
-    // X: effort hours — use actual data range with padding so dots never hit edges
     const maxTime = d3.max(topics, (d) => d.timeSpent) || 1;
-    const xPad    = maxTime * 0.2;
-    const xScale  = d3.scaleLinear()
+    const xPad = maxTime * 0.2;
+    const xScale = d3
+      .scaleLinear()
       .domain([0, maxTime + xPad])
       .range([0, plotWidth]);
 
-    // Y: grade — fixed 50–105 so there's breathing room above 100
-    const yScale = d3.scaleLinear()
+    const yScale = d3
+      .scaleLinear()
       .domain([50, 105])
       .range([plotHeight, 0]);
 
@@ -45,42 +52,57 @@ const QuadrantScatterPlot = ({ topics = [], width = 600, filterType = "month" })
 
     // ─── Quadrant background fills ────────────────────────────────────────────
     const quadrantFills = [
-      { x: 0,    y: 0,    w: midX,            h: midY,             fill: "#f9f7ff" }, // top-left
-      { x: midX, y: 0,    w: plotWidth - midX, h: midY,             fill: "#f0fdf4" }, // top-right
-      { x: 0,    y: midY, w: midX,            h: plotHeight - midY, fill: "#fff5f5" }, // bottom-left
+      { x: 0, y: 0, w: midX, h: midY, fill: "#f9f7ff" }, // top-left
+      { x: midX, y: 0, w: plotWidth - midX, h: midY, fill: "#f0fdf4" }, // top-right
+      { x: 0, y: midY, w: midX, h: plotHeight - midY, fill: "#fff5f5" }, // bottom-left
       { x: midX, y: midY, w: plotWidth - midX, h: plotHeight - midY, fill: "#fffbeb" }, // bottom-right
     ];
 
     quadrantFills.forEach((q) => {
-      svg.append("rect")
-        .attr("x", q.x).attr("y", q.y)
-        .attr("width", q.w).attr("height", q.h)
+      svg
+        .append("rect")
+        .attr("x", q.x)
+        .attr("y", q.y)
+        .attr("width", q.w)
+        .attr("height", q.h)
         .attr("fill", q.fill)
         .attr("rx", 0);
     });
 
     // ─── Divider lines ────────────────────────────────────────────────────────
-    svg.append("line")
-      .attr("x1", midX).attr("y1", 0)
-      .attr("x2", midX).attr("y2", plotHeight)
-      .attr("stroke", "#e2e8f0").attr("stroke-width", 1.5).attr("stroke-dasharray", "4,3");
+    svg
+      .append("line")
+      .attr("x1", midX)
+      .attr("y1", 0)
+      .attr("x2", midX)
+      .attr("y2", plotHeight)
+      .attr("stroke", "#e2e8f0")
+      .attr("stroke-width", 1.5)
+      .attr("stroke-dasharray", "4,3");
 
-    svg.append("line")
-      .attr("x1", 0).attr("y1", midY)
-      .attr("x2", plotWidth).attr("y2", midY)
-      .attr("stroke", "#e2e8f0").attr("stroke-width", 1.5).attr("stroke-dasharray", "4,3");
+    svg
+      .append("line")
+      .attr("x1", 0)
+      .attr("y1", midY)
+      .attr("x2", plotWidth)
+      .attr("y2", midY)
+      .attr("stroke", "#e2e8f0")
+      .attr("stroke-width", 1.5)
+      .attr("stroke-dasharray", "4,3");
 
     // ─── Quadrant labels ──────────────────────────────────────────────────────
     const quadrantLabels = [
-      { x: 12,            y: 16,             label: "DOING GREAT!",    anchor: "start", color: "#a78bfa" },
-      { x: plotWidth - 12, y: 16,            label: "HIGH EFFICIENCY", anchor: "end",   color: "#34d399" },
-      { x: 12,            y: plotHeight - 12, label: "NEEDS HELP",     anchor: "start", color: "#f87171" },
-      { x: plotWidth - 12, y: plotHeight - 12, label: "JUST STARTING", anchor: "end",   color: "#fbbf24" },
+      { x: 12, y: 16, label: "HIGH EFFICIENCY", anchor: "start", color: "#34d399" },
+      { x: plotWidth - 12, y: 16, label: "DOING GREAT!", anchor: "end", color: "#a78bfa" },
+      { x: 12, y: plotHeight - 12, label: "JUST STARTING", anchor: "start", color: "#f87171" },
+      { x: plotWidth - 12, y: plotHeight - 12, label: "NEEDS HELP", anchor: "end", color: "#fbbf24" },
     ];
 
     quadrantLabels.forEach((q) => {
-      svg.append("text")
-        .attr("x", q.x).attr("y", q.y)
+      svg
+        .append("text")
+        .attr("x", q.x)
+        .attr("y", q.y)
         .attr("text-anchor", q.anchor)
         .attr("fill", q.color)
         .style("font-size", "9.5px")
@@ -91,80 +113,142 @@ const QuadrantScatterPlot = ({ topics = [], width = 600, filterType = "month" })
 
     // ─── Axes ─────────────────────────────────────────────────────────────────
     const xAxis = d3.axisBottom(xScale).ticks(5).tickSize(-plotHeight).tickPadding(12);
-    const yAxis = d3.axisLeft(yScale).ticks(6).tickSize(-plotWidth).tickPadding(12)
+    const yAxis = d3
+      .axisLeft(yScale)
+      .ticks(6)
+      .tickSize(-plotWidth)
+      .tickPadding(12)
       .tickFormat((d) => `${d}%`);
 
-    const xAxisG = svg.append("g")
+    const xAxisG = svg
+      .append("g")
       .attr("transform", `translate(0,${plotHeight})`)
       .call(xAxis);
     xAxisG.select(".domain").remove();
-    xAxisG.selectAll(".tick line")
-      .attr("stroke", "#f1f5f9").attr("stroke-width", 1);
-    xAxisG.selectAll("text")
-      .attr("fill", "#94a3b8").style("font-size", "11px");
+    xAxisG.selectAll(".tick line").attr("stroke", "#f1f5f9").attr("stroke-width", 1);
+    xAxisG.selectAll("text").attr("fill", "#94a3b8").style("font-size", "11px");
 
     const yAxisG = svg.append("g").call(yAxis);
     yAxisG.select(".domain").remove();
-    yAxisG.selectAll(".tick line")
-      .attr("stroke", "#f1f5f9").attr("stroke-width", 1);
-    yAxisG.selectAll("text")
-      .attr("fill", "#94a3b8").style("font-size", "11px");
+    yAxisG.selectAll(".tick line").attr("stroke", "#f1f5f9").attr("stroke-width", 1);
+    yAxisG.selectAll("text").attr("fill", "#94a3b8").style("font-size", "11px");
 
-    // Axis titles
-    svg.append("text")
-      .attr("x", plotWidth / 2).attr("y", plotHeight + 50)
+    svg
+      .append("text")
+      .attr("x", plotWidth / 2)
+      .attr("y", plotHeight + 50)
       .attr("text-anchor", "middle")
-      .style("font-size", "10px").style("font-weight", "700")
+      .style("font-size", "10px")
+      .style("font-weight", "700")
       .style("letter-spacing", "0.08em")
-      .attr("fill", "#94a3b8").text("EFFORT (HOURS)");
+      .attr("fill", "#94a3b8")
+      .text("EFFORT (HOURS)");
 
-    svg.append("text")
+    svg
+      .append("text")
       .attr("transform", "rotate(-90)")
-      .attr("x", -plotHeight / 2).attr("y", -52)
+      .attr("x", -plotHeight / 2)
+      .attr("y", -52)
       .attr("text-anchor", "middle")
-      .style("font-size", "10px").style("font-weight", "700")
+      .style("font-size", "10px")
+      .style("font-weight", "700")
       .style("letter-spacing", "0.08em")
-      .attr("fill", "#94a3b8").text("GRADE (%)");
+      .attr("fill", "#94a3b8")
+      .text("GRADE (%)");
+
+    // ─── Tooltip Setup ────────────────────────────────────────────────────────
+    d3.select(d3Ref.current.parentNode).selectAll(".d3-tooltip").remove();
+
+    const tooltip = d3
+      .select(d3Ref.current.parentNode)
+      .append("div")
+      .attr("class", "d3-tooltip")
+      .style("position", "absolute")
+      .style("opacity", 0)
+      .style("background-color", "#1e293b")
+      .style("color", "white")
+      .style("padding", "6px 12px")
+      .style("border-radius", "6px")
+      .style("font-size", "12px")
+      .style("font-weight", "600")
+      .style("pointer-events", "none")
+      .style("z-index", 50)
+      .style("box-shadow", "0 4px 6px -1px rgb(0 0 0 / 0.1)")
+      .style("transform", "translate(-50%, -100%)") // Centers horizontally and pushes above coordinate
+      .style("text-align", "center")
+      .style("white-space", "nowrap");
+
+    // Helper to extract acronyms (e.g., "Linear Relations" -> "LR")
+    const getAcronym = (name) => {
+      if (!name) return "";
+      return name
+        .split(/\s+/)
+        .map((word) => word[0])
+        .join("")
+        .toUpperCase();
+    };
 
     // ─── Dots ─────────────────────────────────────────────────────────────────
-    const dotGroups = svg.selectAll(".topic-dot")
+    const dotGroups = svg
+      .selectAll(".topic-dot")
       .data(topics)
       .enter()
       .append("g")
       .attr("class", "topic-dot")
-      .attr("transform", (d) => `translate(${xScale(d.timeSpent ?? 0)},${yScale(Math.min(d.numericGrade, 100))})`);
+      .attr(
+        "transform",
+        (d) =>
+          `translate(${xScale(d.timeSpent ?? 0)},${yScale(
+            Math.max(50, Math.min(d.numericGrade, 100))
+          )})`
+      )
+      .on("mouseover", function (event, d) {
+        // Use a standard function (not an arrow function) so 'this' refers to the <g> element
+        tooltip.transition().duration(200).style("opacity", 1);
+        tooltip.html(d.title);
+
+        // Get actual dimensions to position perfectly over the dot, immune to viewBox scaling
+        const dotRect = this.getBoundingClientRect();
+        const containerRect = d3Ref.current.parentNode.getBoundingClientRect();
+
+        // Calculate horizontal center and vertical top of the dot
+        const left = dotRect.left - containerRect.left + dotRect.width / 2;
+        const top = dotRect.top - containerRect.top;
+
+        tooltip
+          .style("left", `${left}px`)
+          .style("top", `${top - 8}px`); // Push it slightly above the outer glow ring
+      })
+      .on("mouseleave", () => {
+        tooltip.transition().duration(200).style("opacity", 0);
+      });
 
     // Outer glow ring
-    dotGroups.append("circle")
+    dotGroups
+      .append("circle")
       .attr("r", 14)
-      .attr("fill", (d) => d.color || "#5D3FD3")
+      .attr("fill", (d) => (d.numericGrade < 50 ? "#ef4444" : d.color || "#5D3FD3"))
       .attr("opacity", 0.12);
 
     // Main dot
-    dotGroups.append("circle")
+    dotGroups
+      .append("circle")
       .attr("r", 8)
-      .attr("fill", (d) => d.color || "#5D3FD3")
+      .attr("fill", (d) => (d.numericGrade < 50 ? "#ef4444" : d.color || "#5D3FD3"))
       .attr("stroke", "#fff")
       .attr("stroke-width", 2)
       .style("cursor", "pointer");
 
-    // Grade label inside dot
-    dotGroups.append("text")
+    // Acronym label inside dot
+    dotGroups
+      .append("text")
       .attr("text-anchor", "middle")
       .attr("dy", "0.35em")
       .style("font-size", "7px")
       .style("font-weight", "800")
+      .style("pointer-events", "none")
       .attr("fill", "#fff")
-      .text((d) => d.grade);
-
-    // Topic name above dot
-    dotGroups.append("text")
-      .attr("y", -20)
-      .attr("text-anchor", "middle")
-      .style("font-size", "11px")
-      .style("font-weight", "700")
-      .attr("fill", "#1e293b")
-      .text((d) => d.title.length > 18 ? d.title.slice(0, 16) + "…" : d.title);
+      .text((d) => getAcronym(d.title));
 
   }, [width, topics]);
 
@@ -183,23 +267,31 @@ const QuadrantScatterPlot = ({ topics = [], width = 600, filterType = "month" })
           {badgeMap[filterType] || "This Month"}
         </span>
       </div>
-      <div className="w-full overflow-x-auto">
-        <svg ref={d3Ref} className="mx-auto block" />
+
+      <div className="w-full relative">
+        <svg ref={d3Ref} className="mx-auto block w-full h-auto" />
       </div>
+
+      {hasSub50 && (
+        <div className="mt-2 flex items-center justify-center gap-x-1.5 text-[11px] font-semibold text-rose-500 bg-rose-50/50 py-2 rounded-lg border border-rose-100/50">
+          <AlertCircle className="w-3.5 h-3.5" />
+          <span>Scores below 50% are pinned to the bottom of the chart.</span>
+        </div>
+      )}
     </div>
   );
 };
 
 QuadrantScatterPlot.propTypes = {
-  width:      PropTypes.number,
+  width: PropTypes.number,
   filterType: PropTypes.string,
-  topics:     PropTypes.arrayOf(
+  topics: PropTypes.arrayOf(
     PropTypes.shape({
-      title:        PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
       numericGrade: PropTypes.number.isRequired,
-      timeSpent:    PropTypes.number.isRequired,
-      color:        PropTypes.string,
-      grade:        PropTypes.string,
+      timeSpent: PropTypes.number.isRequired,
+      color: PropTypes.string,
+      grade: PropTypes.string,
     })
   ).isRequired,
 };

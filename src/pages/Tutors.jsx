@@ -45,7 +45,7 @@ const Tutors = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full  text-[#101b30] flex font-sans overflow-x-hidden">
+    <div className="min-h-screen w-full  text-[#101b30] flex font-sans ">
       {/* Global Style Injections */}
       <style>{`
         body {

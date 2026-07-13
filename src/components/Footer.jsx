@@ -111,7 +111,7 @@ const Footer = () => {
           {/* ── Bottom bar ── */}
           <div className="py-6 flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
             <span className="text-muted-foreground text-sm">
-              &copy; {new Date().getFullYear()} Mathamagic. All rights reserved.
+              &copy; {new Date().getFullYear()} Mathmagick. All rights reserved.
             </span>
             <div className="flex items-center gap-6">
               {legalLinks.map(({ title, href }) => (

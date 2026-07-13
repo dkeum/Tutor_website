@@ -1,8 +1,8 @@
 import React, { useRef } from 'react'
-import { TOKEN } from '../../pages/SolveProblems'
+import { TOKEN } from './HomeWorkSolveProblems'
 import { Loader2 } from 'lucide-react'
 
-import MathKeyboardTool from './MathKeyboardTool'
+import MathKeyboardTool from '../solveProblems/MathKeyboardTool'
 import MathQuillInput from '../MathQuillInput';
 
 

@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { IconUpload } from "@tabler/icons-react";
 import { useDropzone } from "react-dropzone";
 
+
 const mainVariant = {
   initial: {
     x: 0,

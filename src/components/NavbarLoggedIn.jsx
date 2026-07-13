@@ -34,22 +34,22 @@ const NavbarLoggedIn = () => {
   }, []);
 
   const sendSessionData = async (start, end) => {
-    try {
-      await axios.post(
-        import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-          ? "http://localhost:3000/save-session"
-          : "https://mathamagic-backend.vercel.app/save-session",
-        {
-          email: email,
-          startTime: start.toISOString(),
-          endTime: end.toISOString(),
-          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        },
-        { withCredentials: true }
-      );
-    } catch (err) {
-      console.error("Error sending session data:", err);
-    }
+    // try {
+    //   await axios.post(
+    //     import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+    //       ? "http://localhost:3000/save-session"
+    //       : "https://mathamagic-backend.vercel.app/save-session",
+    //     {
+    //       email: email,
+    //       startTime: start.toISOString(),
+    //       endTime: end.toISOString(),
+    //       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    //     },
+    //     { withCredentials: true }
+    //   );
+    // } catch (err) {
+    //   console.error("Error sending session data:", err);
+    // }
   };
 
   const handleLogout = async () => {
@@ -67,7 +67,7 @@ const NavbarLoggedIn = () => {
             alt="logo"
           />
           <a href="/" className="font-bold -ml-[25px] mt-[1px]">
-            athamagic
+            athmagick
           </a>
         </div>
 

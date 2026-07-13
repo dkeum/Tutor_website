@@ -68,7 +68,7 @@ const LoggedInLayout = ({ children, bare = false }) => {
         {/* Main Content */}
         <main
           className={`flex-1 w-full min-w-0 lg:pl-64 transition-all duration-300 ${
-            bare ? "" : "px-4 py-8 md:px-8"
+            bare ? "" : "px-4 md:px-8"
           }`}
           style={bare ? undefined : { fontFamily: "'Lexend', sans-serif" }}
         >

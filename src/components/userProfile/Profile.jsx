@@ -16,7 +16,7 @@ const Profile = () => {
         <Completion_graph name="GRADE" value={current_grade} />
       </div>
 
-      <div className="col-span-2 w-full flex justify-center -mt-8">
+      <div className="col-span-2 w-full flex justify-center -mt-1">
         <Completion_graph name="TIME LOGGED" value={goal_commitment} />
       </div>
     </div>

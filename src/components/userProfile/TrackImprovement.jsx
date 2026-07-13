@@ -105,6 +105,8 @@ const TrackImprovement = () => {
   const [weeklyTarget, setWeeklyTarget] = useState(15);
   const [nextMilestone, setNextMilestone] = useState(null);
 
+  const name = useSelector((s) => s.personDetail.name)
+
   const [loading, setLoading] = useState(true);
 
   // ─── Fetch Analytics Data From Backend on Mount ──────────────────────────
@@ -120,11 +122,18 @@ const TrackImprovement = () => {
           data: { session },
         } = await supabase.auth.getSession();
 
+
+
         if (session?.user) {
           const { data } = await axios.get(`${base}/student/progress`, {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`, // Inject the fresh token
+            },
             withCredentials: true,
           });
-          console.log(data);
+
+
+          // console.log(data);
           if (data.gradeTrend) setGradeTrend(data.gradeTrend);
           if (data.topics) setTopicProgress(data.topics);
           // if (data.topicBreakdown) setTopicProgress(data.topicBreakdown);
@@ -299,7 +308,7 @@ const TrackImprovement = () => {
       .map((d) => parseFloat(d.grade));
     const currentAvg = currentPeriodGrades.length
       ? currentPeriodGrades.reduce((a, b) => a + b, 0) /
-        currentPeriodGrades.length
+      currentPeriodGrades.length
       : 0;
 
     const prevDateRange = generateDateRange(prevStart, prevEnd, unit);
@@ -374,7 +383,7 @@ const TrackImprovement = () => {
     {
       option: 3,
       topic: "Grades vs Effort Analysis",
-      previewLabel: "TOPIC MASTERY",
+      previewLabel: "Topic Mastery",
       item: (
         <QuadrantScatterPlot
           topics={advancedSampleTopics}
@@ -389,9 +398,11 @@ const TrackImprovement = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-purple-600 font-bold">
-        Loading analytics...
-      </div>
+      <LoggedInLayout>
+        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-indigo-600"></div>
+        </div>
+      </LoggedInLayout>
     );
   }
 
@@ -412,7 +423,7 @@ const TrackImprovement = () => {
                   className="text-4xl font-bold text-left"
                   style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                 >
-                  Welcome Back, Student!
+                  Welcome Back {name}
                 </h1>
                 <p className="text-lg text-gray-500 mt-2">
                   Keep up the great work on your learning metrics!
@@ -429,16 +440,16 @@ const TrackImprovement = () => {
                   style={
                     filterType === type
                       ? {
-                          background: "#5d3fd3",
-                          color: "#fff",
-                          boxShadow: "0 4px 14px rgba(93,63,211,0.4)",
-                        }
+                        background: "#5d3fd3",
+                        color: "#fff",
+                        boxShadow: "0 4px 14px rgba(93,63,211,0.4)",
+                      }
                       : {
-                          background: "#fff",
-                          border: "1px solid #e2dfec",
-                          color: "#484554",
-                          boxShadow: "0 2px 6px rgba(93,63,211,0.03)",
-                        }
+                        background: "#fff",
+                        border: "1px solid #e2dfec",
+                        color: "#484554",
+                        boxShadow: "0 2px 6px rgba(93,63,211,0.03)",
+                      }
                   }
                 >
                   {label}
@@ -563,15 +574,19 @@ const TrackImprovement = () => {
                       <div
                         key={i.option}
                         onClick={() => setGraphOption(3)}
-                        className={`bg-white p-6 rounded-3xl border transition-all cursor-pointer group flex flex-col justify-between flex-1 ${
-                          isActive
-                            ? "border-purple-300 ring-2 ring-purple-100"
-                            : "border-gray-100 hover:border-purple-200"
-                        }`}
+                        className={`bg-white p-6 rounded-3xl border transition-all cursor-pointer group flex flex-col justify-between flex-1 ${isActive
+                          ? "border-purple-300 ring-2 ring-purple-100"
+                          : "border-gray-100 hover:border-purple-200"
+                          }`}
                         style={{ boxShadow: PURPLE_SHADOW_THEME }}
                       >
                         <div>
-                          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">
+                          <p
+                            className="font-bold text-sm text-gray-800 mb-4 text-center tracking-tight"
+                            style={{
+                              fontFamily: "'Plus Jakarta Sans', sans-serif",
+                            }}
+                          >
                             {i.previewLabel}
                           </p>
 
@@ -584,11 +599,9 @@ const TrackImprovement = () => {
                                   className="flex items-center gap-3"
                                 >
                                   <div
-                                    className={`w-9 h-9 rounded-full ${
-                                      item.bg || "bg-purple-50"
-                                    } flex items-center justify-center ${
-                                      item.text || "text-purple-600"
-                                    } font-black text-xs shadow-sm border border-black/5 flex-shrink-0`}
+                                    className={`w-9 h-9 rounded-full ${item.bg || "bg-purple-50"
+                                      } flex items-center justify-center ${item.text || "text-purple-600"
+                                      } font-black text-xs shadow-sm border border-black/5 flex-shrink-0`}
                                   >
                                     {item.grade}
                                   </div>
@@ -596,7 +609,7 @@ const TrackImprovement = () => {
                                     <h4 className="text-sm font-bold text-gray-800 leading-tight truncate text-left">
                                       {item.title || item.topic}
                                     </h4>
-                                    <p className="text-xs text-gray-400 truncate">
+                                    <p className="text-xs text-gray-400 truncate text-left">
                                       {item.desc ||
                                         `Accuracy Check: ${item.numericGrade}%`}
                                     </p>
@@ -619,11 +632,10 @@ const TrackImprovement = () => {
                     <div
                       key={i.option}
                       onClick={() => setGraphOption(i.option)}
-                      className={`bg-white p-5 rounded-3xl border transition-all cursor-pointer group flex flex-col justify-between h-[115px] ${
-                        isActive
-                          ? "border-purple-300 ring-2 ring-purple-100"
-                          : "border-gray-100 hover:border-purple-200"
-                      }`}
+                      className={`bg-white p-5 rounded-3xl border transition-all cursor-pointer group flex flex-col justify-between h-[115px] ${isActive
+                        ? "border-purple-300 ring-2 ring-purple-100"
+                        : "border-gray-100 hover:border-purple-200"
+                        }`}
                       style={{ boxShadow: PURPLE_SHADOW_THEME }}
                     >
                       <div className="flex justify-between items-start text-center lg:text-left w-full">
@@ -724,7 +736,7 @@ const TrackImprovement = () => {
                             : "Loading Next Objective..."}
                         </h4>
                         <p className="text-sm text-gray-400">
-                          {nextMilestone.type}
+                          {nextMilestone?.type}
                         </p>
                       </>
                     )}

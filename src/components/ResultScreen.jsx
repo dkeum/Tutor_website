@@ -18,10 +18,11 @@ function ResultsScreen({ answerResults, totalSeconds, onRetry, onHome }) {
     <div
       style={{
         flex: 1,
+        minHeight: 0,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
+        overflowY: "auto",
         padding: 32,
       }}
     >
@@ -35,6 +36,7 @@ function ResultsScreen({ answerResults, totalSeconds, onRetry, onHome }) {
           width: "100%",
           textAlign: "center",
           boxShadow: "0 4px 24px rgba(0,0,0,0.04)",
+          margin: "auto 0",
         }}
       >
         <div

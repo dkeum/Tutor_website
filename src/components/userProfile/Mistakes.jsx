@@ -4,6 +4,7 @@ import Sidebar from "../Sidebar";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import LoggedInLayout from "../LoggedInLayout";
+import { supabase } from "../../db/supabaseclient";
 
 const TOPIC_COLORS = [
   {
@@ -54,18 +55,30 @@ export default function Mistakes() {
             ? "http://localhost:3000"
             : "https://mathamagic-backend.vercel.app";
 
-        const { data } = await axios.get(`${base}/questions/mistakes`, {
-          withCredentials: true,
-        });
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-        console.log(data);
-        setTotalMistakes(data.total_mistakes);
-        setWorstSection(data.worst_section);
-        setTopics(data.topics);
+        if (session?.user) {
+          const { data } = await axios.get(`${base}/questions/mistakes`, {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`, // Inject the fresh token
+            },
+            withCredentials: true,
+          });
 
-        if (data.topics.length > 0) {
-          setOpenAccordions({ [data.topics[0].topic_id]: true });
+          // console.log(data);
+          setTotalMistakes(data.total_mistakes);
+          setWorstSection(data.worst_section);
+          setTopics(data.topics);
+
+          if (data.topics.length > 0) {
+            setOpenAccordions({ [data.topics[0].topic_id]: true });
+          }
+
         }
+
+
       } catch (err) {
         console.error(err);
         setError("Failed to load mistakes. Please try again.");
@@ -338,9 +351,8 @@ function ReviewButton({ count, colorClass, onClick }) {
 function ChevronIcon({ isOpen }) {
   return (
     <span
-      className={`text-[#7a7488] block text-xs transition-transform duration-300 ${
-        isOpen ? "rotate-180" : ""
-      }`}
+      className={`text-[#7a7488] block text-xs transition-transform duration-300 ${isOpen ? "rotate-180" : ""
+        }`}
     >
       ▼
     </span>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // 💡 FIXED: Added useEffect to your imports
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -24,14 +24,17 @@ const dashboardSubItems = [
   { path: "/final-exam-prep", icon: <FileText size={16} />, label: "Final Exam Prep" },
 ];
 
+// Mapped both 'free' and 'self-study' strings just to be safe with DB variations
 const PLAN_LABELS = {
-  free: "Free",
+  free: "Self-Study",
+  "self-study": "Self-Study",
   pro: "Pro",
 };
 
 const PLAN_CREDIT_TOTALS = {
-  free: 50,
-  pro: 500, // adjust to whatever your actual Pro-tier monthly credit allotment is
+  free: 4000,
+  "self-study": 4000,
+  pro: 10000, 
 };
 
 const Sidebar = () => {
@@ -41,25 +44,26 @@ const Sidebar = () => {
 
   // Pull everything from Redux
   const studentName = useSelector(s => s.personDetail?.name) || "";
-  const plan_type = useSelector(s => s.personDetail?.plan_type) ?? "free";
+  const plan_type = useSelector(s => s.personDetail?.plan_type) ?? "self-study";
   const ai_credits = useSelector(s => s.personDetail?.ai_credits) ?? 0;
   const is_on_trial = useSelector(s => s.personDetail?.is_on_trial) ?? false;
   const days_remaining = useSelector(s => s.personDetail?.days_remaining) ?? 0;
   const subscription_status = useSelector(s => s.personDetail?.subscription_status) ?? "inactive";
-  const className = useSelector(s => s.personDetail?.class)
+  const className = useSelector(s => s.personDetail?.class);
   const profile_picture = useSelector((state) => state.personDetail.profile_pic);
   const userInitials = studentName ? studentName[0].toUpperCase() : "?";
 
-  const planLabel = PLAN_LABELS[plan_type] ?? "Free";
-  const creditTotal = PLAN_CREDIT_TOTALS[plan_type] ?? 50;
+  // Normalize the plan type to lowercase to ensure matching
+  const safePlanType = plan_type.toLowerCase();
+  const planLabel = PLAN_LABELS[safePlanType] ?? "Self-Study";
+  const creditTotal = PLAN_CREDIT_TOTALS[safePlanType] ?? 4000;
   const creditPct = Math.min(100, Math.round((ai_credits / creditTotal) * 100));
-  const isMaxPlan = plan_type === "pro";
+  const isPro = safePlanType === "pro";
 
   const isPathActive = (path) => location.pathname === path;
   const isDashboardActive =
-  location.pathname === "/showpersonaldata" ||
-  dashboardSubItems.some(sub => location.pathname === sub.path);
-
+    location.pathname === "/showpersonaldata" ||
+    dashboardSubItems.some(sub => location.pathname === sub.path);
 
   const toggleSubMenu = (e) => {
     e.preventDefault();
@@ -85,29 +89,22 @@ const Sidebar = () => {
     >
       {/* User profile card */}
       <div className="flex items-center gap-3 p-2 mb-2 mt-2">
-        {/* <div
+        <Avatar
           className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
-          style={{ background: "#5d3fd3" }}
+          style={{ borderColor: "#e6deff" }}
         >
-          {studentName ? studentName[0].toUpperCase() : "?"}
-        </div> */}
-        <Avatar 
-        className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
-        style={{ borderColor: "#e6deff" }}
-      >
-        <AvatarImage
-          src={profile_picture}
-          alt={studentName || "Student profile"}
-          className="object-cover w-full h-full"
-        />
-        {/* Dynamic structural substitution fallback handler inheriting old design typography markup */}
-        <AvatarFallback 
-          className="w-full h-full flex items-center justify-center text-lg font-black rounded-full"
-          style={{ background: "#5d3fd3", color: "#fff" }}
-        >
-          {userInitials}
-        </AvatarFallback>
-      </Avatar>
+          <AvatarImage
+            src={profile_picture}
+            alt={studentName || "Student profile"}
+            className="object-cover w-full h-full"
+          />
+          <AvatarFallback
+            className="w-full h-full flex items-center justify-center text-lg font-black rounded-full"
+            style={{ background: "#5d3fd3", color: "#fff" }}
+          >
+            {userInitials}
+          </AvatarFallback>
+        </Avatar>
         <div>
           <div className="font-bold text-gray-800">{studentName || "Student"}</div>
           <div className="text-xs text-gray-400">{className}</div>
@@ -170,10 +167,18 @@ const Sidebar = () => {
       {/* Account Details */}
       <section className="px-3 py-4 border-t border-gray-100 bg-gray-50/50 rounded-xl flex flex-col gap-3 mt-auto">
         <div>
-          <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold block">
+          <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold block mb-1">
             Current Plan
           </span>
-          <p className="text-sm font-bold text-gray-700">{planLabel}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-bold text-gray-700">{planLabel}</p>
+            {/* Free Trial Badge added next to plan name */}
+            {is_on_trial && (
+              <span className="bg-green-100 text-green-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider border border-green-200">
+                Free Trial
+              </span>
+            )}
+          </div>
         </div>
 
         <div>
@@ -192,11 +197,12 @@ const Sidebar = () => {
           </div>
         </div>
 
+        {/* Keeping the detailed remaining days indicator just below */}
         {is_on_trial && days_remaining > 0 && (
           <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-lg p-2">
             <CheckCircle2 size={14} className="text-green-600 flex-shrink-0" />
             <span className="text-[11px] font-medium text-green-700">
-              {days_remaining} day{days_remaining !== 1 ? "s" : ""} free trial remaining
+              {days_remaining} day{days_remaining !== 1 ? "s" : ""} left in trial
             </span>
           </div>
         )}
@@ -213,18 +219,16 @@ const Sidebar = () => {
 
       {/* Bottom actions */}
       <div className="flex flex-col gap-2">
-        {!isMaxPlan && (
-          <Link to="/pricing" className="w-full">
-            <button
-              className="font-bold py-3 w-full rounded-xl shadow-md hover:shadow-lg transition-all text-sm cursor-pointer"
-              style={{ background: "#fd8b00", color: "#fff" }}
-            >
-              Upgrade to Pro
-            </button>
-          </Link>
-        )}
+        <Link to="/pricing" className="w-full">
+          <button
+            className="font-bold py-3 w-full rounded-xl shadow-md hover:shadow-lg transition-all text-sm cursor-pointer flex justify-center items-center"
+            style={{ background: "#fd8b00", color: "#fff" }}
+          >
+            {isPro ? "More Credits" : "Upgrade to Pro"}
+          </button>
+        </Link>
         <Link
-          to="/help"
+          to="/contact"
           className="flex items-center gap-3 p-3 text-gray-400 hover:text-indigo-600 transition-all rounded-xl hover:bg-gray-50 text-sm font-medium"
         >
           <HelpCircle size={20} />

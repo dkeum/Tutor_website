@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import { addStyles, EditableMathField } from "react-mathquill";
+
 import normalizeLatex from "../helperFunctions/normalizeLatex";
 import { cn } from "@/lib/utils";
 import {
@@ -43,10 +43,15 @@ import DropDownTool from "../components/solveProblems/DropDownTool";
 import { Button } from "../components/ui/button";
 import { TOOL_REGISTRY } from "../components/solveProblems/toolRegistry";
 import AnswerField from "../components/solveProblems/AnswerField";
-import usePuter from "../hook/usePuter";
+import { supabase } from "../db/supabaseclient";
+import { setProfileInfo } from "../features/auth/personDetails";
 
+// ─── Backend base URL — used by every axios call in this file ────────────────
+const getBaseUrl = () =>
+  import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+    ? "http://localhost:3000"
+    : "https://mathamagic-backend.vercel.app";
 
-addStyles();
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 export const TOKEN = {
@@ -173,6 +178,9 @@ const SolveProblems = () => {
   const section = searchParams.get("section");
   const navigate = useNavigate();
   const studentClassId = useSelector((s) => s.personDetail?.class_ID);
+  const studentPlanType = useSelector((s) => s.personDetail?.plan_type); // "free" | "pro" | ...
+  const [loadingSession, setLoadingSession] = useState(true);
+
 
   const [questions, setQuestions] = useState([]);
   const [latex, setLatex] = useState("");
@@ -200,7 +208,7 @@ const SolveProblems = () => {
   const [cachedVideo, setCachedVideo] = useState({ questionId: null, url: null });
 
   const [chatAttachments, setChatAttachments] = useState([]);
-
+  const [isSubmittingMain, setIsSubmittingMain] = useState(false); // NEW
 
   const [muted, setMuted] = useState(false);
   const toggleMute = () => setMuted((m) => !m);
@@ -331,8 +339,6 @@ const SolveProblems = () => {
     );
   };
 
-  //puter auth temporary user sign up
-  usePuter();
 
   useEffect(() => {
     startTimers();
@@ -345,26 +351,89 @@ const SolveProblems = () => {
   }, [currentIndex]);
 
   useEffect(() => {
+    const initializeUserSession = async () => {
+      try {
+        const base = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+          ? "http://localhost:3000"
+          : "https://mathamagic-backend.vercel.app";
+
+
+
+
+        // 1. Check Supabase for an existing local session
+        const { data: { session } } = await supabase.auth.getSession();
+
+        // console.log("Supabase session:", session);
+        if (session?.user) {
+          const userEmail = session.user.email;
+
+          // 2. Fetch complete profile from backend
+          const res = await axios.get(`${base}/${userEmail}/getprofile`, {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`, // Inject the fresh token
+            },
+            withCredentials: true
+          });
+          // console.log("Profile data fetched:", res.data);
+
+          // 3. Hydrate Redux store
+          dispatch(setProfileInfo(res?.data));
+
+          if (!res.data?.name) {
+            setOpen(true);
+          }
+        } else {
+          navigate("/login");
+        }
+      } catch (err) {
+        console.error("Error initializing session:", err);
+      } finally {
+        setLoadingSession(false);
+      }
+    };
+
     const fetchQuestions = async () => {
       if (!topic || !section) return;
+
+
+      if (!studentClassId) {
+        await initializeUserSession();
+      }
       setLoadingQuestions(true);
       try {
-        const BASE_URL =
-          import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-            ? "http://localhost:3000"
-            : "https://mathamagic-backend.vercel.app";
 
-        const res = await axios.get(
-          `${BASE_URL}/questions/${topic}/${encodeURIComponent(section)}`,
-          { withCredentials: true, params: { class: studentClassId } }
-        );
+        // 1. Check Supabase for an existing local session
+        const { data: { session } } = await supabase.auth.getSession();
 
-        const qs = res.data.questions || [];
-        setQuestions(qs);
+        // console.log("Supabase session:", session);
+        if (session?.user) {
 
-        if (qs.length > 0) {
-          setTopicId(qs[0].topic_id);
-          setSectionId(qs[0].section_id);
+          const BASE_URL =
+            import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+              ? "http://localhost:3000"
+              : "https://mathamagic-backend.vercel.app";
+
+
+
+
+          const res = await axios.get(
+            `${BASE_URL}/questions/${topic}/${encodeURIComponent(section)}`,
+            {
+              withCredentials: true, params: { class: studentClassId },
+
+              headers: {
+                Authorization: `Bearer ${session.access_token}`, // Inject the fresh token
+              },
+            }
+          );
+
+          const qs = res.data.questions || [];
+          setQuestions(qs);
+
+          if (qs.length > 0) {
+            setTopicId(qs[0].topic_id);
+            setSectionId(qs[0].section_id);
+          }
         }
       } catch (err) {
         console.error("Error fetching questions:", err);
@@ -396,45 +465,41 @@ const SolveProblems = () => {
     let verifiedAttempts = [...finalAttempts];
     let finalGrade = 0;
 
+    // Filter out attempts that are already marked correct (either by step-by-step AI or exact text match)
+    const attemptsToVerify = finalAttempts.filter((a) => !a.is_correct);
+
     try {
-      const analysisPrompt = `
-            You are an evaluation engine for a math platform. 
-            Analyze the following student answers against the questions and determine if they are mathematically correct.
-            
-            Data to analyze:
-            ${JSON.stringify(finalAttempts, null, 2)}
-            
-            Your task:
-            1. Review each item. Verify if "answer_given" matches the mathematically correct solution for that question.
-            2. Set "is_correct" strictly to true or false based on your evaluation.
-            3. Return ONLY a valid JSON array containing objects with at least "question_id" and "is_correct".
-            Do not include any markdown formatting, backticks, or extra text.
-          `;
-
-      const response = await window.puter.ai.chat(analysisPrompt, {
-        json_mode: true,
-      });
-
-      const aiOutput = response.message?.content || response;
-      const parsedAiData =
-        typeof aiOutput === "string" ? JSON.parse(aiOutput.trim()) : aiOutput;
-
-      verifiedAttempts = finalAttempts.map((originalAttempt) => {
-        const aiEvaluation = parsedAiData.find(
-          (aiResult) => aiResult.question_id === originalAttempt.question_id
+      // Only call the AI if there are actually answers that need verifying
+      if (attemptsToVerify.length > 0) {
+        const res = await axios.post(
+          `${getBaseUrl()}/ai/verify-answers`,
+          { attempts: attemptsToVerify, plan_type: studentPlanType },
+          { withCredentials: true }
         );
-        return {
-          ...originalAttempt,
-          is_correct:
-            aiEvaluation !== undefined
-              ? aiEvaluation.is_correct
-              : originalAttempt.is_correct,
-        };
-      });
+        const results = res.data.results || [];
+
+        verifiedAttempts = finalAttempts.map((originalAttempt) => {
+          // If it was already correct, skip overriding it to save the confirmed status
+          if (originalAttempt.is_correct) {
+            return originalAttempt;
+          }
+
+          const aiEvaluation = results.find(
+            (r) => r.question_id === originalAttempt.question_id
+          );
+          return {
+            ...originalAttempt,
+            is_correct:
+              aiEvaluation !== undefined
+                ? aiEvaluation.is_correct
+                : originalAttempt.is_correct,
+          };
+        });
+      }
     } catch (aiError) {
       console.error(
-        "Puter.js evaluation failed, falling back to client-side logic:",
-        aiError
+        "AI evaluation failed, falling back to client-side logic:",
+        aiError?.response?.data || aiError.message
       );
     }
 
@@ -456,18 +521,24 @@ const SolveProblems = () => {
     };
 
     try {
-      const BASE_URL =
-        import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-          ? "http://localhost:3000"
-          : "https://mathamagic-backend.vercel.app";
 
-      const res = await axios.post(
-        `${BASE_URL}/questions/save-marks`,
-        payload,
-        { withCredentials: true }
-      );
+      // 1. Check Supabase for an existing local session
+      const { data: { session } } = await supabase.auth.getSession();
 
-      console.log("Marks saved successfully with AI verified data!", res.data);
+      // console.log("Supabase session:", session);
+      if (session?.user) {
+        const res = await axios.post(
+          `${getBaseUrl()}/questions/save-marks`,
+          payload,
+          {
+            withCredentials: true, headers: {
+              Authorization: `Bearer ${session.access_token}`, // Inject the fresh token
+            },
+          }
+        );
+
+        // console.log("Marks saved successfully with AI verified data!", res.data);
+      }
     } catch (apiError) {
       console.error(
         "Failed to save marks to the database:",
@@ -484,51 +555,97 @@ const SolveProblems = () => {
       URL.revokeObjectURL(videoStreamUrl);
     }
 
-    const newAttempt = {
-      question_id: currentQuestion.id,
-      answer_given: latex,
-      is_correct: isCorrect,
-      time_spent_seconds: secondsElapsed,
-      used_ai_video: usedAIVideo,
-      used_ai_chat: usedAIChat,
-    };
+    setIsSubmittingMain(true); // NEW
+    try {
+      const newAttempt = {
+        question_id: currentQuestion.id,
+        answer_given: latex,
+        is_correct: isCorrect,
+        time_spent_seconds: secondsElapsed,
+        used_ai_video: usedAIVideo,
+        used_ai_chat: usedAIChat,
+      };
 
-    const updatedAnswers = [...recordedAnswers, newAttempt];
-    setRecordedAnswers(updatedAnswers);
+      const updatedAnswers = [...recordedAnswers, newAttempt];
+      setRecordedAnswers(updatedAnswers);
 
-    const newResult = { questionId: currentQuestion.id, isCorrect };
-    const updatedResults = [...answerResults, newResult];
-    setAnswerResults(updatedResults);
+      const newResult = { questionId: currentQuestion.id, isCorrect };
+      const updatedResults = [...answerResults, newResult];
+      setAnswerResults(updatedResults);
 
-    setLatex("");
-    setSecondsElapsed(0);
+      setLatex("");
+      setSecondsElapsed(0);
 
-    if (isLastQuestion) {
-      stopTimers();
-      await submitAnswers(updatedAnswers);
-      setShowResults(true);
-    } else {
-      api?.scrollNext();
+      if (isLastQuestion) {
+        stopTimers();
+        await submitAnswers(updatedAnswers);
+        setShowResults(true);
+      } else {
+        api?.scrollNext();
+      }
+    } finally {
+      setIsSubmittingMain(false); // NEW
     }
   };
 
-  const handleNextOrSubmit_solvetab = async () => {
+  const handleNextOrSubmit_solvetab = async (
+    studentAnswerText = "",
+    attachedImageUrl = null,
+    isAlreadyCorrect = false
+  ) => {
     const correctAnswer = currentQuestion?.answers?.[0]?.answer || "";
 
     if (videoStreamUrl?.startsWith("blob:")) {
       URL.revokeObjectURL(videoStreamUrl);
     }
 
+    // Default to whatever the step-by-step dialog already determined
+    let isCorrect = isAlreadyCorrect;
+
+    const hasAnswerContent = !!(studentAnswerText?.trim() || attachedImageUrl);
+
+    // Only hit the AI if step-by-step didn't already confirm "correct"
+    if (!isAlreadyCorrect) {
+      if (!hasAnswerContent) {
+        // Nothing was actually answered (e.g. "Next Question" clicked blind) —
+        // mark it wrong locally, no need to spend an API call on it.
+        isCorrect = false;
+      } else {
+        try {
+          const res = await axios.post(
+            `${getBaseUrl()}/ai/verify-answer`,
+            {
+              question: currentQuestion?.question || "",
+              correctAnswer,
+              studentAnswerText,
+              attachedImageBase64: attachedImageUrl || null,
+              plan_type: studentPlanType,
+            },
+            { withCredentials: true }
+          );
+          isCorrect = !!res.data.is_correct;
+        } catch (err) {
+          console.error(
+            "Answer verification failed, defaulting to incorrect:",
+            err?.response?.data || err.message
+          );
+          isCorrect = false;
+        }
+      }
+    }
+
     const newAnswer = {
-      questionId: currentQuestion.id,
-      answer: normalizeLatex(correctAnswer),
-      timeTaken: secondsElapsed,
-      isCorrect: true,
-      usedAIVideo,
-      usedAIChat,
+      question_id: currentQuestion.id,
+      answer_given: attachedImageUrl
+        ? `${studentAnswerText} (image attached)`.trim()
+        : normalizeLatex(studentAnswerText || ""),
+      time_spent_seconds: secondsElapsed,
+      is_correct: isCorrect,
+      used_ai_video: usedAIVideo,
+      used_ai_chat: usedAIChat,
     };
 
-    const newResult = { questionId: currentQuestion.id, isCorrect: true };
+    const newResult = { questionId: currentQuestion.id, isCorrect };
     const updatedAnswers = [...recordedAnswers, newAnswer];
     const updatedResults = [...answerResults, newResult];
 
@@ -539,7 +656,7 @@ const SolveProblems = () => {
 
     if (isLastQuestion) {
       stopTimers();
-      await submitAnswers(updatedAnswers, updatedResults);
+      await submitAnswers(updatedAnswers);
       setShowResults(true);
     } else {
       api?.scrollNext();
@@ -558,6 +675,16 @@ const SolveProblems = () => {
     if (api) api.scrollTo(0);
     startTimers();
   };
+
+  if (loadingSession) {
+    return (
+      <LoggedInLayout>
+        <div className="min-h-[calc(100vh-64px)] flex items-center justify-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-indigo-600"></div>
+        </div>
+      </LoggedInLayout>
+    );
+  }
 
   return (
     <LoggedInLayout>
@@ -583,19 +710,12 @@ const SolveProblems = () => {
           height: "calc(100vh - 64px)", // ← NEW: anchors the whole layout to the viewport
         }}>
           {showResults ? (
-            <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+            <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
               <ResultsScreen
                 answerResults={answerResults}
                 totalSeconds={totalSeconds}
                 onRetry={handleRetry}
                 onHome={() => navigate("/showpersonaldata")}
-              />
-              <AISidebar
-                topic={topic}
-                section={section}
-                currentQuestion={currentQuestion}
-                onOpenStepByStep={() => setIsDialogOpen(true)}
-                setUsedAIChat={setUsedAIChat}
               />
             </div>
           ) : (
@@ -685,12 +805,17 @@ const SolveProblems = () => {
                         <DialogDescription />
                       </DialogHeader>
                       <SolveProblems_stepbystep
+                        question={currentQuestion}
                         handlePlayAudio={handlePlayAudio}
                         handleNextOrSubmit={handleNextOrSubmit_solvetab}
-                        question={currentQuestion}
                         setIsDialogOpen={setIsDialogOpen}
                         muted={muted}
                         toggleMute={toggleMute}
+                        videoStreamUrl={videoStreamUrl}
+                        isVideoLoading={isVideoLoading}
+                        onGenerateVideo={handleGenerateAndStreamVideo}
+                        isLastQuestion={isLastQuestion}
+                        setUsedAIChat={setUsedAIChat}
                       />
                     </DialogContent>
                   </Dialog>
@@ -978,7 +1103,7 @@ const SolveProblems = () => {
                   </div>
                 )}
 
-                <div style={{ flex: activeTools.length > 0 ? "0 0 75%" : "1 1 auto", overflow: "hidden", minHeight: 0 }}>
+                {!showResults && (<div style={{ flex: activeTools.length > 0 ? "0 0 75%" : "1 1 auto", overflow: "hidden", minHeight: 0 }}>
                   <AISidebar
                     topic={topic}
                     section={section}
@@ -995,6 +1120,8 @@ const SolveProblems = () => {
 
                   />
                 </div>
+                )}
+
               </div>
             </div>
           )}

@@ -41,7 +41,7 @@ const Navbar = () => {
         {/* Logo */}
         <div className="flex flex-row items-center gap-x-3 text-2xl md:text-3xl">
           <img className="w-10 h-8 md:w-12 md:h-10" src="/mathamagic_m_blue_star.svg" alt="logo" />
-          <a href="/" className="font-bold -ml-6">athamagic</a>
+          <a href="/" className="font-bold -ml-6">athmagick</a>
         </div>
 
         {/* Desktop nav */}

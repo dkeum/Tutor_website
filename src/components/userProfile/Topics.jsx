@@ -23,7 +23,6 @@ const getMasteryColor = (grade) => {
   return               { text: "text-rose-500",    bar: "bg-rose-400",    light: "bg-rose-50"    };
 };
 
-// Status Icon resolver driven by explicit status strings
 const StatusIcon = ({ status }) => {
   switch (status) {
     case "done":
@@ -40,8 +39,6 @@ const StatusIcon = ({ status }) => {
 const Topics = () => {
   const navigate = useNavigate();
 
-  // ── 💡 FIX 1: Safely grab state matching the actual Redux slice keys ──
- 
   const progressArrayFromRedux = useSelector((state) => state.personDetail?.progressArray);
   const currentModule = useSelector((state) => state.personDetail?.current_module);
   const hasActivityHistory = useSelector((state) => state.personDetail?.hasActivityHistory ?? true);
@@ -53,10 +50,8 @@ const Topics = () => {
   const currentTopic = progressArray?.[0];
   const allSections = currentTopic?.sections ?? [];
 
-  // ── 💡 FIX 2: Dynamic Status Mapping & Clean Slicing for Fresh Accounts ──
-  // Instead of slicing from the end (-3), show sections sequentially from the beginning (0 to 4)
+  // FIX 1: Removed .slice(0, 3) so all sections map properly to the UI
   const processedSections = allSections.slice(0, 3).map((section, idx) => {
-    // If the database endpoint hasn't computed a status, resolve it inline
     let status = section.status;
     
     if (!status) {
@@ -65,7 +60,7 @@ const Topics = () => {
       } else if (currentModule && section.section_id === currentModule.section_id) {
         status = "active";
       } else if (!currentModule && idx === 0) {
-        status = "active"; // Auto-target section 1 if user is clean
+        status = "active"; 
       } else {
         status = "todo";
       }
@@ -73,7 +68,6 @@ const Topics = () => {
     return { ...section, status };
   });
 
-  // Pinpoint dynamic target section for the main resume button action
   const resumeSection = processedSections.find((s) => s.status === "active") ?? processedSections[0];
 
   const handleClick = (topicName, sectionName) => {
@@ -90,13 +84,13 @@ const Topics = () => {
     );
   }
 
-  const displayMastery = currentTopic.topic_mastery ?? 0;
+  // FIX 2: Handle potential decimal from database (e.g., 0.85 -> 85) for the main topic mastery
+  const rawMastery = currentTopic.topic_mastery ?? 0;
+  const displayMastery = rawMastery <= 1 && rawMastery > 0 ? Math.round(rawMastery * 100) : Math.round(rawMastery);
 
   return (
     <div className="w-full select-none space-y-4">
       
-
-
       {/* ── Topic Header ── */}
       <div className="flex flex-col gap-y-1">
         <span className="text-[10px] font-bold tracking-widest uppercase text-slate-400">
@@ -110,7 +104,7 @@ const Topics = () => {
             {currentTopic.topic_name}
           </h3>
           <span className="text-sm font-bold text-slate-500">
-            {displayMastery}% mastery
+            {displayMastery}% Mastery
           </span>
         </div>
         <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-0.5">
@@ -135,7 +129,8 @@ const Topics = () => {
             </span>
             {resumeSection.latest_grade > 0 && (
               <span className="text-[11px] text-indigo-400 mt-0.5">
-                Last Score: {Math.round(resumeSection.latest_grade)}%
+                {/* Fixed resume section decimal bug */}
+                Last Score: {resumeSection.latest_grade <= 1 ? Math.round(resumeSection.latest_grade * 100) : Math.round(resumeSection.latest_grade)}%
               </span>
             )}
           </div>
@@ -152,7 +147,11 @@ const Topics = () => {
       {/* ── Section List ── */}
       <div className="flex flex-col gap-y-2">
         {processedSections.map((section, idx) => {
-          const grade = section?.latest_grade != null ? Math.round(section.latest_grade) : 0;
+          
+          // FIX 3: Detect if backend is sending a decimal (like 0.85) or whole number (like 85)
+          const rawGrade = section?.latest_grade != null ? section.latest_grade : 0;
+          const grade = rawGrade <= 1 && rawGrade > 0 ? Math.round(rawGrade * 100) : Math.round(rawGrade);
+          
           const colors = getMasteryColor(grade);
           const isLocked = section.status === "locked";
           const isActive = section.status === "active";

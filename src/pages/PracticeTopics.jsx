@@ -13,6 +13,7 @@ import Sidebar from "../components/Sidebar";
 import NavbarLoggedIn from "../components/NavbarLoggedIn";
 import { useNavigate } from "react-router-dom";
 import LoggedInLayout from "../components/LoggedInLayout";
+import { supabase } from "../db/supabaseclient";
 
 const PracticeTopics = () => {
   // 1. Core States for Dynamic Data
@@ -41,21 +42,31 @@ const PracticeTopics = () => {
       try {
         setLoading(true);
 
-        const API_URL =
-          import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-            ? "http://localhost:3000/practice-bank"
-            : "https://mathamagic-backend.vercel.app/practice-bank";
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session?.user) {
 
-        const response = await axios.get(API_URL, {
-          params: { class: studentClassId },
-          withCredentials: true,
-        });
+          const API_URL =
+            import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+              ? "http://localhost:3000/practice-bank"
+              : "https://mathamagic-backend.vercel.app/practice-bank";
 
-        // console.log(response);
+          const response = await axios.get(API_URL, {
 
-        setTopics(response.data.topics || []);
-        setLastWorkedSection(response.data.last_worked_section);
-        setError(null);
+            headers: {
+              Authorization: `Bearer ${session.access_token}`, // Inject the fresh token
+            },
+            params: { class: studentClassId },
+            withCredentials: true,
+          });
+
+          // console.log(response);
+
+          setTopics(response.data.topics || []);
+          setLastWorkedSection(response.data.last_worked_section);
+          setError(null);
+        }
       } catch (err) {
         console.error("Error fetching practice bank:", err);
         setError(err.response?.data?.error || "Failed to load practice banks.");
@@ -268,20 +279,18 @@ const PracticeTopics = () => {
 
                         <div className="flex items-center gap-4">
                           <ChevronDown
-                            className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${
-                              isOpen ? "rotate-180 text-[#4800b2]" : ""
-                            }`}
+                            className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isOpen ? "rotate-180 text-[#4800b2]" : ""
+                              }`}
                           />
                         </div>
                       </button>
 
                       {/* Accordion Dropdown Section Body Area */}
                       <div
-                        className={`accordion-content overflow-hidden transition-all duration-300 ease-in-out border-t border-slate-100 ${
-                          isOpen
-                            ? "max-h-[800px] opacity-100 bg-slate-50/40"
-                            : "max-h-0 opacity-0 pointer-events-none"
-                        }`}
+                        className={`accordion-content overflow-hidden transition-all duration-300 ease-in-out border-t border-slate-100 ${isOpen
+                          ? "max-h-[800px] opacity-100 bg-slate-50/40"
+                          : "max-h-0 opacity-0 pointer-events-none"
+                          }`}
                       >
                         <div className="p-6 flex flex-col gap-3">
                           {nestedSections.map((section) => {
@@ -295,11 +304,10 @@ const PracticeTopics = () => {
                                   !loadingQuestions &&
                                   handleFetchQuestions(topic.name, section.name)
                                 }
-                                className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-[#4800b2]/40 hover:shadow-sm transition-all cursor-pointer group/item ${
-                                  loadingQuestions
-                                    ? "pointer-events-none opacity-60"
-                                    : ""
-                                }`}
+                                className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white rounded-xl border border-slate-200 hover:border-[#4800b2]/40 hover:shadow-sm transition-all cursor-pointer group/item ${loadingQuestions
+                                  ? "pointer-events-none opacity-60"
+                                  : ""
+                                  }`}
                               >
                                 {/* Left: Sub-section Title Status */}
                                 <div className="flex items-center gap-3">
@@ -328,13 +336,12 @@ const PracticeTopics = () => {
                                   </span>
 
                                   <span
-                                    className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
-                                      normalizedDifficulty === "easy"
-                                        ? "bg-green-50 text-green-600 border border-green-100"
-                                        : normalizedDifficulty === "hard"
+                                    className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${normalizedDifficulty === "easy"
+                                      ? "bg-green-50 text-green-600 border border-green-100"
+                                      : normalizedDifficulty === "hard"
                                         ? "bg-rose-50 text-rose-600 border border-rose-100"
                                         : "bg-amber-50 text-amber-600 border border-amber-100"
-                                    }`}
+                                      }`}
                                   >
                                     {section.difficulty || "Medium"}
                                   </span>
@@ -353,14 +360,13 @@ const PracticeTopics = () => {
             )}
           </main>
 
-         
+
 
           <div
-            className={`fixed bottom-10 right-10 transition-all duration-500 z-[100] flex items-center gap-4 bg-[#2ECC71] text-white px-6 py-4 rounded-2xl shadow-2xl shadow-[#2ECC71]/40 ${
-              showToast
-                ? "translate-y-0 opacity-100"
-                : "translate-y-20 opacity-0 pointer-events-none"
-            }`}
+            className={`fixed bottom-10 right-10 transition-all duration-500 z-[100] flex items-center gap-4 bg-[#2ECC71] text-white px-6 py-4 rounded-2xl shadow-2xl shadow-[#2ECC71]/40 ${showToast
+              ? "translate-y-0 opacity-100"
+              : "translate-y-20 opacity-0 pointer-events-none"
+              }`}
           >
             <div className="text-left">
               <p className="text-sm font-bold">Practice Engine Live!</p>

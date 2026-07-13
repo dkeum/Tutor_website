@@ -32,11 +32,18 @@ const FinalExamPrep = () => {
         const {
           data: { session },
         } = await supabase.auth.getSession();
+
         if (session?.user) {
+
           const res = await axios.get(
-            `${BASE}/${session.user.email}/getprofile`,
-            { withCredentials: true }
-          );
+            `${BASE}/${session.user.email}/getprofile`, {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`, // Inject the fresh token
+            },
+            withCredentials: true,
+          });
+
+
           dispatch(setProfileInfo(res?.data));
         } else {
           navigate("/login");
@@ -52,27 +59,39 @@ const FinalExamPrep = () => {
   useEffect(() => {
     if (!classId) return;
 
+
+
     const fetchTopics = async () => {
       setLoadingTopics(true);
       try {
-        const { data } = await axios.get(`${BASE}/final-exam/topics`, {
-          params: { classId },
-          withCredentials: true,
-        });
 
-        // console.log(data);
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-        // Map DB rows → local shape; mastery starts at 0 until you wire up progress
-        setTopics(
-          data.map((t) => ({
-            id: t.id,
-            title: t.name,
-            desc: t.description ?? "",
-            mastery: t.mastery ?? 0, // ← now real, not hardcoded 0
-            attempted: t.attempted ?? false, // ← lets you show a "not yet attempted" state
-            selected: false,
-          }))
-        );
+        if (session?.user) {
+          const { data } = await axios.get(`${BASE}/final-exam/topics`, {
+            params: { classId },
+            headers: {
+              Authorization: `Bearer ${session.access_token}`, // Inject the fresh token
+            },
+            withCredentials: true,
+          });
+
+          // console.log(data);
+
+          // Map DB rows → local shape; mastery starts at 0 until you wire up progress
+          setTopics(
+            data.map((t) => ({
+              id: t.id,
+              title: t.name,
+              desc: t.description ?? "",
+              mastery: t.mastery ?? 0, // ← now real, not hardcoded 0
+              attempted: t.attempted ?? false, // ← lets you show a "not yet attempted" state
+              selected: false,
+            }))
+          );
+        }
       } catch (err) {
         console.error("Failed to fetch topics:", err);
       } finally {
@@ -132,7 +151,7 @@ const FinalExamPrep = () => {
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
-    <div className="text-[#101b30] min-h-screen font-sans overflow-x-hidden antialiased">
+    <div className="text-[#101b30] min-h-screen font-sans  antialiased">
       <LoggedInLayout>
         <main className=" relative transition-all duration-300">
           <div className="max-w-[1280px] mx-auto px-6 md:px-10 py-12">
@@ -204,26 +223,23 @@ const FinalExamPrep = () => {
                   <div
                     key={topic.id}
                     onClick={() => handleToggleTopic(topic.id)}
-                    className={`p-6 rounded-2xl transition-all duration-300 cursor-pointer relative overflow-hidden bg-white transform hover:-translate-y-1 hover:shadow-lg ${
-                      topic.selected
-                        ? "ring-2 ring-[#6200ee] border-transparent shadow-md"
-                        : "border border-slate-200 hover:border-slate-300"
-                    }`}
+                    className={`p-6 rounded-2xl transition-all duration-300 cursor-pointer relative overflow-hidden bg-white transform hover:-translate-y-1 hover:shadow-lg ${topic.selected
+                      ? "ring-2 ring-[#6200ee] border-transparent shadow-md"
+                      : "border border-slate-200 hover:border-slate-300"
+                      }`}
                   >
                     <div className="absolute top-4 right-4">
                       <div
-                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                          topic.selected
-                            ? "bg-[#2ECC71] border-[#2ECC71]"
-                            : "border-slate-300"
-                        }`}
+                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${topic.selected
+                          ? "bg-[#2ECC71] border-[#2ECC71]"
+                          : "border-slate-300"
+                          }`}
                       >
                         <Check
-                          className={`w-3.5 h-3.5 text-white transition-all duration-300 transform ${
-                            topic.selected
-                              ? "scale-100 opacity-100"
-                              : "scale-50 opacity-0"
-                          }`}
+                          className={`w-3.5 h-3.5 text-white transition-all duration-300 transform ${topic.selected
+                            ? "scale-100 opacity-100"
+                            : "scale-50 opacity-0"
+                            }`}
                           strokeWidth={3}
                         />
                       </div>
@@ -246,13 +262,12 @@ const FinalExamPrep = () => {
                       <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                         {topic.attempted ? (
                           <div
-                            className={`h-full relative transition-all duration-500 ${
-                              topic.mastery >= 75
-                                ? "bg-[#2ECC71]"
-                                : topic.mastery >= 50
+                            className={`h-full relative transition-all duration-500 ${topic.mastery >= 75
+                              ? "bg-[#2ECC71]"
+                              : topic.mastery >= 50
                                 ? "bg-[#6200ee]"
                                 : "bg-[#ba1a1a]"
-                            }`}
+                              }`}
                             style={{ width: `${topic.mastery}%` }}
                           />
                         ) : (
@@ -276,9 +291,8 @@ const FinalExamPrep = () => {
 
       {/* Toast */}
       <div
-        className={`fixed bottom-10 right-10 bg-[#2ECC71] text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 transform transition-transform duration-500 z-50 ${
-          showToast ? "translate-y-0" : "translate-y-32"
-        }`}
+        className={`fixed bottom-10 right-10 bg-[#2ECC71] text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 transform transition-transform duration-500 z-50 ${showToast ? "translate-y-0" : "translate-y-32"
+          }`}
       >
         <CheckCircle2 className="w-6 h-6" />
         <span className="font-bold text-sm">

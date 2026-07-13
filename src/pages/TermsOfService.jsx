@@ -4,19 +4,19 @@ const TermsOfService = () => {
 
       <h1 className="text-3xl font-bold mb-2">Terms of Service</h1>
       <p className="text-sm text-gray-500 mb-1">Effective Date: June 7, 2026</p>
-      <p className="text-sm text-gray-500 mb-10">Last Updated: June 7, 2026</p>
+      <p className="text-sm text-gray-500 mb-10">Last Updated:June 7, 2026</p>
 
       {/* 1 */}
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-3">1. Acceptance of Terms</h2>
         <p className="text-gray-600 leading-relaxed">
-          By accessing or using Mathamagic ("we," "us," or "our") at mathamagic.vercel.app, you agree
+          By accessing or using Mathmagick ("we," "us," or "our") at mathmagick.com, you agree
           to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, please
           do not use our platform.
         </p>
         <p className="text-gray-600 leading-relaxed mt-3">
           If you are a minor, your parent or legal guardian must review and agree to these Terms on
-          your behalf. By permitting a minor to use Mathamagic, the parent or guardian agrees to
+          your behalf. By permitting a minor to use Mathmagick, the parent or guardian agrees to
           these Terms and takes full responsibility for the minor's use of the platform.
         </p>
       </section>
@@ -25,15 +25,22 @@ const TermsOfService = () => {
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-3">2. Description of Service</h2>
         <p className="text-gray-600 leading-relaxed">
-          Mathamagic is an online educational platform designed to help students learn mathematics
-          through interactive lessons, practice problems, AI-assisted homework help, and progress
+          Mathmagick is an online educational platform designed to help students learn mathematics
+          through interactive lessons, practice problems, AI-assisted problem solving, and progress
           tracking. Features include but are not limited to:
         </p>
         <ul className="list-disc list-inside text-gray-600 space-y-1 leading-relaxed mt-3">
-          <li>Topic-based lesson modules and practice sections</li>
-          <li>AI-assisted homework review via file upload</li>
-          <li>Academic progress dashboards for students and parents</li>
-          <li>Subscription-based access to premium features</li>
+          <li>Topic-based lesson modules and practice sections, including video lessons</li>
+          <li>An interactive, step-by-step problem-solving workspace with drawing, graphing, and
+            calculator tools</li>
+          <li>AI-generated video explanations for individual problems</li>
+          <li>AI-assisted review of your submitted answers, including verification of whether an
+            answer is correct</li>
+          <li>Academic progress dashboards, including grades derived in part from AI-assisted
+            answer verification</li>
+          <li>Optional parent or guardian access to a student's progress summary (see Section 10)</li>
+          <li>A free trial period, after which continued access to the platform requires a paid
+            subscription (see Section 4)</li>
         </ul>
         <p className="text-gray-600 leading-relaxed mt-3">
           We reserve the right to modify, suspend, or discontinue any part of the service at any time
@@ -45,7 +52,7 @@ const TermsOfService = () => {
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-3">3. Eligibility & Account Registration</h2>
         <p className="text-gray-600 leading-relaxed">
-          To use Mathamagic, you must:
+          To use Mathmagick, you must:
         </p>
         <ul className="list-disc list-inside text-gray-600 space-y-1 leading-relaxed mt-3">
           <li>Be at least 13 years of age, or have verifiable parental consent if under 13</li>
@@ -62,10 +69,12 @@ const TermsOfService = () => {
 
       {/* 4 */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-3">4. Subscriptions and Payments</h2>
+        <h2 className="text-xl font-semibold mb-3">4. Free Trial and Subscription</h2>
         <p className="text-gray-600 leading-relaxed">
-          Some features of Mathamagic require a paid subscription. By subscribing, you agree to the
-          following:
+          Mathmagick is offered on a subscription basis. New accounts may receive a free trial
+          period, after which continued access to the platform requires an active paid subscription.
+          Mathmagick does not offer a permanent free tier of service; access outside of the trial
+          period is subscription-only. By subscribing, you agree to the following:
         </p>
         <div className="mt-4 space-y-3">
           <div>
@@ -76,18 +85,19 @@ const TermsOfService = () => {
             </p>
           </div>
           <div>
-            <p className="font-semibold text-gray-800">Free Trials</p>
+            <p className="font-semibold text-gray-800">Free Trial</p>
             <p className="text-gray-600 leading-relaxed">
-              If a free trial is offered, it will automatically convert to a paid subscription at the
-              end of the trial period unless cancelled before the trial ends.
+              If a free trial is offered at signup, it will automatically convert to a paid
+              subscription at the end of the trial period unless cancelled before the trial ends.
+              You will be notified before your trial converts to a paid plan.
             </p>
           </div>
           <div>
             <p className="font-semibold text-gray-800">Cancellation</p>
             <p className="text-gray-600 leading-relaxed">
-              You may cancel your subscription at any time through your account settings. Cancellation
-              takes effect at the end of the current billing period. You will retain access to paid
-              features until that date.
+              You may cancel your subscription at any time through your account settings.
+              Cancellation takes effect at the end of the current billing period. You will retain
+              access to paid features until that date.
             </p>
           </div>
           <div>
@@ -115,7 +125,7 @@ const TermsOfService = () => {
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-3">5. Acceptable Use</h2>
         <p className="text-gray-600 leading-relaxed mb-3">
-          You agree to use Mathamagic only for lawful, educational purposes. You must not:
+          You agree to use Mathmagick only for lawful, educational purposes. You must not:
         </p>
         <ul className="list-disc list-inside text-gray-600 space-y-1 leading-relaxed">
           <li>Upload content that is illegal, harmful, abusive, or offensive</li>
@@ -137,19 +147,21 @@ const TermsOfService = () => {
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-3">6. User-Submitted Content</h2>
         <p className="text-gray-600 leading-relaxed">
-          When you upload homework files, profile pictures, or other content to Mathamagic, you
-          grant us a limited, non-exclusive license to store and process that content solely for the
-          purpose of providing the service to you.
+          When you upload profile pictures or other content to Mathmagick, you grant us a limited,
+          non-exclusive license to store and process that content solely for the purpose of
+          providing the service to you.
+        </p>
+        <p className="text-gray-600 leading-relaxed mt-3">
+          Answers, work, or images you submit for AI-assisted review (for example, through the
+          step-by-step problem solver or homework correction tools) are processed in order to
+          generate feedback and are not permanently stored in our database. These submissions may
+          be transmitted to third-party AI providers for processing; see Section 8 for details on
+          how that processing works and each provider's own data handling practices.
         </p>
         <p className="text-gray-600 leading-relaxed mt-3">
           You represent that you own or have the right to submit any content you upload, and that
           doing so does not violate the rights of any third party. We do not claim ownership of
           your submitted content.
-        </p>
-        <p className="text-gray-600 leading-relaxed mt-3">
-          Uploaded homework files are retained for 90 days and then automatically deleted. See our{" "}
-          <a href="/privacy" className="text-indigo-600 hover:underline">Privacy Policy</a> for
-          full data retention details.
         </p>
       </section>
 
@@ -157,8 +169,8 @@ const TermsOfService = () => {
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-3">7. Intellectual Property</h2>
         <p className="text-gray-600 leading-relaxed">
-          All content on Mathamagic — including lesson materials, problem sets, graphics, software,
-          and platform design — is owned by or licensed to Mathamagic and is protected by applicable
+          All content on Mathmagick — including lesson materials, problem sets, graphics, software,
+          and platform design — is owned by or licensed to Mathmagick and is protected by applicable
           intellectual property laws.
         </p>
         <p className="text-gray-600 leading-relaxed mt-3">
@@ -171,23 +183,93 @@ const TermsOfService = () => {
 
       {/* 8 */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-3">8. AI-Assisted Features</h2>
+        <h2 className="text-xl font-semibold mb-3">8. Third-Party Processing</h2>
         <p className="text-gray-600 leading-relaxed">
-          Mathamagic uses artificial intelligence to assist with homework review and personalized
-          learning recommendations. Please be aware that:
+          To provide the service, Mathmagick shares certain data with third-party providers,
+          including:
         </p>
         <ul className="list-disc list-inside text-gray-600 space-y-1 leading-relaxed mt-3">
-          <li>AI-generated feedback is for educational assistance only and may not always be accurate</li>
-          <li>AI responses should not be treated as a substitute for qualified teacher or tutor guidance</li>
-          <li>We are continuously improving our AI systems but cannot guarantee error-free output</li>
+          <li>
+            <span className="font-semibold text-gray-800">Google Gemini</span> — used to review and
+            verify the correctness of answers you submit, and to power AI tutoring conversations
+            within the platform
+          </li>
+          <li>
+            <span className="font-semibold text-gray-800">[VIDEO GENERATION PROVIDER — CONFIRM]</span>{" "}
+            — used to generate scripts and content for AI-generated video explanations
+          </li>
+          <li>
+            <span className="font-semibold text-gray-800">Stripe</span> — used to process
+            subscription payments; we do not store your full payment card details
+          </li>
+          <li>
+            <span className="font-semibold text-gray-800">Supabase</span> — used for account
+            authentication and database hosting
+          </li>
+          <li>
+            <span className="font-semibold text-gray-800">YouTube</span> — used to host and embed
+            certain lesson videos
+          </li>
         </ul>
+        <p className="text-gray-600 leading-relaxed mt-3">
+          These providers process data under their own privacy policies and terms. We select
+          providers that we believe handle data responsibly, but we do not control their internal
+          systems and cannot guarantee their practices. See our{" "}
+          <a href="/privacy" className="text-indigo-600 hover:underline">Privacy Policy</a> for
+          further detail.
+        </p>
       </section>
 
       {/* 9 */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-3">9. Disclaimer of Warranties</h2>
+        <h2 className="text-xl font-semibold mb-3">9. AI-Assisted Features and Grading</h2>
         <p className="text-gray-600 leading-relaxed">
-          Mathamagic is provided on an "as is" and "as available" basis without warranties of any
+          Mathmagick uses artificial intelligence to review submitted answers, generate video
+          explanations, and power tutoring conversations. Please be aware that:
+        </p>
+        <ul className="list-disc list-inside text-gray-600 space-y-1 leading-relaxed mt-3">
+          <li>
+            AI is used to determine whether a submitted answer is mathematically correct. This
+            determination directly affects the grades, completion status, and progress shown on
+            your dashboard (and, where enabled, on a linked guardian's progress report)
+          </li>
+          <li>AI-generated feedback and video explanations are for educational assistance only and
+            may occasionally be inaccurate or incomplete</li>
+          <li>AI responses should not be treated as a substitute for qualified teacher or tutor
+            guidance</li>
+          <li>If you believe an AI-assisted grade or evaluation is incorrect, you may contact us at{" "}
+            <a href="mailto:mathamagic.dkeum@gmail.com" className="text-indigo-600 hover:underline">
+              mathamagic.dkeum@gmail.com
+            </a>{" "}
+            to request a review</li>
+          <li>We are continuously improving our AI systems but cannot guarantee error-free output</li>
+        </ul>
+      </section>
+
+      {/* 10 */}
+      <section className="mb-10">
+        <h2 className="text-xl font-semibold mb-3">10. Parent and Guardian Access</h2>
+        <p className="text-gray-600 leading-relaxed">
+          Mathmagick allows a student to optionally invite a parent or guardian to receive progress
+          reports for that student's account. If you enable this feature:
+        </p>
+        <ul className="list-disc list-inside text-gray-600 space-y-1 leading-relaxed mt-3">
+          <li>An invitation is sent to the email address you provide, and the linkage is not active
+            until the invited parent or guardian confirms it</li>
+          <li>A linked parent or guardian can view summary progress information (such as grades,
+            completed lessons, and time spent studying) but cannot access your account password,
+            sign in as you, or make changes on your behalf</li>
+          <li>You or the linked guardian may remove this access at any time from account settings</li>
+          <li>If you are under 18, your parent or legal guardian may also request access to your
+            progress information directly by contacting us</li>
+        </ul>
+      </section>
+
+      {/* 11 */}
+      <section className="mb-10">
+        <h2 className="text-xl font-semibold mb-3">11. Disclaimer of Warranties</h2>
+        <p className="text-gray-600 leading-relaxed">
+          Mathmagick is provided on an "as is" and "as available" basis without warranties of any
           kind, either express or implied. We do not warrant that the platform will be uninterrupted,
           error-free, or free of viruses or other harmful components.
         </p>
@@ -197,11 +279,11 @@ const TermsOfService = () => {
         </p>
       </section>
 
-      {/* 10 */}
+      {/* 12 */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-3">10. Limitation of Liability</h2>
+        <h2 className="text-xl font-semibold mb-3">12. Limitation of Liability</h2>
         <p className="text-gray-600 leading-relaxed">
-          To the fullest extent permitted by applicable law, Mathamagic and its owner shall not be
+          To the fullest extent permitted by applicable law, Mathmagick and its owner shall not be
           liable for any indirect, incidental, special, consequential, or punitive damages arising
           from your use of or inability to use the platform.
         </p>
@@ -211,9 +293,9 @@ const TermsOfService = () => {
         </p>
       </section>
 
-      {/* 11 */}
+      {/* 13 */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-3">11. Governing Law</h2>
+        <h2 className="text-xl font-semibold mb-3">13. Governing Law</h2>
         <p className="text-gray-600 leading-relaxed">
           These Terms are governed by and construed in accordance with the laws of the Province of
           British Columbia and the federal laws of Canada applicable therein. Any disputes arising
@@ -222,23 +304,23 @@ const TermsOfService = () => {
         </p>
       </section>
 
-      {/* 12 */}
+      {/* 14 */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-3">12. Changes to These Terms</h2>
+        <h2 className="text-xl font-semibold mb-3">14. Changes to These Terms</h2>
         <p className="text-gray-600 leading-relaxed">
           We may update these Terms from time to time. When we do, we will update the "Last Updated"
           date at the top of this page. For material changes, we will notify users by email or by a
           prominent notice on the platform at least 14 days before the changes take effect.
         </p>
         <p className="text-gray-600 leading-relaxed mt-3">
-          Your continued use of Mathamagic after updated Terms are posted constitutes your acceptance
+          Your continued use of Mathmagick after updated Terms are posted constitutes your acceptance
           of the revised Terms.
         </p>
       </section>
 
-      {/* 13 */}
+      {/* 15 */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-3">13. Termination</h2>
+        <h2 className="text-xl font-semibold mb-3">15. Termination</h2>
         <p className="text-gray-600 leading-relaxed">
           We reserve the right to suspend or terminate your account and access to the platform at
           our discretion, with or without notice, if we determine you have violated these Terms or
@@ -252,14 +334,14 @@ const TermsOfService = () => {
         </p>
       </section>
 
-      {/* 14 */}
+      {/* 16 */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-3">14. Contact Us</h2>
+        <h2 className="text-xl font-semibold mb-3">16. Contact Us</h2>
         <p className="text-gray-600 leading-relaxed">
           If you have any questions about these Terms, please contact:
         </p>
         <div className="mt-3 text-gray-600 leading-relaxed">
-          <p className="font-semibold text-gray-800">Daniel Keum — Mathamagic</p>
+          <p className="font-semibold text-gray-800">Daniel Keum — Mathmagick</p>
           <p>21385 121 Ave, Maple Ridge, BC, V2X 3S8</p>
           <p>
             <a href="mailto:mathamagic.dkeum@gmail.com" className="text-indigo-600 hover:underline">
@@ -271,7 +353,7 @@ const TermsOfService = () => {
       </section>
 
       <p className="text-xs text-gray-400 border-t border-gray-100 pt-6 mt-6">
-        &copy; {new Date().getFullYear()} Mathamagic. All rights reserved.
+        &copy; {new Date().getFullYear()} Mathmagick. All rights reserved.
       </p>
 
     </div>

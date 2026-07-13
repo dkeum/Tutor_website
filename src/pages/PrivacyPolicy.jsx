@@ -4,19 +4,19 @@ const PrivacyPolicy = () => {
 
       <h1 className="text-3xl font-bold mb-2">Privacy Policy</h1>
       <p className="text-sm text-gray-500 mb-1">Effective Date: June 7, 2026</p>
-      <p className="text-sm text-gray-500 mb-10">Last Updated: June 7, 2026</p>
+      <p className="text-sm text-gray-500 mb-10">Last Updated:June 7, 2026</p>
 
       {/* 1 */}
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-3">1. Introduction</h2>
         <p className="text-gray-600 leading-relaxed">
-          Welcome to Mathamagic ("we," "us," or "our"). We operate the website mathamagic.vercel.app
+          Welcome to Mathmagick ("we," "us," or "our"). We operate the website mathamagic.vercel.app
           and are committed to protecting the privacy of our users, including students who may be minors.
           This Privacy Policy explains what information we collect, how we use it, and your rights
           regarding that information.
         </p>
         <p className="text-gray-600 leading-relaxed mt-3">
-          By using Mathamagic, you agree to the practices described in this policy. If you are a parent
+          By using Mathmagick, you agree to the practices described in this policy. If you are a parent
           or guardian with questions about your child's data, please contact us at{" "}
           <a href="mailto:mathamagic.dkeum@gmail.com" className="text-indigo-600 hover:underline">
             mathamagic.dkeum@gmail.com
@@ -28,7 +28,7 @@ const PrivacyPolicy = () => {
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-3">2. Who We Collect Data From</h2>
         <p className="text-gray-600 leading-relaxed">
-          Mathamagic is an educational platform intended for use by students, including minors under
+          Mathmagick is an educational platform intended for use by students, including minors under
           the age of 13. <strong>We do not knowingly allow children under 13 to create accounts without
           verifiable parental consent.</strong> If a parent or guardian believes their child has provided
           us with personal information without consent, please contact us immediately and we will delete
@@ -38,6 +38,11 @@ const PrivacyPolicy = () => {
           If you are a parent or guardian setting up an account on behalf of your child, you are
           responsible for ensuring the information provided is accurate and that you have authority to
           consent on your child's behalf.
+        </p>
+        <p className="text-gray-600 leading-relaxed mt-3">
+          A student may also optionally invite a parent or guardian to link to their account after
+          registration in order to receive progress reports. See Section 5 for what information is
+          shared with a linked parent or guardian.
         </p>
       </section>
 
@@ -63,15 +68,19 @@ const PrivacyPolicy = () => {
           },
           {
             title: "Academic Data",
-            text: "Grades, mastery scores, progress through lessons and topics, and performance on practice problems.",
+            text: "Grades, mastery scores, progress through lessons and topics, and performance on practice problems, including grades derived in part from AI-assisted answer verification.",
           },
           {
             title: "Session & Activity Data",
             text: "Login timestamps, session durations, pages visited, time spent on lessons, and interaction patterns used to improve the platform.",
           },
           {
-            title: "Uploaded Files",
-            text: "Homework images and PDF documents submitted through the Homework Help feature for AI-assisted review.",
+            title: "Content Submitted for AI Review",
+            text: "Answers, work, drawings, and images you submit through the step-by-step solver or homework correction tools are transmitted to our AI processing provider(s) to generate feedback and determine correctness. This content is processed to deliver that feedback and is not permanently stored in our database. See Section 5 and Section 7 for details.",
+          },
+          {
+            title: "Parent/Guardian Linking Information",
+            text: "If you invite a parent or guardian to your account, we collect the email address you provide for that purpose and the confirmation status of the invitation.",
           },
         ].map(({ title, text }) => (
           <div key={title} className="mb-3">
@@ -92,7 +101,10 @@ const PrivacyPolicy = () => {
           <li>Deliver personalized learning experiences and track academic progress</li>
           <li>Process payments and manage subscription plans through Stripe</li>
           <li>Analyze session activity to improve platform performance and content</li>
-          <li>Review uploaded homework files for AI-assisted feedback</li>
+          <li>Send submitted answers and work to our AI processing provider(s) to generate feedback,
+            verify correctness, and produce AI video explanations</li>
+          <li>Share a progress summary with a linked parent or guardian, where a student has enabled
+            this feature</li>
           <li>Communicate with you about your account, updates, or support requests</li>
           <li>Comply with legal obligations</li>
         </ul>
@@ -122,6 +134,18 @@ const PrivacyPolicy = () => {
             text: "Our hosting provider. Vercel may process request metadata as part of serving the application.",
           },
           {
+            title: "Google Gemini",
+            text: "Answers, work, and images you submit for AI-assisted review are sent to Google's Gemini API to determine correctness and generate feedback and tutoring responses. This content is processed by Google under its own privacy policy and is not permanently stored in our database.",
+          },
+          {
+            title: "[VIDEO GENERATION PROVIDER — CONFIRM]",
+            text: "Question text is sent to this provider to generate scripts for AI video explanations.",
+          },
+          {
+            title: "Linked Parent or Guardian",
+            text: "If you invite a parent or guardian and they confirm the invitation, we share a summary of your academic progress (such as grades, completed lessons, and time spent studying) with them. We do not share your password or allow them to access or modify your account.",
+          },
+          {
             title: "Legal requirements",
             text: "We may disclose information if required by law, court order, or to protect the safety of our users.",
           },
@@ -132,8 +156,8 @@ const PrivacyPolicy = () => {
           </div>
         ))}
         <p className="text-gray-600 leading-relaxed mt-2">
-          We do not share homework files, grades, or session data with any third-party advertisers,
-          analytics companies, or data brokers.
+          We do not share your data with any third-party advertisers, analytics companies, or data
+          brokers.
         </p>
       </section>
 
@@ -147,6 +171,8 @@ const PrivacyPolicy = () => {
           <li>We collect only the minimum data necessary to provide the educational service</li>
           <li>We do not serve behavioural advertising to any users, including minors</li>
           <li>We do not disclose personal information of minors to third parties except as described in Section 5</li>
+          <li>A minor's progress information is only shared with a parent or guardian if the student
+            initiates the invitation and the parent or guardian confirms it</li>
           <li>Parents and guardians may request to review, correct, or delete their child's personal data at any time</li>
           <li>We will respond to verified parental requests within 30 days</li>
         </ul>
@@ -163,8 +189,11 @@ const PrivacyPolicy = () => {
         <ul className="list-disc list-inside text-gray-600 space-y-1 leading-relaxed">
           <li><strong>Account data</strong> — retained until account deletion is requested</li>
           <li><strong>Academic progress data</strong> — retained for the duration of the subscription and up to 12 months after cancellation</li>
-          <li><strong>Uploaded homework files</strong> — retained for 90 days after upload, then automatically deleted</li>
+          <li><strong>Content submitted for AI review</strong> — processed transiently to generate
+            feedback and is not stored in our database. It may be temporarily retained by our AI
+            processing provider(s) in accordance with their own data retention practices</li>
           <li><strong>Session activity data</strong> — retained for up to 12 months for platform improvement purposes</li>
+          <li><strong>Parent/guardian linking data</strong> — retained until the link is removed by the student or the linked guardian</li>
           <li><strong>Payment records</strong> — retained as required by financial and tax regulations (typically 7 years)</li>
         </ul>
       </section>
@@ -200,13 +229,15 @@ const PrivacyPolicy = () => {
           <li><strong>Delete</strong> your personal information ("right to be forgotten")</li>
           <li><strong>Withdraw consent</strong> for data processing where consent is the legal basis</li>
           <li><strong>Request a copy</strong> of your data in a portable format</li>
+          <li><strong>Revoke a parent or guardian link</strong> you previously created, at any time</li>
         </ul>
         <p className="text-gray-600 leading-relaxed mt-4">
           To exercise any of these rights, contact us at{" "}
           <a href="mailto:mathamagic.dkeum@gmail.com" className="text-indigo-600 hover:underline">
             mathamagic.dkeum@gmail.com
           </a>. We will respond within 30 days. Parents and guardians may exercise these rights on
-          behalf of their minor children.
+          behalf of their minor children. A linked parent or guardian's own access is limited to the
+          progress summary described in Section 5 and does not include these broader account rights.
         </p>
       </section>
 
@@ -214,7 +245,7 @@ const PrivacyPolicy = () => {
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-3">10. Cookies and Tracking</h2>
         <p className="text-gray-600 leading-relaxed">
-          Mathamagic uses session cookies necessary for authentication and platform functionality.
+          Mathmagick uses session cookies necessary for authentication and platform functionality.
           We do not use third-party advertising cookies, tracking pixels, or behavioural analytics
           services such as Google Analytics.
         </p>
@@ -235,7 +266,7 @@ const PrivacyPolicy = () => {
         <p className="text-gray-600 leading-relaxed">
           We may update this Privacy Policy from time to time. When we do, we will update the
           "Last Updated" date at the top of this page. For significant changes, we will notify users
-          by email or by a prominent notice on the platform. Your continued use of Mathamagic after
+          by email or by a prominent notice on the platform. Your continued use of Mathmagick after
           changes are posted constitutes your acceptance of the updated policy.
         </p>
       </section>
@@ -248,7 +279,7 @@ const PrivacyPolicy = () => {
           data, please contact:
         </p>
         <div className="mt-3 text-gray-600 leading-relaxed">
-          <p className="font-semibold text-gray-800">Daniel Keum — Mathamagic</p>
+          <p className="font-semibold text-gray-800">Daniel Keum — Mathmagick</p>
           <p>21385 121 Ave, Maple Ridge, BC, V2X 3S8</p>
           <p>
             <a href="mailto:mathamagic.dkeum@gmail.com" className="text-indigo-600 hover:underline">
@@ -260,7 +291,7 @@ const PrivacyPolicy = () => {
       </section>
 
       <p className="text-xs text-gray-400 border-t border-gray-100 pt-6 mt-6">
-        &copy; {new Date().getFullYear()} Mathamagic. All rights reserved.
+        &copy; {new Date().getFullYear()} Mathmagick. All rights reserved.
       </p>
 
     </div>
