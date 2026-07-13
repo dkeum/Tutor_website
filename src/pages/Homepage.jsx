@@ -75,7 +75,7 @@ const Homepage = () => {
               </div>
 
               <p className=" font-medium text-3xl w-2/3 h-[70px] mt-5">
-                Mathamagic have been teaching students close to a decade
+                Mathmagik have been teaching students close to a decade
               </p>
 
             </div>
