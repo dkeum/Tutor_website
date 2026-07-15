@@ -49,6 +49,7 @@ function AIVideoModal({ isOpen, onClose, videoStreamUrl, questionText }) {
         <div style={{ padding: "20px", background: "#000" }}>
           {videoStreamUrl ? (
             <video
+              key={videoStreamUrl} // <-- ADD THIS KEY to force player reload
               src={videoStreamUrl}
               controls
               autoPlay

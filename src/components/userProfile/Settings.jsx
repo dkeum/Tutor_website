@@ -9,6 +9,8 @@ import {
   Bell,
   Users,
   Loader2,
+  Pause,
+  Play,
 } from "lucide-react";
 import LoggedInLayout from "../LoggedInLayout";
 import { supabase } from "../../db/supabaseclient";
@@ -19,10 +21,16 @@ const BASE_URL =
     ? "http://localhost:3000"
     : "https://mathamagic-backend.vercel.app";
 
+const PLAN_LABELS = {
+  self_study: "Self Study",
+  student_pro: "Student Pro",
+};
+
 const Settings = () => {
   const currentName = useSelector((state) => state.personDetail.name);
   const currentEmail = useSelector((state) => state.personDetail.email);
   const currentProfile = useSelector((state) => state.personDetail.profile_pic);
+  const userId = useSelector((state) => state.personDetail.id); // adjust if your slice keys this differently
 
   // ── Profile ────────────────────────────────────────────────────────────────
   const [name, setName] = useState(currentName || "");
@@ -31,6 +39,9 @@ const Settings = () => {
   // ── Subscription & Credits ────────────────────────────────────────────────
   const [subscription, setSubscription] = useState(null);
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
+  const [subscriptionActionLoading, setSubscriptionActionLoading] = useState(false);
+  const [subscriptionMessage, setSubscriptionMessage] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState("");
   const [credits, setCredits] = useState(null);
   const [creditsLoading, setCreditsLoading] = useState(true);
 
@@ -53,43 +64,62 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ── Helper: get a fresh auth header for every authenticated request ────────
+  const getAuthHeader = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      throw new Error("No active session — user is not authenticated.");
+    }
+
+    return { Authorization: `Bearer ${session.access_token}` };
+  };
+
+  // ── Helper: fetch fresh subscription status from the dedicated endpoint ────
+  const fetchSubscriptionStatus = async () => {
+    try {
+      setSubscriptionLoading(true);
+      const headers = await getAuthHeader();
+      const { data } = await axios.get(`${BASE_URL}/payment/subscription-status`, {
+        params: { userId },
+        headers,
+        withCredentials: true,
+      });
+      setSubscription(data);
+      if (data?.plan) setSelectedPlan(data.plan);
+    } catch (err) {
+      console.error("Failed to fetch subscription status:", err);
+    } finally {
+      setSubscriptionLoading(false);
+    }
+  };
+
   // ── Fetch data on mount ───────────────────────────────────────────────────
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         setLoading(true);
 
-        const base =
-          import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-            ? "http://localhost:3000"
-            : "https://mathamagic-backend.vercel.app";
-
         const {
           data: { session },
         } = await supabase.auth.getSession();
 
         if (session?.user) {
-          const { data } = await axios.get(`${base}/setting-info`, {
+          const { data } = await axios.get(`${BASE_URL}/setting-info`, {
             headers: {
               Authorization: `Bearer ${session.access_token}`,
             },
             withCredentials: true,
           });
 
-          // 1. Hydrate Subscription Data
-          setSubscription({
-            plan: data.tier,
-            status: data.status,
-          });
-          setSubscriptionLoading(false);
-
-          // 2. Hydrate Guardian Data
+          // 1. Hydrate Guardian Data
           const guardians = data.guardian_notifications || [];
           setLinkedGuardians(guardians);
           setGuardiansLoading(false);
 
-          // 3. Hydrate Notification Preferences 
-          // (Assuming weekly progress email state maps to the first linked guardian's preference)
+          // 2. Hydrate Notification Preferences
           if (guardians.length > 0) {
             setNotifPrefs((prev) => ({
               ...prev,
@@ -97,10 +127,13 @@ const Settings = () => {
             }));
           }
           setNotifLoading(false);
-          
+
           // Stop credits loading indicator (hydrate this later when you build the credits endpoint)
           setCreditsLoading(false);
         }
+
+        // 3. Hydrate Subscription Data from the dedicated status endpoint
+        await fetchSubscriptionStatus();
       } catch (err) {
         console.error(err);
         setError("Failed to load settings. Please try again.");
@@ -122,7 +155,9 @@ const Settings = () => {
     setNotifPrefs(updated);
     setNotifSaving(true);
     try {
+      const headers = await getAuthHeader();
       await axios.put(`${BASE_URL}/student/notification-preferences`, updated, {
+        headers,
         withCredentials: true,
       });
     } catch (err) {
@@ -139,10 +174,11 @@ const Settings = () => {
     setLinkingGuardian(true);
     setLinkMessage(null);
     try {
+      const headers = await getAuthHeader();
       const res = await axios.post(
         `${BASE_URL}/student/guardians`,
         { parentEmail },
-        { withCredentials: true }
+        { headers, withCredentials: true }
       );
       setLinkedGuardians((prev) => [
         ...prev,
@@ -163,9 +199,108 @@ const Settings = () => {
     document.getElementById("avatar-input").click();
   };
 
+  const handlePauseSubscription = async () => {
+    setSubscriptionActionLoading(true);
+    setSubscriptionMessage(null);
+    try {
+      const headers = await getAuthHeader();
+      await axios.post(
+        `${BASE_URL}/payment/pause-subscription`,
+        { userId },
+        { headers, withCredentials: true }
+      );
+      setSubscriptionMessage({ type: "success", text: "Subscription paused." });
+      await fetchSubscriptionStatus();
+    } catch (err) {
+      console.error("Failed to pause subscription:", err);
+      setSubscriptionMessage({ type: "error", text: "Couldn't pause subscription." });
+    } finally {
+      setSubscriptionActionLoading(false);
+      setTimeout(() => setSubscriptionMessage(null), 4000);
+    }
+  };
+
+  const handleResumeSubscription = async () => {
+    setSubscriptionActionLoading(true);
+    setSubscriptionMessage(null);
+    try {
+      const headers = await getAuthHeader();
+      await axios.post(
+        `${BASE_URL}/payment/resume-subscription`,
+        { userId },
+        { headers, withCredentials: true }
+      );
+      setSubscriptionMessage({ type: "success", text: "Subscription resumed." });
+      await fetchSubscriptionStatus();
+    } catch (err) {
+      console.error("Failed to resume subscription:", err);
+      setSubscriptionMessage({ type: "error", text: "Couldn't resume subscription." });
+    } finally {
+      setSubscriptionActionLoading(false);
+      setTimeout(() => setSubscriptionMessage(null), 4000);
+    }
+  };
+
+  const handleChangePlan = async () => {
+    if (!selectedPlan || selectedPlan === subscription?.plan) return;
+    setSubscriptionActionLoading(true);
+    setSubscriptionMessage(null);
+    try {
+      const headers = await getAuthHeader();
+      const res = await axios.post(
+        `${BASE_URL}/payment/change-plan`,
+        { userId, newPlan: selectedPlan },
+        { headers, withCredentials: true }
+      );
+      setSubscriptionMessage({ type: "success", text: res.data?.message || "Plan updated." });
+      await fetchSubscriptionStatus();
+    } catch (err) {
+      console.error("Failed to change plan:", err);
+      setSubscriptionMessage({ type: "error", text: "Couldn't change plan. Try again." });
+    } finally {
+      setSubscriptionActionLoading(false);
+      setTimeout(() => setSubscriptionMessage(null), 4000);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    setSubscriptionActionLoading(true);
+    setSubscriptionMessage(null);
+    try {
+      const headers = await getAuthHeader();
+      const res = await axios.post(
+        `${BASE_URL}/payment/cancel-subscription`,
+        { userId },
+        { headers, withCredentials: true }
+      );
+      setSubscriptionMessage({
+        type: "success",
+        text: res.data?.message || "Subscription set to cancel at period end.",
+      });
+      await fetchSubscriptionStatus();
+    } catch (err) {
+      console.error("Failed to cancel subscription:", err);
+      setSubscriptionMessage({ type: "error", text: "Couldn't cancel subscription." });
+    } finally {
+      setSubscriptionActionLoading(false);
+      setTimeout(() => setSubscriptionMessage(null), 4000);
+    }
+  };
+
   // ── Derived display values ────────────────────────────────────────────────
-  const planLabel = subscription?.plan === "pro" ? "Pro Plan" : "Free Plan";
-  const isActive = subscription?.status === "active";
+  const planLabel = subscription?.plan
+    ? PLAN_LABELS[subscription.plan] || subscription.plan
+    : "Free Plan";
+  const isActive = subscription?.active;
+  const isPaused = subscription?.paused;
+  const isCanceling = subscription?.cancel_at_period_end;
+  const nextPaymentDate = subscription?.next_payment_date
+    ? new Date(subscription.next_payment_date).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : null;
 
   return (
     <div className="min-h-screen w-full text-[#1C1B1F] flex font-sans">
@@ -188,36 +323,154 @@ const Settings = () => {
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Loading your plan…
                 </div>
-              ) : (
+              ) : subscription?.status === "no_subscription" ? (
                 <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
                   <div className="flex items-center gap-5">
                     <div className="w-14 h-14 bg-[#6200EE] rounded-full flex items-center justify-center text-white shadow-md shadow-purple-200">
                       <BadgeCheck className="w-6 h-6" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-lg font-bold text-gray-900">
-                          {planLabel}
-                        </h3>
-                        {subscription?.plan === "pro" && (
-                          <span
-                            className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${isActive
-                                ? "bg-[#E6F4EA] text-[#137333]"
-                                : "bg-[#FDECEA] text-[#A61C1C]"
-                              }`}
-                          >
-                            {subscription?.status || "unknown"}
-                          </span>
-                        )}
-                      </div>
+                      <h3 className="text-lg font-bold text-gray-900">Free Plan</h3>
                       <p className="text-sm text-gray-500 mt-1">
                         Upgrade to Pro for unlimited AI video explanations and more daily credits.
                       </p>
                     </div>
                   </div>
-                  <button className="bg-[#F2E7FE] text-[#6200EE] font-bold text-xs px-6 py-3 rounded-full border border-purple-100 hover:bg-[#EADDFF] transition-colors whitespace-nowrap">
-                    Manage Subscription
+                  <button
+                    onClick={() => (window.location.href = "/pricing")}
+                    className="bg-[#F2E7FE] text-[#6200EE] font-bold text-xs px-6 py-3 rounded-full border border-purple-100 hover:bg-[#EADDFF] transition-colors whitespace-nowrap"
+                  >
+                    View Plans
                   </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-6">
+                  <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+                    <div className="flex items-center gap-5">
+                      <div className="w-14 h-14 bg-[#6200EE] rounded-full flex items-center justify-center text-white shadow-md shadow-purple-200">
+                        <BadgeCheck className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <h3 className="text-lg font-bold text-gray-900">
+                            {planLabel}
+                          </h3>
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
+                              isPaused
+                                ? "bg-[#FFF4E5] text-[#8A5A00]"
+                                : isActive
+                                ? "bg-[#E6F4EA] text-[#137333]"
+                                : "bg-[#FDECEA] text-[#A61C1C]"
+                            }`}
+                          >
+                            {isPaused ? "paused" : subscription?.status || "unknown"}
+                          </span>
+                          {isCanceling && !isPaused && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider bg-[#FDECEA] text-[#A61C1C]">
+                              canceling
+                            </span>
+                          )}
+                        </div>
+                        {nextPaymentDate && !isCanceling && (
+                          <p className="text-sm text-gray-500 mt-1">
+                            Next payment on <span className="font-semibold text-gray-700">{nextPaymentDate}</span>
+                          </p>
+                        )}
+                        {isCanceling && (
+                          <p className="text-sm text-gray-500 mt-1">
+                            Access ends{" "}
+                            <span className="font-semibold text-gray-700">
+                              {new Date(subscription.current_period_end).toLocaleDateString()}
+                            </span>
+                          </p>
+                        )}
+                        {isPaused && (
+                          <p className="text-sm text-gray-500 mt-1">
+                            Billing is paused — no charges until resumed.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── Plan change + actions ── */}
+                  <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center pt-4 border-t border-gray-100">
+                    <select
+                      value={selectedPlan}
+                      onChange={(e) => setSelectedPlan(e.target.value)}
+                      disabled={subscriptionActionLoading || isPaused}
+                      className="bg-[#F3F3FA] border-2 border-transparent focus:border-[#6200EE] rounded-2xl px-4 py-2.5 text-sm text-gray-800 outline-none flex-1"
+                    >
+                      {Object.entries(PLAN_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={handleChangePlan}
+                      disabled={
+                        subscriptionActionLoading ||
+                        isPaused ||
+                        !selectedPlan ||
+                        selectedPlan === subscription?.plan
+                      }
+                      className="bg-[#1C1B1F] text-white text-xs font-bold px-6 py-3 rounded-full hover:opacity-90 transition-opacity shadow-sm disabled:opacity-40 whitespace-nowrap"
+                    >
+                      Switch Plan
+                    </button>
+
+                    {isPaused ? (
+                      <button
+                        onClick={handleResumeSubscription}
+                        disabled={subscriptionActionLoading}
+                        className="bg-[#E6F4EA] text-[#137333] font-bold text-xs px-6 py-3 rounded-full border border-green-100 hover:bg-[#D4EDDA] transition-colors whitespace-nowrap disabled:opacity-40 flex items-center gap-2 justify-center"
+                      >
+                        {subscriptionActionLoading ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Play className="w-3.5 h-3.5" />
+                        )}
+                        Resume
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handlePauseSubscription}
+                        disabled={subscriptionActionLoading || isCanceling}
+                        className="bg-[#F2E7FE] text-[#6200EE] font-bold text-xs px-6 py-3 rounded-full border border-purple-100 hover:bg-[#EADDFF] transition-colors whitespace-nowrap disabled:opacity-40 flex items-center gap-2 justify-center"
+                      >
+                        {subscriptionActionLoading ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Pause className="w-3.5 h-3.5" />
+                        )}
+                        Pause
+                      </button>
+                    )}
+
+                    {!isCanceling && !isPaused && (
+                      <button
+                        onClick={handleCancelSubscription}
+                        disabled={subscriptionActionLoading}
+                        className="text-[#A61C1C] font-bold text-xs px-6 py-3 rounded-full border border-red-100 hover:bg-[#FDF2F2] transition-colors whitespace-nowrap disabled:opacity-40"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+
+                  {subscriptionMessage && (
+                    <p
+                      className={`text-xs font-semibold ${
+                        subscriptionMessage.type === "success"
+                          ? "text-[#137333]"
+                          : "text-[#A61C1C]"
+                      }`}
+                    >
+                      {subscriptionMessage.text}
+                    </p>
+                  )}
                 </div>
               )}
             </section>

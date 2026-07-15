@@ -206,13 +206,13 @@ const PricingPage = () => {
                     // 3. Hydrate Redux store
                     dispatch(setProfileInfo(res?.data));
 
-    
+
                 } else {
                     navigate("/login");
                 }
             } catch (err) {
                 console.error("Error initializing session:", err);
-            } 
+            }
         };
         if (session) {
 
@@ -224,22 +224,39 @@ const PricingPage = () => {
 
     // Every plan action funnels through here first. If the user isn't
     // logged in, they're sent to /login instead of triggering checkout.
+    // Every plan action funnels through here first. If the user isn't
+    // logged in, they're sent to /login instead of triggering checkout.
     const handleCheckout = async (planType) => {
         if (!isLoggedIn) {
             navigate("/login");
             return;
         }
 
-        const userId = session?.user?.id;
-        const email = session?.user?.email;
-
         try {
+            // Pull a fresh session/token rather than relying on the possibly
+            // stale `session` from component state — access tokens expire.
+            const {
+                data: { session: freshSession },
+            } = await supabase.auth.getSession();
+
+            if (!freshSession) {
+                navigate("/login");
+                return;
+            }
+
+            const email = freshSession.user.email;
+
             const response = await axios.post(
                 import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
                     ? "http://localhost:3000/payment/create-checkout-session"
                     : "https://mathamagic-backend.vercel.app/payment/create-checkout-session",
-                { email, userId, plan: planType },
-                { withCredentials: true }
+                { email, plan: planType },
+                {
+                    headers: {
+                        Authorization: `Bearer ${freshSession.access_token}`,
+                    },
+                    withCredentials: true,
+                }
             );
             window.location.href = response.data.url;
         } catch (err) {

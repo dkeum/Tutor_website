@@ -72,6 +72,8 @@ const ShowPersonalData = () => {
           // 3. Hydrate Redux store
           dispatch(setProfileInfo(res?.data));
 
+          console.log(res.data)
+
           if (!res.data?.name) {
             setOpen(true);
           }
@@ -295,16 +297,39 @@ const DialogBox = ({ open, setOpen }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username.trim()) return;
-    dispatch(setName(username.trim()));
+
     try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        console.error("No active session — cannot update name.");
+        return;
+      }
+
       const base = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
         ? "http://localhost:3000"
         : "https://mathamagic-backend.vercel.app";
-      const res = await axios.put(`${base}/user/setname`, { name: username.trim() }, { withCredentials: true });
 
 
-      console.log(res)
-      if (res.status === 200) setOpen(false);
+      // console.log("sending the name: ", username.trim())
+      // console.log(`${base}/user/setname`)
+      const res = await axios.put(
+        `${base}/user/setname`,
+        { name: username.trim() },
+        {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          withCredentials: true,
+        }
+      );
+
+      console.log("res data", res)
+
+      if (res.status === 200) {
+        dispatch(setName(username.trim())); // dispatch only after confirmed success
+        setOpen(false);
+      }
     } catch (err) {
       console.error("Error setting name:", err);
     }

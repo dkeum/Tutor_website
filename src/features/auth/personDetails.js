@@ -91,6 +91,7 @@ export const personDetailSlice = createSlice({
 
       // subscription
       state.plan_type = p.plan_type ?? "free";
+      
       state.ai_credits = p.ai_credits ?? 0;
       state.subscription_status = p.subscription_status ?? "inactive";
       state.is_on_trial = p.is_on_trial ?? false;

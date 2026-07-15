@@ -1,9 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { supabase } from "../db/supabaseclient"; 
-// import { setProfileInfo } from "../store/personDetailSlice"; // wire up if you dispatch profile info here
 
 const getBaseUrl = () =>
   import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
@@ -14,11 +13,15 @@ const getBaseUrl = () =>
 const AuthCallback = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  
+  // Guard to prevent Strict Mode double-firing
+  const hasRun = useRef(false);
 
   useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
+
     const finishLogin = async () => {
-      // supabase-js already parsed the redirect URL (detectSessionInUrl: true)
-      // by the time this component mounts — just read the session it found.
       const { data, error } = await supabase.auth.getSession();
 
       if (error || !data?.session) {
@@ -33,14 +36,18 @@ const AuthCallback = () => {
         const res = await axios.post(
           `${getBaseUrl()}/auth/google-session`,
           { access_token, refresh_token },
-          { withCredentials: true } // lets the backend set its httpOnly cookie
+          { withCredentials: true } 
         );
 
-        // Same place you'd normally dispatch setProfileInfo after a
-        // password login — plug in your existing profile-fetch here.
-        navigate("/showpersonaldata");
+        // If the student hasn't set a class yet, send them through the
+        // onboarding survey first. Otherwise they've already completed
+        // it, so go straight to their profile.
+        if (res.data?.hasClass) {
+          navigate("/showpersonaldata");
+        } else {
+          navigate("/surveypersonaldetail");
+        }
       } catch (err) {
-        console.error("Backend session exchange failed:", err?.response?.data || err.message);
         navigate("/login?error=session_exchange_failed");
       }
     };

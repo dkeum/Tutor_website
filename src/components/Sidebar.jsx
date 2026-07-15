@@ -28,7 +28,7 @@ const dashboardSubItems = [
 const PLAN_LABELS = {
   free: "Self-Study",
   "self-study": "Self-Study",
-  pro: "Pro",
+  "student_pro": "Student-Pro",
 };
 
 const PLAN_CREDIT_TOTALS = {

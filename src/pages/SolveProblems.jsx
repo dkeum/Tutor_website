@@ -44,7 +44,7 @@ import { Button } from "../components/ui/button";
 import { TOOL_REGISTRY } from "../components/solveProblems/toolRegistry";
 import AnswerField from "../components/solveProblems/AnswerField";
 import { supabase } from "../db/supabaseclient";
-import { setProfileInfo } from "../features/auth/personDetails";
+import { setCredits, setProfileInfo } from "../features/auth/personDetails";
 
 // ─── Backend base URL — used by every axios call in this file ────────────────
 const getBaseUrl = () =>
@@ -239,83 +239,95 @@ const SolveProblems = () => {
     });
   };
 
-  const handleGenerateAndStreamVideo = async () => {
-    if (!currentQuestion || isVideoLoading) return;
+const handleGenerateAndStreamVideo = async () => {
+  if (!currentQuestion || isVideoLoading) return;
 
-    setUsedAIVideo(true);
+  setUsedAIVideo(true);
 
-    if (cachedVideo.questionId === currentQuestion.id && cachedVideo.url) {
-      setVideoStreamUrl(cachedVideo.url);
-      setIsVideoModalOpen(true);
+  if (cachedVideo.questionId === currentQuestion.id && cachedVideo.url) {
+    setVideoStreamUrl(cachedVideo.url);
+    setIsVideoModalOpen(true);
+    return;
+  }
+
+  setIsVideoLoading(true);
+  setVideoStreamUrl(null);
+
+  const questionId = currentQuestion.id;
+  const questionText = currentQuestion.question;
+  const targetTopicId = currentQuestion.topic_id;
+  const targetSectionId = currentQuestion.section_id;
+  const topicName = decodeURIComponent(topic || "");
+  const sectionName = decodeURIComponent(section || "");
+
+  const BASE_URL =
+    import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+      ? "http://localhost:3000"
+      : "https://mathamagic-backend.vercel.app";
+
+  const streamUrl = `${BASE_URL}/question/ai-video-generate?questionId=${questionId}&topicId=${targetTopicId}&sectionId=${targetSectionId}&questionText=${encodeURIComponent(
+    questionText
+  )}&topicName=${encodeURIComponent(topicName)}&sectionName=${encodeURIComponent(sectionName)}`;
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      navigate("/login");
       return;
     }
 
-    setIsVideoLoading(true);
-    setVideoStreamUrl(null);
+    const res = await axios.get(streamUrl, {
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      // Axios defaults to responseType: "json", so no need to specify it
+    });
 
-    const questionId = currentQuestion.id;
-    const questionText = currentQuestion.question;
-    const targetTopicId = currentQuestion.topic_id;
-    const targetSectionId = currentQuestion.section_id;
-    const topicName = decodeURIComponent(topic || "");
-    const sectionName = decodeURIComponent(section || "");
+    // Extract directly from the new backend JSON payload
+    const videoSrcUrl = res.data.video_url;
+    const remainingCredits = res.data.credits_remaining;
 
-    const BASE_URL =
-      import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-        ? "http://localhost:3000"
-        : "https://mathamagic-backend.vercel.app";
-
-    const streamUrl = `${BASE_URL}/question/ai-video-generate?questionId=${questionId}&topicId=${targetTopicId}&sectionId=${targetSectionId}&questionText=${encodeURIComponent(
-      questionText
-    )}&topicName=${encodeURIComponent(topicName)}&sectionName=${encodeURIComponent(sectionName)}`;
-
-    try {
-      const res = await axios.get(streamUrl, {
-        withCredentials: true,
-        responseType: "blob",
-      });
-
-      const remainingCredits = res.headers["x-ai-credits-remaining"];
-
-      if (remainingCredits !== undefined) {
-        dispatch(setCredits({ ai_credits: Number(remainingCredits) }));
-      }
-
-      const objectUrl = URL.createObjectURL(res.data);
-
-      setCachedVideo({ questionId, url: objectUrl });
-      setVideoStreamUrl(objectUrl);
-      setIsVideoModalOpen(true);
-    } catch (err) {
-      console.error("Video generation failed:", err?.response?.data || err.message);
-      const status = err?.response?.status;
-      const backendMessage = err?.response?.data?.message;
-
-      if (status === 403 && backendMessage === "Not Enough Credits") {
-        const creditsAvailable = err.response.data.ai_credits ?? 0;
-        const creditsRequired = err.response.data.required ?? 10;
-
-        toast("Not Enough Credits", {
-          description: `You have ${creditsAvailable} credit${creditsAvailable === 1 ? "" : "s"}, but this video costs ${creditsRequired}. Upgrade your plan or wait for tomorrow's free video.`,
-          action: {
-            label: "Upgrade",
-            onClick: () => navigate("/pricing"),
-          },
-        });
-      } else {
-        toast("AI Video Generation Failed", {
-          description: "Something went wrong while generating your video. Try again?",
-          action: {
-            label: "Retry",
-            onClick: () => handleGenerateAndStreamVideo(),
-          },
-        });
-      }
-      // surface an error state to the user here
-    } finally {
-      setIsVideoLoading(false);
+    if (remainingCredits !== undefined) {
+      dispatch(setCredits({ ai_credits: Number(remainingCredits) }));
     }
-  };
+
+    // Cache and set the public URL string directly
+    setCachedVideo({ questionId, url: videoSrcUrl });
+    setVideoStreamUrl(videoSrcUrl);
+    setIsVideoModalOpen(true);
+  } catch (err) {
+    // Because we are expecting JSON, Axios parses errors cleanly without needing Blob unwrapping
+    const parsedData = err?.response?.data;
+    console.error("Video generation failed:", parsedData || err.message);
+
+    const status = err?.response?.status;
+    const backendMessage = parsedData?.message || parsedData?.error;
+
+    if (status === 403 && backendMessage === "Not Enough Credits") {
+      const creditsAvailable = parsedData?.ai_credits ?? 0;
+      const creditsRequired = parsedData?.required ?? 10;
+
+      toast("Not Enough Credits", {
+        description: `You have ${creditsAvailable} credit${creditsAvailable === 1 ? "" : "s"}, but this video costs ${creditsRequired}. Upgrade your plan or wait for tomorrow's free video.`,
+        action: {
+          label: "Upgrade",
+          onClick: () => navigate("/pricing"),
+        },
+      });
+    } else {
+      toast("AI Video Generation Failed", {
+        description: backendMessage || "Something went wrong while generating your video. Try again?",
+        action: {
+          label: "Retry",
+          onClick: () => handleGenerateAndStreamVideo(),
+        },
+      });
+    }
+  } finally {
+    setIsVideoLoading(false);
+  }
+};
 
   const perQuestionTimerRef = useRef(null);
   const totalTimerRef = useRef(null);
@@ -350,100 +362,88 @@ const SolveProblems = () => {
     setUsedAIChat(false);
   }, [currentIndex]);
 
-  useEffect(() => {
-    const initializeUserSession = async () => {
-      try {
-        const base = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+useEffect(() => {
+  const initializeUserSession = async () => {
+    try {
+      const base = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+        ? "http://localhost:3000"
+        : "https://mathamagic-backend.vercel.app";
+
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        const userEmail = session.user.email;
+        const res = await axios.get(`${base}/${userEmail}/getprofile`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          withCredentials: true
+        });
+        
+        dispatch(setProfileInfo(res?.data));
+
+        if (!res.data?.name && typeof setOpen === 'function') {
+          setOpen(true);
+        }
+      } else {
+        navigate("/login");
+      }
+    } catch (err) {
+      console.error("Error initializing session:", err);
+      // We only stop the spinner here if initialization explicitly failed
+      setLoadingSession(false);
+    }
+  };
+
+  const loadData = async () => {
+    // 1. If we don't have the ID, initialize the session and STOP.
+    // The Redux dispatch above will trigger a re-render and re-run this effect safely.
+    if (!studentClassId) {
+      await initializeUserSession();
+      return; // CRITICAL: Do not continue to fetch questions yet!
+    }
+
+    // 2. We now have the ID! Turn off the full-page spinner.
+    setLoadingSession(false);
+
+    // 3. Ensure route params exist
+    if (!topic || !section) return;
+
+    // 4. Safe to fetch questions
+    setLoadingQuestions(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        const BASE_URL = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
           ? "http://localhost:3000"
           : "https://mathamagic-backend.vercel.app";
 
-
-
-
-        // 1. Check Supabase for an existing local session
-        const { data: { session } } = await supabase.auth.getSession();
-
-        // console.log("Supabase session:", session);
-        if (session?.user) {
-          const userEmail = session.user.email;
-
-          // 2. Fetch complete profile from backend
-          const res = await axios.get(`${base}/${userEmail}/getprofile`, {
-            headers: {
-              Authorization: `Bearer ${session.access_token}`, // Inject the fresh token
-            },
-            withCredentials: true
-          });
-          // console.log("Profile data fetched:", res.data);
-
-          // 3. Hydrate Redux store
-          dispatch(setProfileInfo(res?.data));
-
-          if (!res.data?.name) {
-            setOpen(true);
+        // Wrapped 'topic' in encodeURIComponent to prevent URL breaking on special characters
+        const res = await axios.get(
+          `${BASE_URL}/questions/${encodeURIComponent(topic)}/${encodeURIComponent(section)}`,
+          {
+            withCredentials: true, 
+            params: { class: studentClassId },
+            headers: { Authorization: `Bearer ${session.access_token}` },
           }
-        } else {
-          navigate("/login");
+        );
+
+        const qs = res.data.questions || [];
+        setQuestions(qs);
+
+        if (qs.length > 0) {
+          setTopicId(qs[0].topic_id);
+          setSectionId(qs[0].section_id);
         }
-      } catch (err) {
-        console.error("Error initializing session:", err);
-      } finally {
-        setLoadingSession(false);
       }
-    };
+    } catch (err) {
+      console.error("Error fetching questions:", err);
+    } finally {
+      setLoadingQuestions(false);
+    }
+  };
 
-    const fetchQuestions = async () => {
-      if (!topic || !section) return;
-
-
-      if (!studentClassId) {
-        await initializeUserSession();
-      }
-      setLoadingQuestions(true);
-      try {
-
-        // 1. Check Supabase for an existing local session
-        const { data: { session } } = await supabase.auth.getSession();
-
-        // console.log("Supabase session:", session);
-        if (session?.user) {
-
-          const BASE_URL =
-            import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-              ? "http://localhost:3000"
-              : "https://mathamagic-backend.vercel.app";
-
-
-
-
-          const res = await axios.get(
-            `${BASE_URL}/questions/${topic}/${encodeURIComponent(section)}`,
-            {
-              withCredentials: true, params: { class: studentClassId },
-
-              headers: {
-                Authorization: `Bearer ${session.access_token}`, // Inject the fresh token
-              },
-            }
-          );
-
-          const qs = res.data.questions || [];
-          setQuestions(qs);
-
-          if (qs.length > 0) {
-            setTopicId(qs[0].topic_id);
-            setSectionId(qs[0].section_id);
-          }
-        }
-      } catch (err) {
-        console.error("Error fetching questions:", err);
-      } finally {
-        setLoadingQuestions(false);
-      }
-    };
-
-    fetchQuestions();
-  }, [topic, section, studentClassId]);
+  loadData();
+}, [topic, section, studentClassId]);
 
   useEffect(() => {
     if (api) {
@@ -551,9 +551,6 @@ const SolveProblems = () => {
     const correctAnswer = currentQuestion?.answers?.[0]?.answer || "";
     const isCorrect = normalizeLatex(latex) === normalizeLatex(correctAnswer);
 
-    if (videoStreamUrl?.startsWith("blob:")) {
-      URL.revokeObjectURL(videoStreamUrl);
-    }
 
     setIsSubmittingMain(true); // NEW
     try {
@@ -595,9 +592,6 @@ const SolveProblems = () => {
   ) => {
     const correctAnswer = currentQuestion?.answers?.[0]?.answer || "";
 
-    if (videoStreamUrl?.startsWith("blob:")) {
-      URL.revokeObjectURL(videoStreamUrl);
-    }
 
     // Default to whatever the step-by-step dialog already determined
     let isCorrect = isAlreadyCorrect;

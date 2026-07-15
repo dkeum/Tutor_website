@@ -18,35 +18,18 @@ const PROGRESS_LABELS = [
 
 const CLASS_MAP = {
   Math: {
-    "grade 1-5": ["Math 1", "Math 2", "Math 3", "Math 4", "Math 5"],
-    "grade 6-8": ["Math 6", "Math 7", "Math 8"],
-    "grade 9-12": ["Math 9", "Pre-Calculus 10", "Pre-Calculus 11", "Pre-Calculus 12", "Calculus 12", "AP Calculus AB", "AP Calculus BC"],
-    University: ["Calculus I", "Calculus II", "Linear Algebra", "Diff Eq"],
-  },
-  Science: {
-    "grade 1-5": ["Intro to Science", "Environmental Science"],
-    "grade 6-8": ["General Science", "Earth Science", "Life Science"],
-    "grade 9-12": ["Science 10", "Physics 11", "Physics 12", "Chemistry 11", "Chemistry 12"],
-    University: ["Biochemistry", "Organic Chemistry", "Astrophysics", "Molecular Biology"],
-  },
-  Physics: {
-    "grade 9-12": ["Physics 11", "Physics 12"],
-    University: ["Calculus I", "Calculus II", "Linear Algebra"],
-  },
-  Chemistry: {
-    "grade 9-12": ["Chemistry 11", "Chemistry 12"],
-    University: ["Organic Chemistry", "Biochemistry"],
+    "grade 9-12": ["Pre-Calculus 10", "Pre-Calculus 11", "Pre-Calculus 12", "AP Calculus AB", "AP Calculus BC"],
   },
 };
 
 const STATIC_QUESTIONS = [
   {
     question: "What subjects are you interested in?",
-    options: ["Math", "Science", "Physics", "Chemistry"],
+    options: ["Math"],
   },
   {
     question: "What's your grade level?",
-    options: ["grade 1-5", "grade 6-8", "grade 9-12", "University"],
+    options: ["grade 9-12"],
   },
   {
     question: "Select the class you want",
@@ -95,7 +78,7 @@ const SurveyPersonalDetails = () => {
         ? "http://localhost:3000"
         : "https://mathamagic-backend.vercel.app";
 
-        // console.log("makeing the call now")
+      // console.log("makeing the call now")
       try {
         const response = await axios.get(`${base}/verify-email`, {
           params: { token },
@@ -109,7 +92,7 @@ const SurveyPersonalDetails = () => {
             access_token: response.data.access_token,
             refresh_token: response.data.refresh_token,
           });
-           setAccessToken(response.data.access_token); // store it in state
+          setAccessToken(response.data.access_token); // store it in state
         }
       } catch (verifyErr) {
         console.error("Email verification failed:", verifyErr);
@@ -120,35 +103,56 @@ const SurveyPersonalDetails = () => {
     handleTokenVerification();
   }, [searchParams, navigate]);
 
-  const handleClick = async (selectedOption) => {
-    const updatedAnswers = [...answers, selectedOption];
+ const handleClick = async (selectedOption) => {
+  if (submitting) return; // guard against a stray double-click slipping through before re-render
+
+  const updatedAnswers = [...answers, selectedOption];
+  const nextQuestion = questionNumber + 1;
+
+  if (nextQuestion < STATIC_QUESTIONS.length) {
     setAnswers(updatedAnswers);
+    setQuestionNumber(nextQuestion);
+    return;
+  }
 
-    const nextQuestion = questionNumber + 1;
+  // Last question — submit using the locally computed array directly.
+  // Do NOT call setAnswers here: if this fails and the user retries,
+  // we want a clean 5-item array built from `answers` (unchanged),
+  // not a stacked one built on top of a failed attempt.
+  setSubmitting(true);
 
-    if (nextQuestion < STATIC_QUESTIONS.length) {
-      setQuestionNumber(nextQuestion);
-    } else {
-      setSubmitting(true);
-      try {
-        const response = await axios.post(
-          import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-            ? "http://localhost:3000/update-userprofile"
-            : "https://mathamagic-backend.vercel.app/update-userprofile",
-          { answers: updatedAnswers , access_token: accessToken },
-          { withCredentials: true }
-        );
-        if (response.status === 200) {
-          navigate("/showpersonaldata");
-        } else {
-          console.error("Unexpected response status:", response.status);
-        }
-      } catch (err) {
-        console.error("Failed to submit survey:", err);
-        setSubmitting(false);
-      }
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session?.user) {
+      setSubmitting(false);
+      navigate("/login");
+      return;
     }
-  };
+
+    const response = await axios.post(
+      import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+        ? "http://localhost:3000/survey-details"
+        : "https://mathamagic-backend.vercel.app/survey-details",
+      { answers: updatedAnswers, access_token: accessToken },
+      {
+        withCredentials: true,
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      }
+    );
+
+    if (response.status === 200) {
+      setAnswers(updatedAnswers); // commit only now, on confirmed success
+      navigate("/showpersonaldata");
+    } else {
+      console.error("Unexpected response status:", response.status);
+      setSubmitting(false);
+    }
+  } catch (err) {
+    console.error("Failed to submit survey:", err);
+    setSubmitting(false); // safe retry — `answers` state was never polluted
+  }
+};
 
   const currentQuestion = STATIC_QUESTIONS[questionNumber];
   const currentOptions = getCurrentOptions();
