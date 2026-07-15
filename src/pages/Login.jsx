@@ -21,6 +21,11 @@ const LoginSignup = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const getBaseUrl = () =>
+  import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+    ? "http://localhost:5173"
+    : "https://mathmagick.com";
+
   const handleGoogleLogin = async () => {
     setResponseMessage("");
     setIsGoogleSubmitting(true);
@@ -28,7 +33,7 @@ const LoginSignup = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${getBaseUrl()}/auth/callback`,
         },
       });
       if (error) {
