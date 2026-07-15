@@ -29,7 +29,7 @@ const Settings = () => {
   const currentName = useSelector((state) => state.personDetail.name);
   const currentEmail = useSelector((state) => state.personDetail.email);
   const currentProfile = useSelector((state) => state.personDetail.profile_pic);
-  const userId = useSelector((state) => state.personDetail.id); // adjust if your slice keys this differently
+  const userId = useSelector((state) => state.personDetail.id);
 
   // ── Profile ────────────────────────────────────────────────────────────────
   const [name, setName] = useState(currentName || "");
@@ -406,7 +406,8 @@ const Settings = () => {
                                 : "bg-[#FDECEA] text-[#A61C1C]"
                             }`}
                           >
-                            {isPaused ? "paused" : subscription?.status || "unknown"}
+                            {/* Updated line below */}
+                            {isPaused ? "paused" : subscription?.status || "Try the Free Trial"}
                           </span>
                           {isCanceling && !isPaused && (
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider bg-[#FDECEA] text-[#A61C1C]">

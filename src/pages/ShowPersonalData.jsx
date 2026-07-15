@@ -324,7 +324,7 @@ const DialogBox = ({ open, setOpen }) => {
         }
       );
 
-      console.log("res data", res)
+      // console.log("res data", res)
 
       if (res.status === 200) {
         dispatch(setName(username.trim())); // dispatch only after confirmed success

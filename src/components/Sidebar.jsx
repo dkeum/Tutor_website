@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -24,7 +24,6 @@ const dashboardSubItems = [
   { path: "/final-exam-prep", icon: <FileText size={16} />, label: "Final Exam Prep" },
 ];
 
-// Mapped both 'free' and 'self-study' strings just to be safe with DB variations
 const PLAN_LABELS = {
   free: "Self-Study",
   "self-study": "Self-Study",
@@ -42,7 +41,6 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const [isDashboardOpen, setIsDashboardOpen] = useState(true);
 
-  // Pull everything from Redux
   const studentName = useSelector(s => s.personDetail?.name) || "";
   const plan_type = useSelector(s => s.personDetail?.plan_type) ?? "self-study";
   const ai_credits = useSelector(s => s.personDetail?.ai_credits) ?? 0;
@@ -53,7 +51,6 @@ const Sidebar = () => {
   const profile_picture = useSelector((state) => state.personDetail.profile_pic);
   const userInitials = studentName ? studentName[0].toUpperCase() : "?";
 
-  // Normalize the plan type to lowercase to ensure matching
   const safePlanType = plan_type.toLowerCase();
   const planLabel = PLAN_LABELS[safePlanType] ?? "Self-Study";
   const creditTotal = PLAN_CREDIT_TOTALS[safePlanType] ?? 4000;
@@ -77,17 +74,15 @@ const Sidebar = () => {
 
   return (
     <aside
-      className="hidden lg:flex flex-col gap-4 p-4 pt-[64px] w-64 border-r fixed top-0 left-0 text-left"
+      // Removed "hidden lg:flex fixed" so it renders properly inside the mobile drawer
+      className="flex flex-col gap-4 p-4 w-full h-full text-left"
       style={{
-        height: "100vh",
         borderColor: "#e5e7eb",
         background: "#fff",
         fontFamily: "'Plus Jakarta Sans', sans-serif",
         fontSize: "14px",
-        zIndex: 40,
       }}
     >
-      {/* User profile card */}
       <div className="flex items-center gap-3 p-2 mb-2 mt-2">
         <Avatar
           className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
@@ -111,7 +106,6 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Navigation */}
       <nav className="flex flex-col gap-1 select-none overflow-y-auto max-h-[calc(100vh-380px)] pr-1">
         {sideNavItems.map((item) => {
           const isActive = item.hasSubMenu ? isDashboardActive : isPathActive(item.path);
@@ -164,7 +158,6 @@ const Sidebar = () => {
         })}
       </nav>
 
-      {/* Account Details */}
       <section className="px-3 py-4 border-t border-gray-100 bg-gray-50/50 rounded-xl flex flex-col gap-3 mt-auto">
         <div>
           <span className="text-[10px] uppercase tracking-wider text-gray-400 font-bold block mb-1">
@@ -172,7 +165,6 @@ const Sidebar = () => {
           </span>
           <div className="flex items-center gap-2">
             <p className="text-sm font-bold text-gray-700">{planLabel}</p>
-            {/* Free Trial Badge added next to plan name */}
             {is_on_trial && (
               <span className="bg-green-100 text-green-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider border border-green-200">
                 Free Trial
@@ -197,7 +189,6 @@ const Sidebar = () => {
           </div>
         </div>
 
-        {/* Keeping the detailed remaining days indicator just below */}
         {is_on_trial && days_remaining > 0 && (
           <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-lg p-2">
             <CheckCircle2 size={14} className="text-green-600 flex-shrink-0" />
@@ -217,7 +208,6 @@ const Sidebar = () => {
         )}
       </section>
 
-      {/* Bottom actions */}
       <div className="flex flex-col gap-2">
         <Link to="/pricing" className="w-full">
           <button

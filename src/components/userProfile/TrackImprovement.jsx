@@ -18,71 +18,9 @@ import NavbarLoggedIn from "../NavbarLoggedIn";
 import { supabase } from "../../db/supabaseclient";
 import LoggedInLayout from "../LoggedInLayout";
 
-const temp_data = [
-  { date: "2025-08-01T10:00:00Z", grade: "0.00" },
-  { date: "2025-08-02T10:00:00Z", grade: "33.33" },
-  { date: "2025-08-03T10:00:00Z", grade: "15.00" },
-  { date: "2025-08-04T10:00:00Z", grade: "100.00" },
-  { date: "2025-08-05T10:00:00Z", grade: "72.50" },
-  { date: "2025-08-06T10:00:00Z", grade: "10.00" },
-  { date: "2025-08-07T10:00:00Z", grade: "88.00" },
-  { date: "2025-08-08T10:00:00Z", grade: "55.00" },
-  { date: "2025-08-09T10:00:00Z", grade: "65.00" },
-  { date: "2025-08-10T10:00:00Z", grade: "78.00" },
-  { date: "2025-08-11T10:00:00Z", grade: "45.00" },
-  { date: "2025-08-12T10:00:00Z", grade: "90.00" },
-  { date: "2025-09-01T10:00:00Z", grade: "90.00" },
-  { date: "2025-09-08T10:00:00Z", grade: "60.00" },
-  { date: "2025-09-09T10:00:00Z", grade: "90.00" },
-  { date: "2025-09-10T10:00:00Z", grade: "70.00" },
-  { date: "2025-09-11T10:00:00Z", grade: "100.00" },
-  { date: "2025-09-12T10:00:00Z", grade: "90.00" },
-  { date: "2025-09-13T10:00:00Z", grade: "70.00" },
-  { date: "2025-09-14T10:00:00Z", grade: "40.00" },
-];
+const temp_data = []
 
-const mockTopics = [
-  {
-    title: "Calculus Basics",
-    desc: "Perfect Score Streak",
-    grade: "A+",
-    numericGrade: 95,
-    timeSpent: 4.5,
-    bg: "bg-green-50",
-    text: "text-green-600",
-    color: "#38A169",
-  },
-  {
-    title: "Statistics",
-    desc: "Needs consistent review",
-    grade: "B-",
-    numericGrade: 72,
-    timeSpent: 4.8,
-    bg: "bg-amber-50",
-    text: "text-amber-600",
-    color: "#fd8b00",
-  },
-  {
-    title: "Probability",
-    desc: "Improving steadily",
-    grade: "B+",
-    numericGrade: 84,
-    timeSpent: 2.2,
-    bg: "bg-purple-50",
-    text: "text-purple-600",
-    color: "#5d3fd3",
-  },
-  {
-    title: "Linear Algebra",
-    desc: "High effort required",
-    grade: "C+",
-    numericGrade: 62,
-    timeSpent: 5.5,
-    bg: "bg-red-50",
-    text: "text-red-500",
-    color: "#E53E3E",
-  },
-];
+const mockTopics = [];
 
 const graphTitleMap = {
   week: "Past 7 Days",
@@ -181,7 +119,7 @@ const TrackImprovement = () => {
 
     if (actualHours === 0)
       actualHours =
-        filterType === "week" ? 12 : filterType === "month" ? 45 : 480;
+        filterType === "week" ? 12 : filterType === "month" ? 45 : 0;
 
     const percentMet = Math.round((actualHours / targetHours) * 100);
     const isGoalMet = percentMet >= 100;

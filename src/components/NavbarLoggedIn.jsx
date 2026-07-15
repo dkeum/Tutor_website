@@ -59,8 +59,12 @@ const NavbarLoggedIn = () => {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm w-full">
       <div className="flex flex-row justify-between items-center px-6 md:px-10 py-2">
-        {/* Logo Element Block */}
-        <div className="flex flex-row items-center gap-x-3 text-2xl md:text-3xl">
+
+        {/* 
+          FIX: Changed ml-12 to ml-16 for better spacing. 
+          Changed md:ml-0 to lg:ml-0 to match the LoggedInLayout hamburger button breakpoint.
+        */}
+        <div className="flex flex-row items-center gap-x-3 text-2xl md:text-3xl ml-16 lg:ml-0">
           <img
             className="w-10 h-8 md:w-12 md:h-10"
             src="/mathamagic_m_blue_star.svg"
@@ -70,16 +74,15 @@ const NavbarLoggedIn = () => {
             athmagick
           </a>
         </div>
-
         {/* Desktop Interface Action Options */}
         <div className="hidden md:flex flex-row gap-x-10 items-center text-xl">
-        
 
-        <button onClick={() => {navigate("/pricing")}} className="text-base font-semibold text-gray-700 hover:text-indigo-600 transition-colors">
+
+          <button onClick={() => { navigate("/pricing") }} className="text-base font-semibold text-gray-700 hover:text-indigo-600 transition-colors">
             Pricing
           </button>
 
-          <button onClick={() => {navigate("/classes")}} className="text-base font-semibold text-gray-700 hover:text-indigo-600 transition-colors">
+          <button onClick={() => { navigate("/classes") }} className="text-base font-semibold text-gray-700 hover:text-indigo-600 transition-colors">
             Classes
           </button>
 

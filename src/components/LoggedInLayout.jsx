@@ -21,8 +21,8 @@ const LoggedInLayout = ({ children, bare = false }) => {
       {/* Top Navigation Bar */}
       <NavbarLoggedIn />
 
-      {/* Floating Mobile Hamburger Toggle Button */}
-      <div className="fixed top-4 left-4 z-50 lg:hidden">
+      {/* Floating Mobile Hamburger Toggle Button - Adjusted z-index and top margin */}
+      <div className="fixed top-3 left-4 z-[60] lg:hidden">
         <button
           onClick={() => setIsMobileOpen(!isMobileOpen)}
           className="p-2 rounded-xl bg-white border border-gray-200 text-gray-700 shadow-md hover:bg-gray-50 focus:outline-none transition-colors"
@@ -31,7 +31,6 @@ const LoggedInLayout = ({ children, bare = false }) => {
           {isMobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
-
       {/* Navigation Layout Wrapper */}
       <div className="flex flex-1 pt-16 relative min-h-0">
 
@@ -42,9 +41,8 @@ const LoggedInLayout = ({ children, bare = false }) => {
 
         {/* Mobile Slide-out Drawer */}
         <div
-          className={`fixed inset-0 z-40 lg:hidden transition-opacity duration-300 ${
-            isMobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-          }`}
+          className={`fixed inset-0 z-40 lg:hidden transition-opacity duration-300 ${isMobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            }`}
         >
           {/* Dark Backdrop */}
           <div
@@ -54,9 +52,8 @@ const LoggedInLayout = ({ children, bare = false }) => {
 
           {/* Sidebar Drawer Panel */}
           <div
-            className={`absolute left-0 top-0 bottom-0 w-72 bg-white shadow-2xl p-6 transition-transform duration-300 ease-out flex flex-col ${
-              isMobileOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
+            className={`absolute left-0 top-0 bottom-0 w-72 bg-white shadow-2xl p-6 transition-transform duration-300 ease-out flex flex-col ${isMobileOpen ? "translate-x-0" : "-translate-x-full"
+              }`}
           >
             <div className="h-12 flex-shrink-0" />
             <div className="flex-1 overflow-y-auto">
@@ -67,9 +64,8 @@ const LoggedInLayout = ({ children, bare = false }) => {
 
         {/* Main Content */}
         <main
-          className={`flex-1 w-full min-w-0 lg:pl-64 transition-all duration-300 ${
-            bare ? "" : "px-4 md:px-8"
-          }`}
+          className={`flex-1 w-full min-w-0 lg:pl-64 transition-all duration-300 ${bare ? "" : "px-4 md:px-8"
+            }`}
           style={bare ? undefined : { fontFamily: "'Lexend', sans-serif" }}
         >
           {bare ? children : (
