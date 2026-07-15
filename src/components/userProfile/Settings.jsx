@@ -20,7 +20,9 @@ const BASE_URL =
     ? "http://localhost:3000"
     : "https://mathamagic-backend.vercel.app";
 
+// ADDED: 'free' option so the dropdown can default to it
 const PLAN_LABELS = {
+  free: "Free Plan",
   self_study: "Self Study",
   student_pro: "Student Pro",
 };
@@ -40,7 +42,7 @@ const Settings = () => {
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const [subscriptionActionLoading, setSubscriptionActionLoading] = useState(false);
   const [subscriptionMessage, setSubscriptionMessage] = useState(null);
-  const [selectedPlan, setSelectedPlan] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState("free");
   const [credits, setCredits] = useState(null);
   const [creditsLoading, setCreditsLoading] = useState(true);
 
@@ -79,7 +81,12 @@ const Settings = () => {
           },
         });
         setSubscription(data);
-        if (data?.plan) setSelectedPlan(data.plan);
+        // Default to "free" in the dropdown if there is no active paid plan
+        if (data?.plan && data.status !== "no_subscription") {
+          setSelectedPlan(data.plan);
+        } else {
+          setSelectedPlan("free");
+        }
       }
     } catch (err) {
       console.error("Failed to fetch subscription status:", err);
@@ -330,9 +337,10 @@ const Settings = () => {
   };
 
   // ── Derived display values ────────────────────────────────────────────────
-  const planLabel = subscription?.plan
-    ? PLAN_LABELS[subscription.plan] || subscription.plan
-    : "Free Plan";
+  const isFree = !subscription || subscription?.status === "no_subscription";
+  const planLabel = isFree
+    ? "Free Plan"
+    : PLAN_LABELS[subscription?.plan] || subscription?.plan;
   const isActive = subscription?.active;
   const isPaused = subscription?.paused;
   const isCanceling = subscription?.cancel_at_period_end;
@@ -365,28 +373,9 @@ const Settings = () => {
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Loading your plan…
                 </div>
-              ) : subscription?.status === "no_subscription" ? (
-                <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-                  <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 bg-[#6200EE] rounded-full flex items-center justify-center text-white shadow-md shadow-purple-200">
-                      <BadgeCheck className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900">Free Plan</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Upgrade to Pro for unlimited AI video explanations and more daily credits.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => (window.location.href = "/pricing")}
-                    className="bg-[#F2E7FE] text-[#6200EE] font-bold text-xs px-6 py-3 rounded-full border border-purple-100 hover:bg-[#EADDFF] transition-colors whitespace-nowrap"
-                  >
-                    View Plans
-                  </button>
-                </div>
               ) : (
                 <div className="flex flex-col gap-6">
+                  {/* Top Info Area */}
                   <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
                     <div className="flex items-center gap-5">
                       <div className="w-14 h-14 bg-[#6200EE] rounded-full flex items-center justify-center text-white shadow-md shadow-purple-200">
@@ -399,39 +388,50 @@ const Settings = () => {
                           </h3>
                           <span
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
-                              isPaused
+                              isFree
+                                ? "bg-[#F3F3FA] text-[#6200EE]"
+                                : isPaused
                                 ? "bg-[#FFF4E5] text-[#8A5A00]"
                                 : isActive
                                 ? "bg-[#E6F4EA] text-[#137333]"
                                 : "bg-[#FDECEA] text-[#A61C1C]"
                             }`}
                           >
-                            {/* Updated line below */}
-                            {isPaused ? "paused" : subscription?.status || "Try the Free Trial"}
+                            {isFree ? "Free" : isPaused ? "paused" : subscription?.status}
                           </span>
-                          {isCanceling && !isPaused && (
+                          {isCanceling && !isPaused && !isFree && (
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider bg-[#FDECEA] text-[#A61C1C]">
                               canceling
                             </span>
                           )}
                         </div>
-                        {nextPaymentDate && !isCanceling && (
+
+                        {/* Contextual Description text based on Subscription Status */}
+                        {isFree ? (
                           <p className="text-sm text-gray-500 mt-1">
-                            Next payment on <span className="font-semibold text-gray-700">{nextPaymentDate}</span>
+                            Upgrade to Pro for unlimited AI video explanations and more daily credits.
                           </p>
-                        )}
-                        {isCanceling && (
-                          <p className="text-sm text-gray-500 mt-1">
-                            Access ends{" "}
-                            <span className="font-semibold text-gray-700">
-                              {new Date(subscription.current_period_end).toLocaleDateString()}
-                            </span>
-                          </p>
-                        )}
-                        {isPaused && (
-                          <p className="text-sm text-gray-500 mt-1">
-                            Billing is paused — no charges until resumed.
-                          </p>
+                        ) : (
+                          <>
+                            {nextPaymentDate && !isCanceling && (
+                              <p className="text-sm text-gray-500 mt-1">
+                                Next payment on <span className="font-semibold text-gray-700">{nextPaymentDate}</span>
+                              </p>
+                            )}
+                            {isCanceling && (
+                              <p className="text-sm text-gray-500 mt-1">
+                                Access ends{" "}
+                                <span className="font-semibold text-gray-700">
+                                  {new Date(subscription.current_period_end).toLocaleDateString()}
+                                </span>
+                              </p>
+                            )}
+                            {isPaused && (
+                              <p className="text-sm text-gray-500 mt-1">
+                                Billing is paused — no charges until resumed.
+                              </p>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
@@ -451,55 +451,68 @@ const Settings = () => {
                         </option>
                       ))}
                     </select>
-                    <button
-                      onClick={handleChangePlan}
-                      disabled={
-                        subscriptionActionLoading ||
-                        isPaused ||
-                        !selectedPlan ||
-                        selectedPlan === subscription?.plan
-                      }
-                      className="bg-[#1C1B1F] text-white text-xs font-bold px-6 py-3 rounded-full hover:opacity-90 transition-opacity shadow-sm disabled:opacity-40 whitespace-nowrap"
-                    >
-                      Switch Plan
-                    </button>
 
-                    {isPaused ? (
+                    {/* Button Rendering Logic based on isFree */}
+                    {isFree ? (
                       <button
-                        onClick={handleResumeSubscription}
-                        disabled={subscriptionActionLoading}
-                        className="bg-[#E6F4EA] text-[#137333] font-bold text-xs px-6 py-3 rounded-full border border-green-100 hover:bg-[#D4EDDA] transition-colors whitespace-nowrap disabled:opacity-40 flex items-center gap-2 justify-center"
+                        onClick={() => (window.location.href = "/pricing")}
+                        className="bg-[#F2E7FE] text-[#6200EE] font-bold text-xs px-6 py-3 rounded-full border border-purple-100 hover:bg-[#EADDFF] transition-colors whitespace-nowrap"
                       >
-                        {subscriptionActionLoading ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <Play className="w-3.5 h-3.5" />
-                        )}
-                        Resume
+                        View Plans
                       </button>
                     ) : (
-                      <button
-                        onClick={handlePauseSubscription}
-                        disabled={subscriptionActionLoading || isCanceling}
-                        className="bg-[#F2E7FE] text-[#6200EE] font-bold text-xs px-6 py-3 rounded-full border border-purple-100 hover:bg-[#EADDFF] transition-colors whitespace-nowrap disabled:opacity-40 flex items-center gap-2 justify-center"
-                      >
-                        {subscriptionActionLoading ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <Pause className="w-3.5 h-3.5" />
-                        )}
-                        Pause
-                      </button>
-                    )}
+                      <>
+                        <button
+                          onClick={handleChangePlan}
+                          disabled={
+                            subscriptionActionLoading ||
+                            isPaused ||
+                            !selectedPlan ||
+                            selectedPlan === subscription?.plan
+                          }
+                          className="bg-[#1C1B1F] text-white text-xs font-bold px-6 py-3 rounded-full hover:opacity-90 transition-opacity shadow-sm disabled:opacity-40 whitespace-nowrap"
+                        >
+                          Switch Plan
+                        </button>
 
-                    {!isCanceling && !isPaused && (
-                      <button
-                        onClick={handleCancelSubscription}
-                        disabled={subscriptionActionLoading}
-                        className="text-[#A61C1C] font-bold text-xs px-6 py-3 rounded-full border border-red-100 hover:bg-[#FDF2F2] transition-colors whitespace-nowrap disabled:opacity-40"
-                      >
-                        Cancel
-                      </button>
+                        {isPaused ? (
+                          <button
+                            onClick={handleResumeSubscription}
+                            disabled={subscriptionActionLoading}
+                            className="bg-[#E6F4EA] text-[#137333] font-bold text-xs px-6 py-3 rounded-full border border-green-100 hover:bg-[#D4EDDA] transition-colors whitespace-nowrap disabled:opacity-40 flex items-center gap-2 justify-center"
+                          >
+                            {subscriptionActionLoading ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Play className="w-3.5 h-3.5" />
+                            )}
+                            Resume
+                          </button>
+                        ) : (
+                          <button
+                            onClick={handlePauseSubscription}
+                            disabled={subscriptionActionLoading || isCanceling}
+                            className="bg-[#F2E7FE] text-[#6200EE] font-bold text-xs px-6 py-3 rounded-full border border-purple-100 hover:bg-[#EADDFF] transition-colors whitespace-nowrap disabled:opacity-40 flex items-center gap-2 justify-center"
+                          >
+                            {subscriptionActionLoading ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Pause className="w-3.5 h-3.5" />
+                            )}
+                            Pause
+                          </button>
+                        )}
+
+                        {!isCanceling && !isPaused && (
+                          <button
+                            onClick={handleCancelSubscription}
+                            disabled={subscriptionActionLoading}
+                            className="text-[#A61C1C] font-bold text-xs px-6 py-3 rounded-full border border-red-100 hover:bg-[#FDF2F2] transition-colors whitespace-nowrap disabled:opacity-40"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
 
