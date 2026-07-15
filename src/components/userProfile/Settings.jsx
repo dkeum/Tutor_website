@@ -15,7 +15,6 @@ import {
 import LoggedInLayout from "../LoggedInLayout";
 import { supabase } from "../../db/supabaseclient";
 
-
 const BASE_URL =
   import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
     ? "http://localhost:3000"
@@ -64,31 +63,25 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ── Helper: get a fresh auth header for every authenticated request ────────
-  const getAuthHeader = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session?.access_token) {
-      throw new Error("No active session — user is not authenticated.");
-    }
-
-    return { Authorization: `Bearer ${session.access_token}` };
-  };
-
   // ── Helper: fetch fresh subscription status from the dedicated endpoint ────
   const fetchSubscriptionStatus = async () => {
     try {
       setSubscriptionLoading(true);
-      const headers = await getAuthHeader();
-      const { data } = await axios.get(`${BASE_URL}/payment/subscription-status`, {
-        params: { userId },
-        headers,
-        withCredentials: true,
-      });
-      setSubscription(data);
-      if (data?.plan) setSelectedPlan(data.plan);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        const { data } = await axios.get(`${BASE_URL}/payment/subscription-status`, {
+          params: { userId },
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          withCredentials: true,
+        });
+        setSubscription(data);
+        if (data?.plan) setSelectedPlan(data.plan);
+      }
     } catch (err) {
       console.error("Failed to fetch subscription status:", err);
     } finally {
@@ -155,11 +148,18 @@ const Settings = () => {
     setNotifPrefs(updated);
     setNotifSaving(true);
     try {
-      const headers = await getAuthHeader();
-      await axios.put(`${BASE_URL}/student/notification-preferences`, updated, {
-        headers,
-        withCredentials: true,
-      });
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        await axios.put(`${BASE_URL}/student/notification-preferences`, updated, {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          withCredentials: true,
+        });
+      }
     } catch (err) {
       console.error("Failed to save notification preferences:", err);
       // Revert if failed
@@ -174,18 +174,28 @@ const Settings = () => {
     setLinkingGuardian(true);
     setLinkMessage(null);
     try {
-      const headers = await getAuthHeader();
-      const res = await axios.post(
-        `${BASE_URL}/student/guardians`,
-        { parentEmail },
-        { headers, withCredentials: true }
-      );
-      setLinkedGuardians((prev) => [
-        ...prev,
-        res.data?.guardian || { id: Date.now(), guardian_email: parentEmail, status: "pending" },
-      ]);
-      setParentEmail("");
-      setLinkMessage({ type: "success", text: "Invite sent." });
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        const res = await axios.post(
+          `${BASE_URL}/student/guardians`,
+          { parentEmail },
+          {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            withCredentials: true,
+          }
+        );
+        setLinkedGuardians((prev) => [
+          ...prev,
+          res.data?.guardian || { id: Date.now(), guardian_email: parentEmail, status: "pending" },
+        ]);
+        setParentEmail("");
+        setLinkMessage({ type: "success", text: "Invite sent." });
+      }
     } catch (err) {
       console.error("Failed to link guardian:", err);
       setLinkMessage({ type: "error", text: "Couldn't send invite. Try again." });
@@ -203,14 +213,24 @@ const Settings = () => {
     setSubscriptionActionLoading(true);
     setSubscriptionMessage(null);
     try {
-      const headers = await getAuthHeader();
-      await axios.post(
-        `${BASE_URL}/payment/pause-subscription`,
-        { userId },
-        { headers, withCredentials: true }
-      );
-      setSubscriptionMessage({ type: "success", text: "Subscription paused." });
-      await fetchSubscriptionStatus();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        await axios.post(
+          `${BASE_URL}/payment/pause-subscription`,
+          { userId },
+          {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            withCredentials: true,
+          }
+        );
+        setSubscriptionMessage({ type: "success", text: "Subscription paused." });
+        await fetchSubscriptionStatus();
+      }
     } catch (err) {
       console.error("Failed to pause subscription:", err);
       setSubscriptionMessage({ type: "error", text: "Couldn't pause subscription." });
@@ -224,14 +244,24 @@ const Settings = () => {
     setSubscriptionActionLoading(true);
     setSubscriptionMessage(null);
     try {
-      const headers = await getAuthHeader();
-      await axios.post(
-        `${BASE_URL}/payment/resume-subscription`,
-        { userId },
-        { headers, withCredentials: true }
-      );
-      setSubscriptionMessage({ type: "success", text: "Subscription resumed." });
-      await fetchSubscriptionStatus();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        await axios.post(
+          `${BASE_URL}/payment/resume-subscription`,
+          { userId },
+          {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            withCredentials: true,
+          }
+        );
+        setSubscriptionMessage({ type: "success", text: "Subscription resumed." });
+        await fetchSubscriptionStatus();
+      }
     } catch (err) {
       console.error("Failed to resume subscription:", err);
       setSubscriptionMessage({ type: "error", text: "Couldn't resume subscription." });
@@ -246,14 +276,24 @@ const Settings = () => {
     setSubscriptionActionLoading(true);
     setSubscriptionMessage(null);
     try {
-      const headers = await getAuthHeader();
-      const res = await axios.post(
-        `${BASE_URL}/payment/change-plan`,
-        { userId, newPlan: selectedPlan },
-        { headers, withCredentials: true }
-      );
-      setSubscriptionMessage({ type: "success", text: res.data?.message || "Plan updated." });
-      await fetchSubscriptionStatus();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        const res = await axios.post(
+          `${BASE_URL}/payment/change-plan`,
+          { userId, newPlan: selectedPlan },
+          {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            withCredentials: true,
+          }
+        );
+        setSubscriptionMessage({ type: "success", text: res.data?.message || "Plan updated." });
+        await fetchSubscriptionStatus();
+      }
     } catch (err) {
       console.error("Failed to change plan:", err);
       setSubscriptionMessage({ type: "error", text: "Couldn't change plan. Try again." });
@@ -267,17 +307,27 @@ const Settings = () => {
     setSubscriptionActionLoading(true);
     setSubscriptionMessage(null);
     try {
-      const headers = await getAuthHeader();
-      const res = await axios.post(
-        `${BASE_URL}/payment/cancel-subscription`,
-        { userId },
-        { headers, withCredentials: true }
-      );
-      setSubscriptionMessage({
-        type: "success",
-        text: res.data?.message || "Subscription set to cancel at period end.",
-      });
-      await fetchSubscriptionStatus();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        const res = await axios.post(
+          `${BASE_URL}/payment/cancel-subscription`,
+          { userId },
+          {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            withCredentials: true,
+          }
+        );
+        setSubscriptionMessage({
+          type: "success",
+          text: res.data?.message || "Subscription set to cancel at period end.",
+        });
+        await fetchSubscriptionStatus();
+      }
     } catch (err) {
       console.error("Failed to cancel subscription:", err);
       setSubscriptionMessage({ type: "error", text: "Couldn't cancel subscription." });
