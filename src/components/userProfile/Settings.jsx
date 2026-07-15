@@ -77,7 +77,7 @@ const Settings = () => {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
           },
-          withCredentials: true,
+          // withCredentials: true,
         });
         setSubscription(data);
         if (data?.plan) setSelectedPlan(data.plan);
