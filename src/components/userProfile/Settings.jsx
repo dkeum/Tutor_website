@@ -77,7 +77,6 @@ const Settings = () => {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
           },
-          // withCredentials: true,
         });
         setSubscription(data);
         if (data?.plan) setSelectedPlan(data.plan);
@@ -104,7 +103,6 @@ const Settings = () => {
             headers: {
               Authorization: `Bearer ${session.access_token}`,
             },
-            withCredentials: true,
           });
 
           // 1. Hydrate Guardian Data
@@ -157,7 +155,6 @@ const Settings = () => {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
           },
-          withCredentials: true,
         });
       }
     } catch (err) {
@@ -186,7 +183,6 @@ const Settings = () => {
             headers: {
               Authorization: `Bearer ${session.access_token}`,
             },
-            withCredentials: true,
           }
         );
         setLinkedGuardians((prev) => [
@@ -225,7 +221,6 @@ const Settings = () => {
             headers: {
               Authorization: `Bearer ${session.access_token}`,
             },
-            withCredentials: true,
           }
         );
         setSubscriptionMessage({ type: "success", text: "Subscription paused." });
@@ -256,7 +251,6 @@ const Settings = () => {
             headers: {
               Authorization: `Bearer ${session.access_token}`,
             },
-            withCredentials: true,
           }
         );
         setSubscriptionMessage({ type: "success", text: "Subscription resumed." });
@@ -288,7 +282,6 @@ const Settings = () => {
             headers: {
               Authorization: `Bearer ${session.access_token}`,
             },
-            withCredentials: true,
           }
         );
         setSubscriptionMessage({ type: "success", text: res.data?.message || "Plan updated." });
@@ -319,7 +312,6 @@ const Settings = () => {
             headers: {
               Authorization: `Bearer ${session.access_token}`,
             },
-            withCredentials: true,
           }
         );
         setSubscriptionMessage({
