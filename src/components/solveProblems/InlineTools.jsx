@@ -9,6 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
+import MathQuillInput from "../MathQuillInput";
 
 const mainVariant = {
   initial: { x: 0, y: 0 },
@@ -119,8 +120,9 @@ export const InlineDrawTool = ({ onAttach }) => {
 };
 
 // ── Inline Graph ──
+// ── Inline Graph ──
 export const InlineGraphTool = ({ onAttach }) => {
-  const [equation, setEquation] = useState("y = x^2");
+  const [equation, setEquation] = useState("x^2"); // no leading "y =" — MathQuill handles that as you type
   const graphRef = useRef(null);
   const calculatorInst = useRef(null);
 
@@ -138,22 +140,29 @@ export const InlineGraphTool = ({ onAttach }) => {
 
     if (window.Desmos) {
       init();
-    } else {
+    } else if (!document.getElementById("desmos-script")) {
+      // Only inject the Desmos script once, even across repeated mounts
+      // (this component mounts/unmounts every time the tool tab is switched)
       const script = document.createElement("script");
+      script.id = "desmos-script";
       script.src = "https://www.desmos.com/api/v1.8/calculator.js?apiKey=b7f43827f4544c6ca4861c278c3727a8";
       script.async = true;
       script.onload = init;
       document.body.appendChild(script);
+    } else {
+      // Script tag already exists but hasn't finished loading yet — wait for it
+      document.getElementById("desmos-script").addEventListener("load", init, { once: true });
     }
+
     return () => {
       calculatorInst.current?.destroy();
       calculatorInst.current = null;
     };
   }, []);
 
-  const handleEquationChange = (e) => {
-    setEquation(e.target.value);
-    calculatorInst.current?.setExpression({ id: "eq1", latex: e.target.value });
+  const handleEquationChange = (newLatex) => {
+    setEquation(newLatex);
+    calculatorInst.current?.setExpression({ id: "eq1", latex: newLatex });
   };
 
   const handleAttach = () => {
@@ -165,22 +174,17 @@ export const InlineGraphTool = ({ onAttach }) => {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%" }}>
       <div style={{ display: "flex", gap: 6, alignItems: "center", padding: "8px 10px", borderBottom: `1px solid ${BRAND_BORDER}` }}>
-        <input
-          type="text"
-          value={equation}
-          onChange={handleEquationChange}
-          placeholder="y = sin(x)"
-          style={{ flex: 1, padding: "5px 8px", borderRadius: 6, border: `1px solid ${BRAND_BORDER}`, outline: "none", fontSize: 12, fontFamily: "monospace" }}
-        />
+        <div style={{ flex: 1 }}>
+          <MathQuillInput value={equation} onChange={handleEquationChange} />
+        </div>
         <button onClick={handleAttach} style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 10px", border: `1px solid ${BRAND_BORDER}`, borderRadius: 6, background: "transparent", fontSize: 11, fontWeight: 600, color: BRAND }}>
           <Check size={12} /> Attach
         </button>
       </div>
-      <div ref={graphRef} style={{ flex: 1, width: "100%", overflow: "hidden", background: "#fff" }} />
+      <div ref={graphRef} style={{ flex: 1, minHeight: 300, width: "100%", overflow: "hidden", background: "#fff" }} />
     </div>
   );
 };
-
 // ── Inline Upload ──
 export const InlineUploadTool = ({ onAttach }) => {
   const [file, setFile] = useState(null);
