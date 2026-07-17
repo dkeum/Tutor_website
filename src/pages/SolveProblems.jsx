@@ -239,95 +239,95 @@ const SolveProblems = () => {
     });
   };
 
-const handleGenerateAndStreamVideo = async () => {
-  if (!currentQuestion || isVideoLoading) return;
+  const handleGenerateAndStreamVideo = async () => {
+    if (!currentQuestion || isVideoLoading) return;
 
-  setUsedAIVideo(true);
+    setUsedAIVideo(true);
 
-  if (cachedVideo.questionId === currentQuestion.id && cachedVideo.url) {
-    setVideoStreamUrl(cachedVideo.url);
-    setIsVideoModalOpen(true);
-    return;
-  }
-
-  setIsVideoLoading(true);
-  setVideoStreamUrl(null);
-
-  const questionId = currentQuestion.id;
-  const questionText = currentQuestion.question;
-  const targetTopicId = currentQuestion.topic_id;
-  const targetSectionId = currentQuestion.section_id;
-  const topicName = decodeURIComponent(topic || "");
-  const sectionName = decodeURIComponent(section || "");
-
-  const BASE_URL =
-    import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-      ? "http://localhost:3000"
-      : "https://mathamagic-backend.vercel.app";
-
-  const streamUrl = `${BASE_URL}/question/ai-video-generate?questionId=${questionId}&topicId=${targetTopicId}&sectionId=${targetSectionId}&questionText=${encodeURIComponent(
-    questionText
-  )}&topicName=${encodeURIComponent(topicName)}&sectionName=${encodeURIComponent(sectionName)}`;
-
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) {
-      navigate("/login");
+    if (cachedVideo.questionId === currentQuestion.id && cachedVideo.url) {
+      setVideoStreamUrl(cachedVideo.url);
+      setIsVideoModalOpen(true);
       return;
     }
 
-    const res = await axios.get(streamUrl, {
-      withCredentials: true,
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      // Axios defaults to responseType: "json", so no need to specify it
-    });
+    setIsVideoLoading(true);
+    setVideoStreamUrl(null);
 
-    // Extract directly from the new backend JSON payload
-    const videoSrcUrl = res.data.video_url;
-    const remainingCredits = res.data.credits_remaining;
+    const questionId = currentQuestion.id;
+    const questionText = currentQuestion.question;
+    const targetTopicId = currentQuestion.topic_id;
+    const targetSectionId = currentQuestion.section_id;
+    const topicName = decodeURIComponent(topic || "");
+    const sectionName = decodeURIComponent(section || "");
 
-    if (remainingCredits !== undefined) {
-      dispatch(setCredits({ ai_credits: Number(remainingCredits) }));
-    }
+    const BASE_URL =
+      import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+        ? "http://localhost:3000"
+        : "https://mathamagic-backend.vercel.app";
 
-    // Cache and set the public URL string directly
-    setCachedVideo({ questionId, url: videoSrcUrl });
-    setVideoStreamUrl(videoSrcUrl);
-    setIsVideoModalOpen(true);
-  } catch (err) {
-    // Because we are expecting JSON, Axios parses errors cleanly without needing Blob unwrapping
-    const parsedData = err?.response?.data;
-    console.error("Video generation failed:", parsedData || err.message);
+    const streamUrl = `${BASE_URL}/question/ai-video-generate?questionId=${questionId}&topicId=${targetTopicId}&sectionId=${targetSectionId}&questionText=${encodeURIComponent(
+      questionText
+    )}&topicName=${encodeURIComponent(topicName)}&sectionName=${encodeURIComponent(sectionName)}`;
 
-    const status = err?.response?.status;
-    const backendMessage = parsedData?.message || parsedData?.error;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        navigate("/login");
+        return;
+      }
 
-    if (status === 403 && backendMessage === "Not Enough Credits") {
-      const creditsAvailable = parsedData?.ai_credits ?? 0;
-      const creditsRequired = parsedData?.required ?? 10;
-
-      toast("Not Enough Credits", {
-        description: `You have ${creditsAvailable} credit${creditsAvailable === 1 ? "" : "s"}, but this video costs ${creditsRequired}. Upgrade your plan or wait for tomorrow's free video.`,
-        action: {
-          label: "Upgrade",
-          onClick: () => navigate("/pricing"),
+      const res = await axios.get(streamUrl, {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
         },
+        // Axios defaults to responseType: "json", so no need to specify it
       });
-    } else {
-      toast("AI Video Generation Failed", {
-        description: backendMessage || "Something went wrong while generating your video. Try again?",
-        action: {
-          label: "Retry",
-          onClick: () => handleGenerateAndStreamVideo(),
-        },
-      });
+
+      // Extract directly from the new backend JSON payload
+      const videoSrcUrl = res.data.video_url;
+      const remainingCredits = res.data.credits_remaining;
+
+      if (remainingCredits !== undefined) {
+        dispatch(setCredits({ ai_credits: Number(remainingCredits) }));
+      }
+
+      // Cache and set the public URL string directly
+      setCachedVideo({ questionId, url: videoSrcUrl });
+      setVideoStreamUrl(videoSrcUrl);
+      setIsVideoModalOpen(true);
+    } catch (err) {
+      // Because we are expecting JSON, Axios parses errors cleanly without needing Blob unwrapping
+      const parsedData = err?.response?.data;
+      console.error("Video generation failed:", parsedData || err.message);
+
+      const status = err?.response?.status;
+      const backendMessage = parsedData?.message || parsedData?.error;
+
+      if (status === 403 && backendMessage === "Not Enough Credits") {
+        const creditsAvailable = parsedData?.ai_credits ?? 0;
+        const creditsRequired = parsedData?.required ?? 10;
+
+        toast("Not Enough Credits", {
+          description: `You have ${creditsAvailable} credit${creditsAvailable === 1 ? "" : "s"}, but this video costs ${creditsRequired}. Upgrade your plan or wait for tomorrow's free video.`,
+          action: {
+            label: "Upgrade",
+            onClick: () => navigate("/pricing"),
+          },
+        });
+      } else {
+        toast("AI Video Generation Failed", {
+          description: backendMessage || "Something went wrong while generating your video. Try again?",
+          action: {
+            label: "Retry",
+            onClick: () => handleGenerateAndStreamVideo(),
+          },
+        });
+      }
+    } finally {
+      setIsVideoLoading(false);
     }
-  } finally {
-    setIsVideoLoading(false);
-  }
-};
+  };
 
   const perQuestionTimerRef = useRef(null);
   const totalTimerRef = useRef(null);
@@ -362,88 +362,88 @@ const handleGenerateAndStreamVideo = async () => {
     setUsedAIChat(false);
   }, [currentIndex]);
 
-useEffect(() => {
-  const initializeUserSession = async () => {
-    try {
-      const base = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-        ? "http://localhost:3000"
-        : "https://mathamagic-backend.vercel.app";
-
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (session?.user) {
-        const userEmail = session.user.email;
-        const res = await axios.get(`${base}/${userEmail}/getprofile`, {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-          withCredentials: true
-        });
-        
-        dispatch(setProfileInfo(res?.data));
-
-        if (!res.data?.name && typeof setOpen === 'function') {
-          setOpen(true);
-        }
-      } else {
-        navigate("/login");
-      }
-    } catch (err) {
-      console.error("Error initializing session:", err);
-      // We only stop the spinner here if initialization explicitly failed
-      setLoadingSession(false);
-    }
-  };
-
-  const loadData = async () => {
-    // 1. If we don't have the ID, initialize the session and STOP.
-    // The Redux dispatch above will trigger a re-render and re-run this effect safely.
-    if (!studentClassId) {
-      await initializeUserSession();
-      return; // CRITICAL: Do not continue to fetch questions yet!
-    }
-
-    // 2. We now have the ID! Turn off the full-page spinner.
-    setLoadingSession(false);
-
-    // 3. Ensure route params exist
-    if (!topic || !section) return;
-
-    // 4. Safe to fetch questions
-    setLoadingQuestions(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (session?.user) {
-        const BASE_URL = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+  useEffect(() => {
+    const initializeUserSession = async () => {
+      try {
+        const base = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
           ? "http://localhost:3000"
           : "https://mathamagic-backend.vercel.app";
 
-        // Wrapped 'topic' in encodeURIComponent to prevent URL breaking on special characters
-        const res = await axios.get(
-          `${BASE_URL}/questions/${encodeURIComponent(topic)}/${encodeURIComponent(section)}`,
-          {
-            withCredentials: true, 
-            params: { class: studentClassId },
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session?.user) {
+          const userEmail = session.user.email;
+          const res = await axios.get(`${base}/${userEmail}/getprofile`, {
             headers: { Authorization: `Bearer ${session.access_token}` },
+            withCredentials: true
+          });
+
+          dispatch(setProfileInfo(res?.data));
+
+          if (!res.data?.name && typeof setOpen === 'function') {
+            setOpen(true);
           }
-        );
-
-        const qs = res.data.questions || [];
-        setQuestions(qs);
-
-        if (qs.length > 0) {
-          setTopicId(qs[0].topic_id);
-          setSectionId(qs[0].section_id);
+        } else {
+          navigate("/login");
         }
+      } catch (err) {
+        console.error("Error initializing session:", err);
+        // We only stop the spinner here if initialization explicitly failed
+        setLoadingSession(false);
       }
-    } catch (err) {
-      console.error("Error fetching questions:", err);
-    } finally {
-      setLoadingQuestions(false);
-    }
-  };
+    };
 
-  loadData();
-}, [topic, section, studentClassId]);
+    const loadData = async () => {
+      // 1. If we don't have the ID, initialize the session and STOP.
+      // The Redux dispatch above will trigger a re-render and re-run this effect safely.
+      if (!studentClassId) {
+        await initializeUserSession();
+        return; // CRITICAL: Do not continue to fetch questions yet!
+      }
+
+      // 2. We now have the ID! Turn off the full-page spinner.
+      setLoadingSession(false);
+
+      // 3. Ensure route params exist
+      if (!topic || !section) return;
+
+      // 4. Safe to fetch questions
+      setLoadingQuestions(true);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session?.user) {
+          const BASE_URL = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+            ? "http://localhost:3000"
+            : "https://mathamagic-backend.vercel.app";
+
+          // Wrapped 'topic' in encodeURIComponent to prevent URL breaking on special characters
+          const res = await axios.get(
+            `${BASE_URL}/questions/${encodeURIComponent(topic)}/${encodeURIComponent(section)}`,
+            {
+              withCredentials: true,
+              params: { class: studentClassId },
+              headers: { Authorization: `Bearer ${session.access_token}` },
+            }
+          );
+
+          const qs = res.data.questions || [];
+          setQuestions(qs);
+
+          if (qs.length > 0) {
+            setTopicId(qs[0].topic_id);
+            setSectionId(qs[0].section_id);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching questions:", err);
+      } finally {
+        setLoadingQuestions(false);
+      }
+    };
+
+    loadData();
+  }, [topic, section, studentClassId]);
 
   useEffect(() => {
     if (api) {
@@ -1079,6 +1079,7 @@ useEffect(() => {
                           </div>
                           <div style={{ flex: 1, overflow: "auto", minHeight: 0 }}>
                             <ToolComponent
+                              question={currentQuestion.question}
                               onAddToAIChat={(imageDataUrl) => {
                                 setChatAttachments((prev) => {
                                   // If the image is exactly the same as one already in the array, do nothing

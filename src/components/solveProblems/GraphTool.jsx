@@ -8,11 +8,12 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Maximize2, Bot, ArrowRight, FunctionSquare } from "lucide-react";
+import MathQuillInput from "../MathQuillInput"; // adjust path to match your project structure
 
 const GraphTool = ({ onAddToAIChat }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
-  const [equation, setEquation] = useState("y = x^2"); // Default equation
+  const [equation, setEquation] = useState("x^2"); // Default equation (no leading "y =", see note below)
 
   const graphRef = useRef(null);
   const calculatorInst = useRef(null);
@@ -41,7 +42,7 @@ const GraphTool = ({ onAddToAIChat }) => {
 
     const initDesmos = () => {
       if (!graphRef.current) return;
-      
+
       // Prevent initializing twice
       if (!calculatorInst.current) {
         calculatorInst.current = window.Desmos.GraphingCalculator(graphRef.current, {
@@ -57,14 +58,18 @@ const GraphTool = ({ onAddToAIChat }) => {
 
     if (window.Desmos) {
       initDesmos();
-    } else {
-      // Dynamically inject the Desmos script if it doesn't exist yet
+    } else if (!document.getElementById("desmos-script")) {
+      // Only inject the Desmos script once, even across repeated dialog opens
       const script = document.createElement("script");
+      script.id = "desmos-script";
       script.src =
         "https://www.desmos.com/api/v1.8/calculator.js?apiKey=b7f43827f4544c6ca4861c278c3727a8";
       script.async = true;
       script.onload = initDesmos;
       document.body.appendChild(script);
+    } else {
+      // Script tag already exists but hasn't finished loading yet — wait for it
+      document.getElementById("desmos-script").addEventListener("load", initDesmos, { once: true });
     }
 
     // Cleanup instance when dialog closes
@@ -77,9 +82,8 @@ const GraphTool = ({ onAddToAIChat }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDialogOpen]);
 
-  // ── Handle LaTeX Input Change ──
-  const handleEquationChange = (e) => {
-    const newLatex = e.target.value;
+  // ── Handle LaTeX Input Change (now driven by MathQuill, not a raw <input>) ──
+  const handleEquationChange = (newLatex) => {
     setEquation(newLatex);
     if (calculatorInst.current) {
       calculatorInst.current.setExpression({ id: "eq1", latex: newLatex });
@@ -212,25 +216,13 @@ const GraphTool = ({ onAddToAIChat }) => {
                 <FunctionSquare size={18} />
               </div>
 
-              {/* Custom LaTeX Input Field */}
-              <input
-                type="text"
-                value={equation}
-                onChange={handleEquationChange}
-                placeholder="Enter LaTeX equation (e.g., y = \\sin(x))"
-                style={{
-                  flex: 1,
-                  maxWidth: "400px",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #d1d5db",
-                  outline: "none",
-                  fontSize: "14px",
-                  fontFamily: "monospace",
-                }}
-              />
+              {/* MathQuill input — replaces the old raw text <input> so ^, sqrt, fractions
+                  render as real math and always produce valid LaTeX for Desmos */}
+              <div style={{ flex: 1, maxWidth: "400px" }}>
+                <MathQuillInput value={equation} onChange={handleEquationChange} />
+              </div>
               <span style={{ fontSize: "12px", color: "#6b7280" }}>
-                Supports standard LaTeX rendering
+                Use the keypad or type e.g. x^2, sqrt, /
               </span>
             </div>
 
@@ -244,6 +236,7 @@ const GraphTool = ({ onAddToAIChat }) => {
             ref={graphRef}
             style={{
               flex: 1,
+              minHeight: 400, // prevents collapse to 0px inside the flex column
               width: "100%",
               overflow: "hidden",
               background: "#ffffff",

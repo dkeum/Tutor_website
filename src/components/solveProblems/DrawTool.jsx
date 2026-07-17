@@ -8,13 +8,23 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Maximize2, Bot, ArrowRight, Eraser, Pencil, X, Undo, Grid2x2 } from "lucide-react";
+import {
+  Maximize2,
+  Bot,
+  ArrowRight,
+  Eraser,
+  Pencil,
+  X,
+  Undo,
+  Grid2x2,
+  HelpCircle,
+} from "lucide-react";
 
-const DrawTool = ({ onAddToAIChat }) => {
+const DrawTool = ({ onAddToAIChat, question }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
   const [showGrid, setShowGrid] = useState(false);
-
+  const [showQuestion, setShowQuestion] = useState(true); // toggle for the question overlay
 
   // ── Logic State from your snippet ──
   const [tool, setTool] = useState("pen"); // 'pen' | 'eraser'
@@ -25,7 +35,6 @@ const DrawTool = ({ onAddToAIChat }) => {
   const stageRef = useRef(null);
   const containerRef = useRef(null);
   const [stageDimensions, setStageDimensions] = useState({ width: 500, height: 800 });
-
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -46,7 +55,6 @@ const DrawTool = ({ onAddToAIChat }) => {
     if (!isDialogOpen || !containerRef.current) return;
 
     const resizeObserver = new ResizeObserver((entries) => {
-      console.log(entries[0].contentRect);
       const { width, height } = entries[0].contentRect;
       if (width > 0 && height > 0) {
         setStageDimensions({ width, height });
@@ -134,7 +142,6 @@ const DrawTool = ({ onAddToAIChat }) => {
 
   // ── Process flat base64 layout image preview string on workspace closing ──
   const handleOpenChange = (open) => {
-
     if (!open) {
       savePreview();
     }
@@ -161,8 +168,6 @@ const DrawTool = ({ onAddToAIChat }) => {
 
     setPreviewImage(dataURL);
   };
-
-
 
   return (
     <div
@@ -333,6 +338,28 @@ const DrawTool = ({ onAddToAIChat }) => {
                 <Grid2x2 size={14} />
                 Grid
               </button>
+
+              <button
+                onClick={() => setShowQuestion((prev) => !prev)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "6px 12px",
+                  borderRadius: 8,
+                  border: "1px solid #e5e7eb",
+                  background: showQuestion ? "#ede9ff" : "transparent",
+                  color: showQuestion ? "#4338ca" : "#6b7280",
+                  cursor: "pointer",
+                  fontSize: 13,
+                  fontWeight: 600,
+                }}
+                title="Show/hide the question above the canvas"
+              >
+                <HelpCircle size={14} />
+                Show Question
+              </button>
+
               <button
                 onClick={handleUndo}
                 disabled={lines.length === 0}
@@ -354,17 +381,56 @@ const DrawTool = ({ onAddToAIChat }) => {
               >
                 <Undo size={14} />
               </button>
-
-
             </div>
 
-            <DialogClose asChild>
-
-            </DialogClose>
+            <DialogClose asChild></DialogClose>
           </div>
 
           {/* Active Canvas target area layout boundary */}
-          <div ref={containerRef} style={{ flex: 1, width: "100%", overflow: "hidden", background: "#ffffff", cursor: "crosshair" }}>
+          <div
+            ref={containerRef}
+            style={{
+              flex: 1,
+              width: "100%",
+              overflow: "hidden",
+              background: "#ffffff",
+              cursor: "crosshair",
+              position: "relative", // anchors the question overlay
+            }}
+          >
+            {/* Question overlay — floats above the canvas, doesn't block drawing */}
+            {showQuestion && question && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 12,
+                  left: 12,
+                  right: 12,
+                  zIndex: 10,
+                  pointerEvents: "none", // let pen/eraser strokes pass through underneath
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  style={{
+                    maxWidth: "80%",
+                    padding: "10px 16px",
+                    borderRadius: 10,
+                    background: "rgba(255, 255, 255, 0.92)",
+                    border: "1px solid #e5e7eb",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: "#111827",
+                    textAlign: "center",
+                  }}
+                >
+                  {question}
+                </div>
+              </div>
+            )}
+
             {stageDimensions.width > 0 && (
               <Stage
                 width={stageDimensions.width}
@@ -376,7 +442,6 @@ const DrawTool = ({ onAddToAIChat }) => {
                 onTouchStart={handleMouseDown}
                 onTouchMove={handleMouseMove}
                 onTouchEnd={handleMouseUp}
-              // ref={containerRef}
               >
                 <Layer>
                   <Rect
