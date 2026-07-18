@@ -73,6 +73,7 @@ const UploadPictureTool = ({ onAddToAIChat }) => {
 
     const sessionId = crypto.randomUUID();
     const qrValue = `${window.location.origin}/mobile-upload/${sessionId}`;
+    console.log("QR code link:", qrValue);
     setPhoneSession({ sessionId, qrValue });
 
     const folderPath = `mobile-sessions/${sessionId}`;

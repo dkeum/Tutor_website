@@ -22,7 +22,11 @@ const MobileUploadPage = () => {
     setStatus("uploading");
     setErrorMessage("");
 
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    console.log("Current session:", sessionData?.session);
+
     const filePath = `mobile-sessions/${sessionId}/${Date.now()}.jpg`;
+    console.log("Uploading to path:", filePath);
 
     const { error } = await supabaseClient.storage
       .from(STORAGE_BUCKET)
@@ -31,9 +35,15 @@ const MobileUploadPage = () => {
     if (error) {
       console.error("mobile upload error:", error);
       setStatus("error");
-      setErrorMessage( error);
+      setErrorMessage(error.message || "Upload failed. Please try again.");
       return;
     }
+
+    const { data: publicUrlData } = supabaseClient.storage
+      .from(STORAGE_BUCKET)
+      .getPublicUrl(filePath);
+
+    console.log("Public URL:", publicUrlData?.publicUrl);
 
     setStatus("done");
   };
