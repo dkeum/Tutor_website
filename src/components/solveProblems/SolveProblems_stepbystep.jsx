@@ -61,6 +61,7 @@ const SolveProblems_stepbystep = ({
   const [activeTool, setActiveTool] = useState(null);
   const [hintsUsed, setHintsUsed] = useState({});
   const [hintLoading, setHintLoading] = useState(false);
+  const [toolState, setToolState] = useState({}); // { graph: { equation }, draw: {...}, ... }
 
   const [isSubmitting, setIsSubmitting] = useState(false); // NEW
 
@@ -103,6 +104,7 @@ const SolveProblems_stepbystep = ({
     setActiveTool(null);
     setHintsUsed({});
     setHintLoading(false);
+    setToolState({});
 
     // 2. Set up the fresh chat messages
     const freshMessages = [...INITIAL_MESSAGES];
@@ -549,6 +551,8 @@ const SolveProblems_stepbystep = ({
               videoStreamUrl={videoStreamUrl}
               isVideoLoading={isVideoLoading}
               onGenerateVideo={onGenerateVideo}
+              toolState={toolState}
+              setToolState={setToolState}
             />
           </div>
         </div>

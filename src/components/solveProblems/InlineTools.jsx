@@ -119,12 +119,44 @@ export const InlineDrawTool = ({ onAttach }) => {
   );
 };
 
-// ── Inline Graph ──
-// ── Inline Graph ──
-export const InlineGraphTool = ({ onAttach }) => {
-  const [equation, setEquation] = useState("x^2"); // no leading "y =" — MathQuill handles that as you type
+export const InlineGraphTool = ({ onAttach, toolState, setToolState }) => {
+  const equation = toolState?.graph?.equation ?? "x^2";
   const graphRef = useRef(null);
   const calculatorInst = useRef(null);
+  const prevIdsRef = useRef([]); // tracks which expression ids currently exist, so we can clean up removed ones
+
+  const setEquation = (newLatex) => {
+    setToolState((prev) => ({ ...prev, graph: { ...prev.graph, equation: newLatex } }));
+  };
+
+  // Splits "x^2; y=x; (3,4)" into ["x^2", "y=x", "(3,4)"], dropping empty pieces
+  // (e.g. a trailing ";" while still typing shouldn't create a blank expression)
+  const parseExpressions = (latexString) =>
+    latexString
+      .split(";")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+
+  // Pushes the full parsed list into Desmos: sets each expression by index-based id,
+  // then removes any ids left over from a previous, longer list.
+  const syncExpressions = (latexString) => {
+    if (!calculatorInst.current) return;
+
+    const parts = parseExpressions(latexString);
+    const newIds = parts.map((_, i) => `eq${i}`);
+
+    parts.forEach((latex, i) => {
+      calculatorInst.current.setExpression({ id: `eq${i}`, latex });
+    });
+
+    // Remove ids that existed before but aren't part of the current list
+    // (e.g. user deleted the second equation after the semicolon)
+    prevIdsRef.current
+      .filter((id) => !newIds.includes(id))
+      .forEach((id) => calculatorInst.current.removeExpression({ id }));
+
+    prevIdsRef.current = newIds;
+  };
 
   useEffect(() => {
     const init = () => {
@@ -135,14 +167,12 @@ export const InlineGraphTool = ({ onAttach }) => {
         settingsMenu: false,
         zoomButtons: true,
       });
-      calculatorInst.current.setExpression({ id: "eq1", latex: equation });
+      syncExpressions(equation);
     };
 
     if (window.Desmos) {
       init();
     } else if (!document.getElementById("desmos-script")) {
-      // Only inject the Desmos script once, even across repeated mounts
-      // (this component mounts/unmounts every time the tool tab is switched)
       const script = document.createElement("script");
       script.id = "desmos-script";
       script.src = "https://www.desmos.com/api/v1.8/calculator.js?apiKey=b7f43827f4544c6ca4861c278c3727a8";
@@ -150,19 +180,20 @@ export const InlineGraphTool = ({ onAttach }) => {
       script.onload = init;
       document.body.appendChild(script);
     } else {
-      // Script tag already exists but hasn't finished loading yet — wait for it
       document.getElementById("desmos-script").addEventListener("load", init, { once: true });
     }
 
     return () => {
       calculatorInst.current?.destroy();
       calculatorInst.current = null;
+      prevIdsRef.current = [];
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // mount-only — seeds from whatever `equation` currently is in parent state
 
   const handleEquationChange = (newLatex) => {
     setEquation(newLatex);
-    calculatorInst.current?.setExpression({ id: "eq1", latex: newLatex });
+    syncExpressions(newLatex);
   };
 
   const handleAttach = () => {
@@ -185,6 +216,9 @@ export const InlineGraphTool = ({ onAttach }) => {
     </div>
   );
 };
+
+
+
 // ── Inline Upload ──
 export const InlineUploadTool = ({ onAttach }) => {
   const [file, setFile] = useState(null);

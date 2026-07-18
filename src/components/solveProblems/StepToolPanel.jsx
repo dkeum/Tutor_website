@@ -24,6 +24,8 @@ const StepToolsPanel = ({
   videoStreamUrl,
   isVideoLoading,
   onGenerateVideo,
+  toolState,
+  setToolState,
 }) => {
   const currentTool = activeTool || "chat"; // NEW: never empty, defaults to chat
   const InlineComponent = INLINE_TOOL_REGISTRY[currentTool];
@@ -51,6 +53,8 @@ const StepToolsPanel = ({
             isVideoLoading={isVideoLoading}
             onGenerate={onGenerateVideo}
             questionText={question?.question}
+            toolState={toolState}
+            setToolState={setToolState} // Ensure this is passed here
           />
         ) : (
           <div className="p-3 text-sm text-slate-400">Coming soon</div>
@@ -109,7 +113,7 @@ const StepToolsPanel = ({
           onMouseLeave={(e) => unhover(e, false)}
         >
           <HelpCircle size={18} />
-         
+
         </button>
       </div>
     </div>

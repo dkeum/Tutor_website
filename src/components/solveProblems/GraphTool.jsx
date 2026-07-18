@@ -16,10 +16,12 @@ const GraphTool = ({ onAddToAIChat }) => {
 
   const graphRef = useRef(null);
   const calculatorInst = useRef(null);
+  const prevIdsRef = useRef([]); // tracks which expression ids currently exist in Desmos
 
   const destroyCalculator = () => {
     const inst = calculatorInst.current;
     calculatorInst.current = null;
+    prevIdsRef.current = [];
     if (inst) {
       try {
         inst.destroy();
@@ -27,6 +29,33 @@ const GraphTool = ({ onAddToAIChat }) => {
         console.error("Error destroying Desmos instance:", e);
       }
     }
+  };
+
+  // Splits "x^2; y=x; (3,4)" into ["x^2", "y=x", "(3,4)"], dropping empty pieces
+  // (e.g. a trailing ";" while still typing shouldn't create a blank expression)
+  const parseExpressions = (latexString) =>
+    latexString
+      .split(";")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+
+  // Pushes the full parsed list into Desmos: sets each expression by index-based id,
+  // then removes any ids left over from a previous, longer list.
+  const syncExpressions = (latexString) => {
+    if (!calculatorInst.current) return;
+
+    const parts = parseExpressions(latexString);
+    const newIds = parts.map((_, i) => `eq${i}`);
+
+    parts.forEach((latex, i) => {
+      calculatorInst.current.setExpression({ id: `eq${i}`, latex });
+    });
+
+    prevIdsRef.current
+      .filter((id) => !newIds.includes(id))
+      .forEach((id) => calculatorInst.current.removeExpression({ id }));
+
+    prevIdsRef.current = newIds;
   };
 
   useEffect(() => {
@@ -50,7 +79,7 @@ const GraphTool = ({ onAddToAIChat }) => {
           settingsMenu: false,
           zoomButtons: true,
         });
-        calculatorInst.current.setExpression({ id: "eq1", latex: equation });
+        syncExpressions(equation);
       };
 
       if (window.Desmos) {
@@ -93,7 +122,7 @@ const GraphTool = ({ onAddToAIChat }) => {
 
   const handleEquationChange = (newLatex) => {
     setEquation(newLatex);
-    calculatorInst.current?.setExpression({ id: "eq1", latex: newLatex });
+    syncExpressions(newLatex);
   };
 
   return (
@@ -156,7 +185,7 @@ const GraphTool = ({ onAddToAIChat }) => {
                 <MathQuillInput value={equation} onChange={handleEquationChange} />
               </div>
               <span style={{ fontSize: "12px", color: "#6b7280" }}>
-                Use the keypad or type e.g. x^2, sqrt, /
+                Use the keypad or type e.g. x^2; y=x
               </span>
             </div>
           </div>
