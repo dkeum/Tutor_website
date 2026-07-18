@@ -31,7 +31,7 @@ const MobileUploadPage = () => {
     if (error) {
       console.error("mobile upload error:", error);
       setStatus("error");
-      setErrorMessage("Upload failed — please try again.");
+      setErrorMessage("Upload failed — please try again.", error);
       return;
     }
 
