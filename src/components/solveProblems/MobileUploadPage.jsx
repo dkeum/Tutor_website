@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import { supabaseClient } from "../lib/supabaseClient"; // adjust path to match your project
+import { supabase as supabaseClient } from "../../db/supabaseclient"; // adjust path to match your project
 
 const STORAGE_BUCKET = "Mathmagick image attachments"; // your existing public bucket
 
