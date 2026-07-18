@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Bot, ArrowRight, ImageOff, RotateCcw, Smartphone, X } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { FileUpload } from "./FileUploadTemp";
-import { supabase as supabaseClient } from "../../db/supabaseClient"; // adjust path to match your project
+import { supabase as supabaseClient } from "../../db/supabaseclient"; // adjust path to match your project
 
 const STORAGE_BUCKET = "Mathmagick image attachments"; // your existing public bucket
 const POLL_INTERVAL_MS = 2000;
