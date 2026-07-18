@@ -6,7 +6,8 @@ const MathQuestion = ({ text }) => {
   if (!text) return null;
 
   const parts = [];
-  const regex = /\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)/g;
+  // Updated regex to include $$ and $ delimiters
+  const regex = /\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)|\$\$([\s\S]*?)\$\$|\$([\s\S]*?)\$/g;
   let lastIndex = 0;
   let match;
 
@@ -14,8 +15,14 @@ const MathQuestion = ({ text }) => {
     if (match.index > lastIndex) {
       parts.push({ type: "text", content: text.slice(lastIndex, match.index) });
     }
-    const isBlock = match[0].startsWith("\\[");
-    parts.push({ type: "math", content: match[1] ?? match[2], block: isBlock });
+    
+    // Check if the match is a block type (either \[ or $$)
+    const isBlock = match[0].startsWith("\\[") || match[0].startsWith("$$");
+    
+    // The actual math content will be in one of the 4 capture groups
+    const content = match[1] ?? match[2] ?? match[3] ?? match[4];
+    
+    parts.push({ type: "math", content: content, block: isBlock });
     lastIndex = match.index + match[0].length;
   }
 
