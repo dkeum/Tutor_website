@@ -59,6 +59,8 @@ const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const FinalExamTest = lazy(() => import("./pages/FinalExamTest"));
 const AuthCallback = lazy(() => import("./components/AuthCallback"));
 
+const MobileUploadPage = lazy(() => import("./components/solveProblems/MobileUploadPage"))
+
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
     <Loader2 className="animate-spin w-10 h-10 text-gray-600" />
@@ -91,6 +93,9 @@ createRoot(document.getElementById("root")).render(
 
                 }
               />
+
+              <Route path="/mobile-upload/:sessionId" element={<MobileUploadPage />} />
+              
               <Route
                 path="/surveypersonaldetail"
                 element={<SurveyPersonalDetail />}
