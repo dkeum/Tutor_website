@@ -288,7 +288,7 @@ function AISidebar({
                 >
                   <ReactMarkdown
                     remarkPlugins={[remarkMath]}
-                    rehypePlugins={[rehypeKatex]}
+                    rehypePlugins={[[rehypeKatex, { output: "htmlAndMathml" }]]}
                   >
                     {msg.text}
                   </ReactMarkdown>

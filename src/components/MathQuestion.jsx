@@ -1,13 +1,26 @@
 import React from "react";
+import katex from "katex";
 import "katex/dist/katex.min.css";
-import { InlineMath, BlockMath } from "react-katex";
+
+const InlineMath = ({ math }) => {
+  const html = katex.renderToString(math, { throwOnError: false });
+  return <span dangerouslySetInnerHTML={{ __html: html }} />;
+};
+
+const BlockMath = ({ math }) => {
+  const html = katex.renderToString(math, {
+    throwOnError: false,
+    displayMode: true,
+  });
+  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+};
 
 const MathQuestion = ({ text }) => {
   if (!text) return null;
 
   const parts = [];
-  // Updated regex to include $$ and $ delimiters
-  const regex = /\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)|\$\$([\s\S]*?)\$\$|\$([\s\S]*?)\$/g;
+  const regex =
+    /\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)|\$\$([\s\S]*?)\$\$|\$([\s\S]*?)\$/g;
   let lastIndex = 0;
   let match;
 
@@ -15,14 +28,11 @@ const MathQuestion = ({ text }) => {
     if (match.index > lastIndex) {
       parts.push({ type: "text", content: text.slice(lastIndex, match.index) });
     }
-    
-    // Check if the match is a block type (either \[ or $$)
+
     const isBlock = match[0].startsWith("\\[") || match[0].startsWith("$$");
-    
-    // The actual math content will be in one of the 4 capture groups
     const content = match[1] ?? match[2] ?? match[3] ?? match[4];
-    
-    parts.push({ type: "math", content: content, block: isBlock });
+
+    parts.push({ type: "math", content, block: isBlock });
     lastIndex = match.index + match[0].length;
   }
 

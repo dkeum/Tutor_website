@@ -7,6 +7,7 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { supabase } from "../../db/supabaseclient";
 import { setCredits } from "../../features/auth/personDetails";
+import MathQuestion from "../MathQuestion";
 
 const MAX_HINTS_PER_STEP = 3;
 const BRAND = "#4441c4";
@@ -430,21 +431,13 @@ const SolveProblems_stepbystep = ({
 
       <div className="flex-1 p-4 w-full border rounded-lg flex flex-row justify-between my-2 overflow-hidden">
         <div className="flex-1 flex flex-col gap-3 overflow-scroll overflow-x-hidden pb-20 pr-3">
+
           <div
-            className="rounded-lg min-h-[70px] flex items-center px-3 text-left"
+            className="rounded-lg min-h-[70px] flex items-center px-3 py-3 text-left"
             style={{ border: `1px solid ${BRAND_BORDER}`, fontFamily: "'Hanken Grotesk', sans-serif" }}
           >
-            <b>Question:</b>&nbsp; {question?.question}
+            <b>Question:</b>&nbsp; <MathQuestion text={question?.question} />
           </div>
-
-          {question?.image_url && (
-            <div
-              className="rounded-lg min-h-[200px] max-h-[250px] flex px-3 text-left overflow-hidden"
-              style={{ border: `1px solid ${BRAND_BORDER}` }}
-            >
-              <img src={question.image_url} className="min-h-[200px] max-h-[250px] object-contain" alt="Question" />
-            </div>
-          )}
 
           {steps.map((step, index) => {
             const status = stepStatus[index];

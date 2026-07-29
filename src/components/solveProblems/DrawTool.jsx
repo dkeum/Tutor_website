@@ -19,6 +19,7 @@ import {
   Grid2x2,
   HelpCircle,
 } from "lucide-react";
+import MathQuestion from "../MathQuestion";
 
 const DrawTool = ({ onAddToAIChat, question }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -426,7 +427,7 @@ const DrawTool = ({ onAddToAIChat, question }) => {
                     textAlign: "center",
                   }}
                 >
-                  {question}
+                  <MathQuestion text={typeof question === 'string' ? question : question?.question} />
                 </div>
               </div>
             )}

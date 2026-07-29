@@ -12,6 +12,7 @@ import { Provider } from "react-redux";
 
 import ProtectedRoute from "./components/ProtectRoute.jsx";
 import { AuthProvider } from "./hook/useAuthSession.jsx";
+import "katex/dist/katex.min.css";
 
 // Lazy load the pages
 const Contactme = lazy(() => import("./pages/Contactme"));
@@ -95,7 +96,7 @@ createRoot(document.getElementById("root")).render(
               />
 
               <Route path="/mobile-upload/:sessionId" element={<MobileUploadPage />} />
-              
+
               <Route
                 path="/surveypersonaldetail"
                 element={<SurveyPersonalDetail />}

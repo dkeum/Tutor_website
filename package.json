@@ -45,7 +45,7 @@
     "embla-carousel-react": "^8.6.0",
     "jest-environment-jsdom": "^30.0.4",
     "jquery": "^4.0.0",
-    "katex": "^0.17.0",
+    "katex": "^0.18.1",
     "konva": "^9.3.22",
     "lucide-react": "^0.525.0",
     "mathlive": "^0.106.0",
@@ -97,7 +97,8 @@
   "overrides": {
     "react-mathquill": {
       "react": "19.1.0",
-      "react-dom": "19.1.0"
+      "react-dom": "19.1.0",
+      "katex": "0.18.1"
     },
     "*": {
       "react": "19.1.0",
