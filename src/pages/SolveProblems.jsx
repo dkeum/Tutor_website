@@ -548,6 +548,7 @@ const SolveProblems = () => {
   };
 
   const handleNextOrSubmit = async () => {
+    if (isSubmittingMain) return; // NEW — block double-fire
     const correctAnswer = currentQuestion?.answers?.[0]?.answer || "";
     const isCorrect = normalizeLatex(latex) === normalizeLatex(correctAnswer);
 
@@ -590,6 +591,7 @@ const SolveProblems = () => {
     attachedImageUrl = null,
     isAlreadyCorrect = false
   ) => {
+    if (isSubmittingMain) return; // NEW — block double-fire
     const correctAnswer = currentQuestion?.answers?.[0]?.answer || "";
 
 
@@ -701,7 +703,8 @@ const SolveProblems = () => {
         <div style={{
           display: "flex",
           flexDirection: "column",
-          height: "calc(100vh - 64px)", // ← NEW: anchors the whole layout to the viewport
+          height: showResults ? "auto" : "calc(100vh - 64px)",
+          minHeight: showResults ? "calc(100vh - 64px)" : undefined,
         }}>
           {showResults ? (
             <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
@@ -1004,6 +1007,8 @@ const SolveProblems = () => {
                     isLastQuestion={isLastQuestion}
                     latex={latex}
                     setLatex={setLatex}
+                    disabled={isSubmittingMain}   // NEW
+                    isSubmitting={isSubmittingMain}
                   />
 
 
