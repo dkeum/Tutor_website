@@ -589,10 +589,10 @@ const Homepage = () => {
                 If a real self-serve trial exists, route this to signup
                 instead and restore "Start Free Trial" as the label. */}
             <Button1
-              onClick={() => navigate("/waitlist")}
+              onClick={() => navigate("/contact")}
               className="bg-white text-[#1a4fd6] font-bold hover:bg-gray-100 whitespace-nowrap shadow-md"
             >
-              Join the Waitlist
+              Contact Us
             </Button1>
             {showPricingButton && (
               <Button1
