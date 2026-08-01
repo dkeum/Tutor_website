@@ -32,24 +32,29 @@ const Navbar = () => {
   const isDevelopment = import.meta.env.VITE_ENVIRONMENT === "PRODUCTION";
 
   // Compute CTA settings based on the current environment profile
-  const ctaLink = isDevelopment ? "/login" : "/waitlist";
-  const ctaLabel = isDevelopment ? "Login/Signup" : "Join Waitlist";
+  const ctaLink = "/login";
+  const ctaLabel = "Login/Signup";
 
   return (
     <div className="sticky top-0 z-50 bg-white shadow-sm">
-      <div className="flex flex-row justify-between items-center px-6 md:px-10 py-2">
-        {/* Logo */}
-        <div className="flex flex-row items-center gap-x-3 text-2xl md:text-3xl">
+      {/* 
+        Main wrapper: max-width applied, mx-auto to center the whole bar, 
+        flex and items-center to align the 3 child columns.
+      */}
+      <div className="flex justify-between items-center px-6 md:px-10 h-20 max-w-[1280px] mx-auto w-full">
+
+        {/* 1. Left: Logo (flex-1 pushes the center item to the exact middle) */}
+        <div className="flex-1 flex justify-start items-center gap-x-3 text-2xl md:text-3xl">
           <img className="w-10 h-8 md:w-12 md:h-10" src="/mathamagic_m_blue_star.svg" alt="logo" />
           <a href="/" className="font-bold -ml-6">athmagick</a>
         </div>
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex flex-row gap-x-10 items-center text-xl">
+        {/* 2. Center: Desktop Nav */}
+        <div className="hidden md:flex justify-center items-center text-lg">
           <NavigationMenu>
-            <NavigationMenuList>
+            <NavigationMenuList className="gap-x-4">
               <NavigationMenuItem>
-                <NavigationMenuTrigger>How we help</NavigationMenuTrigger>
+                <NavigationMenuTrigger className="font-semibold hover:text-white">How we help</NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid grid-cols-2 gap-2 md:w-[300px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                     <li className="col-span-1">
@@ -82,70 +87,75 @@ const Navbar = () => {
 
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <a className="font-semibold" href="/about">About</a>
+                  <a className="font-semibold px-4 py-2  hover:text-white transition-colors" href="/pricing">Pricing</a>
                 </NavigationMenuLink>
               </NavigationMenuItem>
-{/* 
+
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <a className="font-semibold" href="/freeResources">Free Resources</a>
+                  <a className="font-semibold px-4 py-2 hover:text-white transition-colors" href="/about">About</a>
                 </NavigationMenuLink>
-              </NavigationMenuItem> */}
+              </NavigationMenuItem>
 
               {/* Conditionally render Pricing item only in DEVELOPMENT */}
               {isDevelopment && (
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
-                    <a className="font-semibold" href="/pricing">Pricing</a>
+                    <a className="font-semibold px-4 py-2 hover:text-[#2b56de] transition-colors" href="/pricing">Pricing</a>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               )}
 
             </NavigationMenuList>
           </NavigationMenu>
-
-          {/* Dynamic Desktop CTA Button */}
-          <a href={ctaLink}>
-            <Button
-              className="
-                px-7 py-3
-                text-base font-bold
-                bg-[#2b56de] text-white
-                rounded-[12px]
-                shadow-[0_4px_14px_rgba(43,86,222,0.2)]
-                hover:bg-[#1e40af] hover:shadow-[0_6px_20px_rgba(43,86,222,0.3)] hover:-translate-y-px
-                active:translate-y-px
-                transition-all duration-150
-                cursor-pointer
-                whitespace-nowrap
-              "
-            >
-              {ctaLabel}
-            </Button>
-          </a>
         </div>
 
-        {/* Mobile burger */}
-        <button
-          className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
-          onClick={() => setMenuOpen((prev) => !prev)}
-          aria-label="Toggle menu"
-        >
-          {menuOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          )}
-        </button>
+        {/* 3. Right: CTA Button & Mobile Burger (flex-1 to balance the left side) */}
+        <div className="flex-1 flex justify-end items-center gap-4">
+          {/* Dynamic Desktop CTA Button */}
+          <div className="hidden md:block">
+            <a href={ctaLink}>
+              <Button
+                className="
+                  px-7 py-3
+                  text-base font-bold
+                  bg-[#2b56de] text-white
+                  rounded-[12px]
+                  shadow-[0_4px_14px_rgba(43,86,222,0.2)]
+                  hover:bg-[#1e40af] hover:shadow-[0_6px_20px_rgba(43,86,222,0.3)] hover:-translate-y-px
+                  active:translate-y-px
+                  transition-all duration-150
+                  cursor-pointer
+                  whitespace-nowrap
+                "
+              >
+                {ctaLabel}
+              </Button>
+            </a>
+          </div>
+
+          {/* Mobile burger */}
+          <button
+            className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
+            onClick={() => setMenuOpen((prev) => !prev)}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile dropdown */}
       {menuOpen && (
-        <div className="md:hidden border-t border-gray-100 bg-white px-6 py-4 flex flex-col gap-4 shadow-lg">
+        <div className="md:hidden border-t border-gray-100 bg-white px-6 py-4 flex flex-col gap-4 shadow-lg absolute w-full left-0">
           <a
             href="/about"
             className="text-lg font-semibold text-gray-800 hover:text-[#2b56de] transition-colors py-1"
@@ -160,7 +170,7 @@ const Navbar = () => {
           >
             Free Resources
           </a>
-          
+
           {/* Conditionally render Pricing link in Mobile View only in DEVELOPMENT */}
           {isDevelopment && (
             <a

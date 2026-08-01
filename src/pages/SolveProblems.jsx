@@ -977,7 +977,7 @@ const SolveProblems = () => {
                                   >
                                     <MathQuestion text={q.question} />
                                   </div>
-                                  {q?.image_url && (
+                                  {/* {q?.image_url && (
                                     <img
                                       src={q.image_url}
                                       alt="Question visual"
@@ -988,7 +988,7 @@ const SolveProblems = () => {
                                         border: `1px solid ${TOKEN.outlineVariant}`,
                                       }}
                                     />
-                                  )}
+                                  )} */}
                                 </div>
                               </CarouselItem>
                             ))}
