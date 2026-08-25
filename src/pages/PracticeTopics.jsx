@@ -8,6 +8,7 @@ import {
   CircleDot,
   ArrowRight,
   Play,
+  SparklesIcon,
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import NavbarLoggedIn from "../components/NavbarLoggedIn";
@@ -15,12 +16,38 @@ import { useNavigate } from "react-router-dom";
 import LoggedInLayout from "../components/LoggedInLayout";
 import { supabase } from "../db/supabaseclient";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+import { Button } from "@/components/ui/button"
+
+const DIFFICULTY_LEVELS = ["easy", "medium", "hard"];
+const QUESTION_TYPES = [
+  { value: "fill-in-the-blank", label: "Fill in the Blank" },
+  { value: "multiple-choice", label: "Multiple Choice" },
+  { value: "multistep", label: "Multistep" },
+  { value: "mixed", label: "Mixed" },
+];
+
 const PracticeTopics = () => {
   // 1. Core States for Dynamic Data
   const [topics, setTopics] = useState([]);
   const [lastWorkedSection, setLastWorkedSection] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const plan_type = useSelector((state) => state.personDetail?.plan_type);
 
   // States for handling questions payload separately
   const [questions, setQuestions] = useState([]);
@@ -28,6 +55,13 @@ const PracticeTopics = () => {
 
   const [openTopicId, setOpenTopicId] = useState(null);
   const [showToast, setShowToast] = useState(false);
+
+  // Difficulty & question-type selector state — feeds into the question-session URL
+  const [difficulty, setDifficulty] = useState("medium");
+  const [questionType, setQuestionType] = useState("mixed");
+
+  // Pro-only gating for the difficulty & question-type selectors
+  const isProStudent = plan_type === "student_pro";
 
   // Grab the student's class ID from your Redux store
   const studentClassId = useSelector((s) => s.personDetail?.class_ID);
@@ -118,6 +152,8 @@ const PracticeTopics = () => {
     navigate(
       `/question/${encodeURIComponent(topicName)}?section=${encodeURIComponent(
         sectionName
+      )}&difficulty=${encodeURIComponent(difficulty)}&type=${encodeURIComponent(
+        questionType
       )}`
     );
   };
@@ -185,9 +221,9 @@ const PracticeTopics = () => {
         <div className="flex-1 flex flex-col relative overflow-hidden">
           <div className="absolute inset-0 math-grid pointer-events-none z-0"></div>
 
-          <main className=" mx-auto flex-1 z-10 flex flex-col gap-10">
+          <main className="mx-auto flex-1 z-10 flex flex-col">
             {/* Header Layout */}
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10">
               <div>
                 <h2
                   className="text-4xl font-bold text-[#101b30] tracking-tight text-left"
@@ -244,6 +280,85 @@ const PracticeTopics = () => {
             {error && (
               <div className="text-center py-20 text-sm font-semibold text-rose-500 bg-rose-50 border border-rose-100 rounded-2xl">
                 {error}
+              </div>
+            )}
+
+            {/* Difficulty & Question-Type Selectors — sit tight against the topics list below */}
+            {!loading && !error && (
+              <div className="flex justify-end gap-3 mb-3">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      disabled={!isProStudent}
+                      className="capitalize font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                      title={
+                        isProStudent
+                          ? undefined
+                          : "Upgrade to Pro to customize difficulty"
+                      }
+                    >
+                      <SparklesIcon className="w-4 h-4 text-purple-700" />{" "}
+                      Difficulty: {difficulty}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-40" align="end">
+                    <DropdownMenuLabel>Question Difficulty</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      {DIFFICULTY_LEVELS.map((level) => (
+                        <DropdownMenuItem
+                          key={level}
+                          onClick={() => setDifficulty(level)}
+                          className="capitalize"
+                        >
+                          {level}
+                          {difficulty === level && (
+                            <DropdownMenuShortcut>✓</DropdownMenuShortcut>
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      disabled={!isProStudent}
+                      className="font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                      title={
+                        isProStudent
+                          ? undefined
+                          : "Upgrade to Pro to customize question type"
+                      }
+                    >
+                      <SparklesIcon className="w-4 h-4 text-purple-700" /> Type:{" "}
+                      {
+                        QUESTION_TYPES.find((t) => t.value === questionType)
+                          ?.label
+                      }
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-48" align="end">
+                    <DropdownMenuLabel>Question Type</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      {QUESTION_TYPES.map((type) => (
+                        <DropdownMenuItem
+                          key={type.value}
+                          onClick={() => setQuestionType(type.value)}
+                        >
+                          {type.label}
+                          {questionType === type.value && (
+                            <DropdownMenuShortcut>✓</DropdownMenuShortcut>
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             )}
 
@@ -332,7 +447,7 @@ const PracticeTopics = () => {
                                 {/* Right: Meta Details and Forward Action Arrow */}
                                 <div className="flex items-center gap-4 mt-2 sm:mt-0 ml-8 sm:ml-0">
                                   <span className="text-xs text-[#494456] font-semibold bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200/60">
-                                    {section.questions || "30 Qs"}
+                                    {section.questions || "10 Qs"}
                                   </span>
 
                                   <span
@@ -359,8 +474,6 @@ const PracticeTopics = () => {
               </div>
             )}
           </main>
-
-
 
           <div
             className={`fixed bottom-10 right-10 transition-all duration-500 z-[100] flex items-center gap-4 bg-[#2ECC71] text-white px-6 py-4 rounded-2xl shadow-2xl shadow-[#2ECC71]/40 ${showToast

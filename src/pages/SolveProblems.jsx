@@ -103,6 +103,7 @@ export const styles = `
   }
   .sp-btn-primary:hover { opacity: 0.92; transform: scale(1.02); }
   .sp-btn-primary:active { transform: scale(0.97); }
+  .sp-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
   .sp-btn-outline {
     background: transparent; color: ${TOKEN.primary};
@@ -164,6 +165,14 @@ export const styles = `
   }
   .video-modal-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
 
+  /* NEW — multiple-choice submit row under the options */
+  .sp-mc-submit-row {
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 24px;
+    border-top: 1px solid ${TOKEN.outlineVariant};
+  }
+
   @media (max-width: 768px) {
     .sp-ai-sidebar { display: none; }
     .sp-main-grid { grid-template-columns: 1fr !important; }
@@ -176,10 +185,14 @@ const SolveProblems = () => {
   const { topic } = useParams();
   const [searchParams] = useSearchParams();
   const section = searchParams.get("section");
+  const difficulty = searchParams.get("difficulty");
+  const questionType = searchParams.get("type");
   const navigate = useNavigate();
   const studentClassId = useSelector((s) => s.personDetail?.class_ID);
   const studentPlanType = useSelector((s) => s.personDetail?.plan_type); // "free" | "pro" | ...
   const [loadingSession, setLoadingSession] = useState(true);
+
+
 
 
   const [questions, setQuestions] = useState([]);
@@ -201,6 +214,10 @@ const SolveProblems = () => {
 
   const [usedAIVideo, setUsedAIVideo] = useState(false);
   const [usedAIChat, setUsedAIChat] = useState(false);
+
+  // NEW — tracks which option label ("A"/"B"/"C"/"D") the student picked
+  // for the CURRENT multiple-choice question. Reset whenever currentIndex changes.
+  const [selectedOption, setSelectedOption] = useState(null);
 
   const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [videoStreamUrl, setVideoStreamUrl] = useState(null);
@@ -238,6 +255,49 @@ const SolveProblems = () => {
       return [...prev, toolId];
     });
   };
+
+
+  // Extracted so both the initial load AND retry can call it
+  const fetchQuestions = async () => {
+    if (!topic || !section) return;
+
+    setLoadingQuestions(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        const BASE_URL = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+          ? "http://localhost:3000"
+          : "https://mathamagic-backend.vercel.app";
+
+        const res = await axios.get(
+          `${BASE_URL}/questions/${encodeURIComponent(topic)}/${encodeURIComponent(section)}`,
+          {
+            withCredentials: true,
+            params: {
+              class: studentClassId,
+              difficulty,
+              type: questionType,
+            },
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          }
+        );
+
+        const qs = res.data.questions || [];
+        setQuestions(qs);
+
+        if (qs.length > 0) {
+          setTopicId(qs[0].topic_id);
+          setSectionId(qs[0].section_id);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching questions:", err);
+    } finally {
+      setLoadingQuestions(false);
+    }
+  };
+
 
   const handleGenerateAndStreamVideo = async () => {
     if (!currentQuestion || isVideoLoading) return;
@@ -357,9 +417,11 @@ const SolveProblems = () => {
     return () => stopTimers();
   }, []);
 
+  // CHANGED — also reset the selected MC option whenever the question changes
   useEffect(() => {
     setUsedAIVideo(false);
     setUsedAIChat(false);
+    setSelectedOption(null);
   }, [currentIndex]);
 
   useEffect(() => {
@@ -422,7 +484,10 @@ const SolveProblems = () => {
             `${BASE_URL}/questions/${encodeURIComponent(topic)}/${encodeURIComponent(section)}`,
             {
               withCredentials: true,
-              params: { class: studentClassId },
+              params: {
+                class: studentClassId, difficulty,
+                type: questionType,
+              },
               headers: { Authorization: `Bearer ${session.access_token}` },
             }
           );
@@ -454,22 +519,21 @@ const SolveProblems = () => {
 
   const isLastQuestion = currentIndex === questions.length - 1;
   const currentQuestion = questions[currentIndex] || {};
+  const isMultipleChoice = currentQuestion.question_type === "multiple_choice"; // NEW
   const progressPct =
     questions.length > 0
       ? Math.round(((currentIndex + 1) / questions.length) * 100)
       : 0;
 
   const submitAnswers = async (finalAttempts) => {
-    if (!finalAttempts || finalAttempts.length === 0) return;
+    if (!finalAttempts || finalAttempts.length === 0) return finalAttempts;
 
     let verifiedAttempts = [...finalAttempts];
     let finalGrade = 0;
 
-    // Filter out attempts that are already marked correct (either by step-by-step AI or exact text match)
     const attemptsToVerify = finalAttempts.filter((a) => !a.is_correct);
 
     try {
-      // Only call the AI if there are actually answers that need verifying
       if (attemptsToVerify.length > 0) {
         const res = await axios.post(
           `${getBaseUrl()}/ai/verify-answers`,
@@ -479,7 +543,6 @@ const SolveProblems = () => {
         const results = res.data.results || [];
 
         verifiedAttempts = finalAttempts.map((originalAttempt) => {
-          // If it was already correct, skip overriding it to save the confirmed status
           if (originalAttempt.is_correct) {
             return originalAttempt;
           }
@@ -521,23 +584,15 @@ const SolveProblems = () => {
     };
 
     try {
-
-      // 1. Check Supabase for an existing local session
       const { data: { session } } = await supabase.auth.getSession();
 
-      // console.log("Supabase session:", session);
       if (session?.user) {
-        const res = await axios.post(
-          `${getBaseUrl()}/questions/save-marks`,
-          payload,
-          {
-            withCredentials: true, headers: {
-              Authorization: `Bearer ${session.access_token}`, // Inject the fresh token
-            },
-          }
-        );
-
-        // console.log("Marks saved successfully with AI verified data!", res.data);
+        await axios.post(`${getBaseUrl()}/questions/save-marks`, payload, {
+          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
       }
     } catch (apiError) {
       console.error(
@@ -545,19 +600,31 @@ const SolveProblems = () => {
         apiError?.response?.data || apiError.message
       );
     }
+
+    return verifiedAttempts; // NEW — hand the AI-corrected data back to the caller
   };
 
+  // CHANGED — read the correct answer straight off the question row
+  // (`question.answer`), not the old `question.answers[0].answer` shape
+  // from the removed `answer` table join.
   const handleNextOrSubmit = async () => {
-    if (isSubmittingMain) return; // NEW — block double-fire
-    const correctAnswer = currentQuestion?.answers?.[0]?.answer || "";
-    const isCorrect = normalizeLatex(latex) === normalizeLatex(correctAnswer);
+    if (isSubmittingMain) return;
 
+    // NEW — for multiple choice, require a selection before allowing submit
+    if (isMultipleChoice && !selectedOption) return;
 
-    setIsSubmittingMain(true); // NEW
+    const correctAnswer = currentQuestion?.answer || "";
+    const studentAnswer = isMultipleChoice ? selectedOption : latex;
+
+    const isCorrect = isMultipleChoice
+      ? studentAnswer === correctAnswer
+      : normalizeLatex(studentAnswer) === normalizeLatex(correctAnswer);
+
+    setIsSubmittingMain(true);
     try {
       const newAttempt = {
         question_id: currentQuestion.id,
-        answer_given: latex,
+        answer_given: studentAnswer,
         is_correct: isCorrect,
         time_spent_seconds: secondsElapsed,
         used_ai_video: usedAIVideo,
@@ -572,39 +639,42 @@ const SolveProblems = () => {
       setAnswerResults(updatedResults);
 
       setLatex("");
+      setSelectedOption(null); // NEW
       setSecondsElapsed(0);
 
       if (isLastQuestion) {
         stopTimers();
-        await submitAnswers(updatedAnswers);
+        const verifiedAttempts = await submitAnswers(updatedAnswers); // NEW — capture return
+        // NEW — rebuild results screen data from AI-verified attempts, not the raw client guesses
+        setAnswerResults(
+          verifiedAttempts.map((a) => ({
+            questionId: a.question_id,
+            isCorrect: a.is_correct,
+          }))
+        );
         setShowResults(true);
       } else {
         api?.scrollNext();
       }
     } finally {
-      setIsSubmittingMain(false); // NEW
+      setIsSubmittingMain(false);
     }
   };
 
+  // CHANGED — same `answer` fix as above
   const handleNextOrSubmit_solvetab = async (
     studentAnswerText = "",
     attachedImageUrl = null,
     isAlreadyCorrect = false
   ) => {
-    if (isSubmittingMain) return; // NEW — block double-fire
-    const correctAnswer = currentQuestion?.answers?.[0]?.answer || "";
+    if (isSubmittingMain) return;
+    const correctAnswer = currentQuestion?.answer || "";
 
-
-    // Default to whatever the step-by-step dialog already determined
     let isCorrect = isAlreadyCorrect;
-
     const hasAnswerContent = !!(studentAnswerText?.trim() || attachedImageUrl);
 
-    // Only hit the AI if step-by-step didn't already confirm "correct"
     if (!isAlreadyCorrect) {
       if (!hasAnswerContent) {
-        // Nothing was actually answered (e.g. "Next Question" clicked blind) —
-        // mark it wrong locally, no need to spend an API call on it.
         isCorrect = false;
       } else {
         try {
@@ -652,25 +722,39 @@ const SolveProblems = () => {
 
     if (isLastQuestion) {
       stopTimers();
-      await submitAnswers(updatedAnswers);
+      const verifiedAttempts = await submitAnswers(updatedAnswers); // NEW
+      setAnswerResults(
+        verifiedAttempts.map((a) => ({
+          questionId: a.question_id,
+          isCorrect: a.is_correct,
+        }))
+      ); // NEW
       setShowResults(true);
     } else {
       api?.scrollNext();
     }
   };
 
-  const handleRetry = () => {
+
+
+  const handleRetry = async () => {
     setAnswerResults([]);
     setRecordedAnswers([]);
     setCurrentIndex(0);
     setLatex("");
+    setSelectedOption(null);
     setSecondsElapsed(0);
     setTotalSeconds(0);
     setShowResults(false);
-    setSessionStartTime(new Date().toISOString());
+
+    await fetchQuestions();     // pull a fresh 10 questions first
+
+    setSessionStartTime(new Date().toISOString());  // then start the new session clock
+
     if (api) api.scrollTo(0);
     startTimers();
   };
+
 
   if (loadingSession) {
     return (
@@ -974,11 +1058,23 @@ const SolveProblems = () => {
                                       color: TOKEN.onSurface,
                                       fontWeight: 500,
                                       margin: 0,
-                                      maxHeight: 160,
+                                      maxHeight: 500,
                                       overflowY: "hidden",
                                     }}
                                   >
-                                    <MathQuestion text={q.question} />
+                                    {/* CHANGED — pass the real flag + options,
+                                        and wire up selection so it feeds
+                                        handleNextOrSubmit via `selectedOption` */}
+                                    <MathQuestion
+                                      text={q.question}
+                                      multiplechoice={q.question_type === "multiple_choice"}
+                                      options={q.options}
+                                      selected={index === currentIndex ? selectedOption : undefined}
+                                      onSelect={(label) => {
+                                        if (index !== currentIndex) return;
+                                        setSelectedOption(label);
+                                      }}
+                                    />
                                   </div>
                                   {/* {q?.image_url && (
                                     <img
@@ -1001,15 +1097,39 @@ const SolveProblems = () => {
                     )}
                   </div>
 
-                  {/* Answer area */}
-                  <AnswerField
-                    handleNextOrSubmit={handleNextOrSubmit}
-                    isLastQuestion={isLastQuestion}
-                    latex={latex}
-                    setLatex={setLatex}
-                    disabled={isSubmittingMain}   // NEW
-                    isSubmitting={isSubmittingMain}
-                  />
+                  {/* Answer area — CHANGED: multiple-choice questions use the
+                      option buttons rendered inside MathQuestion above instead
+                      of the free-text AnswerField, so they get their own
+                      Next/Submit trigger here. */}
+                  {isMultipleChoice ? (
+                    <div className="sp-mc-submit-row">
+                      <button
+                        className="sp-btn-primary"
+                        onClick={handleNextOrSubmit}
+                        disabled={!selectedOption || isSubmittingMain}
+                      >
+                        {isSubmittingMain ? (
+                          <>
+                            <Loader2 size={14} className="spin-icon" />
+                            Submitting…
+                          </>
+                        ) : isLastQuestion ? (
+                          "Submit"
+                        ) : (
+                          "Next"
+                        )}
+                      </button>
+                    </div>
+                  ) : (
+                    <AnswerField
+                      handleNextOrSubmit={handleNextOrSubmit}
+                      isLastQuestion={isLastQuestion}
+                      latex={latex}
+                      setLatex={setLatex}
+                      disabled={isSubmittingMain}   // NEW
+                      isSubmitting={isSubmittingMain}
+                    />
+                  )}
 
 
                 </div>

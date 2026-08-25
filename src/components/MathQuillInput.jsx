@@ -96,7 +96,7 @@
 //     />
 //   );
 // }
-import { useEffect, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import $ from "jquery";
 import "mathquill/build/mathquill.css";
 
@@ -127,7 +127,7 @@ function loadMathQuill() {
   return mqLoadPromise;
 }
 
-export default function MathQuillInput({ value, onChange }) {
+const MathQuillInput = forwardRef(function MathQuillInput({ value, onChange }, ref) {
   const mathFieldRef = useRef(null);
   const mqInstance = useRef(null);
 
@@ -185,6 +185,20 @@ export default function MathQuillInput({ value, onChange }) {
     }
   }, [value]);
 
+  // Exposes imperative methods so a parent (e.g. the math keypad)
+  // can insert LaTeX at the cursor instead of replacing the whole field
+  useImperativeHandle(ref, () => ({
+    insertLatex: (latex) => {
+      if (!mqInstance.current) return;
+      mqInstance.current.write(latex);
+      mqInstance.current.focus();
+      const latexNow = mqInstance.current.latex();
+      lastEmittedRef.current = latexNow;
+      onChangeRef.current?.(latexNow);
+    },
+    focus: () => mqInstance.current?.focus(),
+  }));
+
   return (
     <div
       ref={mathFieldRef}
@@ -199,4 +213,6 @@ export default function MathQuillInput({ value, onChange }) {
       }}
     />
   );
-}
+});
+
+export default MathQuillInput;

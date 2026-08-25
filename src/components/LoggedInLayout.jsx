@@ -2,9 +2,24 @@ import React, { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import NavbarLoggedIn from "./NavbarLoggedIn";
 import Sidebar from "./Sidebar";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const LoggedInLayout = ({ children, bare = false }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  const is_on_trial = useSelector((state) => state.personDetail.is_on_trial);
+  const subscription_status = useSelector((state) => state.personDetail.subscription_status);
+
+
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (is_on_trial === false && subscription_status !== "active" && subscription_status !== "trialing") {
+      navigate("/pricing");
+    }
+  }, [is_on_trial, subscription_status, navigate]);
+
 
   useEffect(() => {
     const handleResize = () => {

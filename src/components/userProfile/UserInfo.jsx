@@ -7,7 +7,10 @@ const UserInfo = () => {
   const name = useSelector((state) => state.personDetail.name);
   const grade = useSelector((state) => state.personDetail.grade);
   const email = useSelector((state) => state.personDetail.email) || ""; // Fallback fallback safety handling
+  const userAttributes = useSelector((state) => state.personDetail.userAttributes) || ""; // Fallback fallback safety handling
   const profile_picture = useSelector((state) => state.personDetail.profile_pic);
+  const userWorkEthic = useSelector((state) => state.personDetail.workEthic) || "Beginner"; //Soft Skills
+  const userWorkResults = useSelector((state) => state.personDetail.workResults); //Hard Skills
 
   // Extracting student initials cleanly for fallback state representation
   const userInitials = name ? name[0].toUpperCase() : "?";
@@ -28,7 +31,7 @@ const UserInfo = () => {
       />
 
       {/* Integrated Shadcn Avatar Core Block wrapped directly inside your custom style guidelines */}
-      <Avatar 
+      <Avatar
         className="w-24 h-24 mb-4 relative z-10 flex-shrink-0 select-none border-4"
         style={{ borderColor: "#e6deff" }}
       >
@@ -38,7 +41,7 @@ const UserInfo = () => {
           className="object-cover w-full h-full"
         />
         {/* Dynamic structural substitution fallback handler inheriting old design typography markup */}
-        <AvatarFallback 
+        <AvatarFallback
           className="w-full h-full flex items-center justify-center text-4xl font-black rounded-full"
           style={{ background: "#5d3fd3", color: "#fff" }}
         >
@@ -53,18 +56,34 @@ const UserInfo = () => {
       >
         {name || "Student"}
       </h2>
-      
-      <p className="text-lg opacity-90 relative z-10 w-full break-all px-2">
-        {email || (grade ? `Grade: ${grade}` : "")}
-      </p>
+
 
       {/* Educational Tier Indicator Badge Component Layout */}
       <div
         className="mt-4 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest relative z-10 flex-shrink-0 select-none"
         style={{ background: "rgba(255,255,255,0.15)" }}
       >
-        {grade ? `Grade ${grade}` : "Advanced Level"}
+        {grade ? `Grade ${grade}` : "Grade 11"}
       </div>
+
+      {userWorkEthic &&
+        <div
+          className="mt-4 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest relative z-10 flex-shrink-0 select-none"
+          style={{ background: "rgba(255,255,255,0.15)" }}
+        >
+          {userWorkEthic}
+        </div>
+
+      }
+      {userWorkResults &&
+        <div
+          className="mt-4 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest relative z-10 flex-shrink-0 select-none"
+          style={{ background: "rgba(255,255,255,0.15)" }}
+        >
+          {userWorkResults}
+        </div>
+      }
+
     </div>
   );
 };

@@ -7,6 +7,9 @@ import {
   TrendingUpIcon,
   TrendingDownIcon,
   ChevronRightIcon,
+  TreePine,
+  FileUser,
+  SparklesIcon,
 } from "lucide-react";
 
 import TrackingDottedGraph from "./TrackData/TrackingDottedGraph";
@@ -17,6 +20,8 @@ import NavbarLoggedIn from "../NavbarLoggedIn";
 
 import { supabase } from "../../db/supabaseclient";
 import LoggedInLayout from "../LoggedInLayout";
+
+import { Button } from "../ui/button";
 
 const temp_data = []
 
@@ -43,7 +48,11 @@ const TrackImprovement = () => {
   const [weeklyTarget, setWeeklyTarget] = useState(15);
   const [nextMilestone, setNextMilestone] = useState(null);
 
+  const plan_type = useSelector((state) => state.personDetail?.plan_type);
   const name = useSelector((s) => s.personDetail.name)
+
+  // Pro-only gating for Knowledge Tree & Generate Report
+  const isProStudent = plan_type === "student_pro";
 
   const [loading, setLoading] = useState(true);
 
@@ -369,30 +378,76 @@ const TrackImprovement = () => {
               </div>
             </div>
 
-            <div className="flex gap-3 mb-6">
-              {Object.entries(graphTitleMap).map(([type, label]) => (
-                <button
-                  key={type}
-                  onClick={() => setFilterType(type)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95 cursor-pointer"
-                  style={
-                    filterType === type
-                      ? {
-                        background: "#5d3fd3",
-                        color: "#fff",
-                        boxShadow: "0 4px 14px rgba(93,63,211,0.4)",
-                      }
-                      : {
-                        background: "#fff",
-                        border: "1px solid #e2dfec",
-                        color: "#484554",
-                        boxShadow: "0 2px 6px rgba(93,63,211,0.03)",
-                      }
+            <div className="flex flex-row  justify-between gap-3 mb-6">
+
+              <div className="flex flex-wrap gap-3">
+                {Object.entries(graphTitleMap).map(([type, label]) => (
+                  <button
+                    key={type}
+                    onClick={() => setFilterType(type)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95 cursor-pointer"
+                    style={
+                      filterType === type
+                        ? {
+                          background: "#5d3fd3",
+                          color: "#fff",
+                          boxShadow: "0 4px 14px rgba(93,63,211,0.4)",
+                        }
+                        : {
+                          background: "#fff",
+                          border: "1px solid #e2dfec",
+                          color: "#484554",
+                          boxShadow: "0 2px 6px rgba(93,63,211,0.03)",
+                        }
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  className="bg-[#5d3fd3] text-white hover:bg-purple-700 font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#5d3fd3]"
+                  disabled={!isProStudent}
+                  title={
+                    isProStudent
+                      ? undefined
+                      : "Upgrade to Pro to unlock the Knowledge Tree"
                   }
+                  onClick={() => {
+                    navigate("/knowledge-tree");
+                  }}
                 >
-                  {label}
-                </button>
-              ))}
+                  {!isProStudent && (
+                    <SparklesIcon className="w-4 h-4 text-yellow-300" />
+                  )}
+                  Knowledge Tree <TreePine className="w-5 h-5 font" />
+                </Button>
+
+                <Button
+                  className="bg-[#5d3fd3] text-white hover:bg-purple-700 font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#5d3fd3]"
+                  disabled={!isProStudent}
+                  title={
+                    isProStudent
+                      ? undefined
+                      : "Upgrade to Pro to generate progress reports"
+                  }
+                  onClick={() => {
+                    navigate("/student-progress-report");
+                  }}
+                >
+                  {!isProStudent && (
+                    <SparklesIcon className="w-4 h-4 text-yellow-300" />
+                  )}
+                  Generate Report <FileUser />
+                </Button>
+
+
+              </div>
+
+
             </div>
 
             <div className="grid grid-cols-12 gap-6 items-stretch">

@@ -33,7 +33,7 @@ const PLAN_LABELS = {
 const PLAN_CREDIT_TOTALS = {
   free: 4000,
   "self-study": 4000,
-  pro: 10000, 
+  pro: 10000,
 };
 
 const Sidebar = () => {
@@ -50,6 +50,8 @@ const Sidebar = () => {
   const className = useSelector(s => s.personDetail?.class);
   const profile_picture = useSelector((state) => state.personDetail.profile_pic);
   const userInitials = studentName ? studentName[0].toUpperCase() : "?";
+
+
 
   const safePlanType = plan_type.toLowerCase();
   const planLabel = PLAN_LABELS[safePlanType] ?? "Self-Study";

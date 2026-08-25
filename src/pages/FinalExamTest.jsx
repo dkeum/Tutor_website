@@ -6,6 +6,9 @@ import NavbarLoggedIn from "../components/NavbarLoggedIn";
 import Sidebar from "../components/Sidebar";
 import LoggedInLayout from "../components/LoggedInLayout";
 import { supabase } from "../db/supabaseclient";
+import MathKeyboardTool from "../components/solveProblems/MathKeyboardTool";
+import MathQuillInput from "../components/MathQuillInput";
+import MathQuestion from "../components/MathQuestion";
 
 const BASE =
   import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
@@ -102,6 +105,7 @@ const FinalExamPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [totalSeconds, setTotalSeconds] = useState(0);
   const [skippedIndices, setSkippedIndices] = useState(new Set());
+  const mathFieldRef = useRef(null);
 
   const timerRef = useRef(null);
   // Per-question elapsed seconds (resets when moving between questions)
@@ -151,6 +155,8 @@ const FinalExamPage = () => {
   }
 
   const currentQ = questions[currentIndex];
+
+  console.log(currentQ)
   const totalQ = questions.length;
   const answeredCount = Object.keys(answers).length;
   const remaining = totalQ - answeredCount;
@@ -305,20 +311,30 @@ const FinalExamPage = () => {
                 </div>
               </div>
 
-              <p style={{ fontSize: 16, lineHeight: 1.65, color: TOKEN.onSurface, fontWeight: 500, margin: "0 0 20px" }}>
-                {currentQ.question}
-              </p>
+              <div style={{ fontSize: 16, lineHeight: 1.65, color: TOKEN.onSurface, fontWeight: 500, margin: "0 0 20px" }}>
+                <MathQuestion text={currentQ.question} />
+              </div>
 
-              <textarea
-                value={draftAnswer}
-                onChange={(e) => setDraftAnswer(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter" && e.metaKey) handleNext(); }}
-                placeholder="Type your answer here…"
-                rows={4}
-                style={{ width: "100%", padding: "12px 14px", border: `1px solid ${TOKEN.outlineVariant}`, borderRadius: 12, fontSize: 15, fontFamily: "'Work Sans', sans-serif", lineHeight: 1.6, resize: "vertical", outline: "none", boxSizing: "border-box", color: TOKEN.onSurface, background: TOKEN.surfaceContainerLow }}
-                onFocus={(e) => (e.target.style.borderColor = TOKEN.primary)}
-                onBlur={(e) => (e.target.style.borderColor = TOKEN.outlineVariant)}
-              />
+              <div style={{ marginBottom: 12 }}>
+                <MathQuillInput
+                  ref={mathFieldRef}
+                  value={draftAnswer}
+                  onChange={(latex) => setDraftAnswer(latex)}
+                />
+              </div>
+
+              <div
+                style={{
+                  border: `1px solid ${TOKEN.outlineVariant}`,
+                  borderRadius: 12,
+                  overflow: "hidden",
+                  height: 200,
+                }}
+              >
+                <MathKeyboardTool
+                  insertLatex={(latex) => mathFieldRef.current?.insertLatex(latex)}
+                />
+              </div>
             </div>
 
             {/* Action bar */}

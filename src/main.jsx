@@ -62,6 +62,10 @@ const AuthCallback = lazy(() => import("./components/AuthCallback"));
 
 const MobileUploadPage = lazy(() => import("./components/solveProblems/MobileUploadPage"))
 
+const KnowledgeTree = lazy(() => import("./pages/KnowledgeTree"))
+
+const StudentProgressReport = lazy(() => import("./pages/StudentProgressReport"))
+
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
     <Loader2 className="animate-spin w-10 h-10 text-gray-600" />
@@ -123,6 +127,24 @@ createRoot(document.getElementById("root")).render(
                 element={
                   <ProtectedRoute>
                     <Settings />
+                  </ProtectedRoute>
+                }
+              />
+
+
+              <Route
+                path="/student-progress-report"
+                element={
+                  <ProtectedRoute>
+                    <StudentProgressReport />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/knowledge-tree"
+                element={
+                  <ProtectedRoute>
+                    <KnowledgeTree />
                   </ProtectedRoute>
                 }
               />
