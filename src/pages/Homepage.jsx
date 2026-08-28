@@ -41,9 +41,6 @@ const Homepage = () => {
     <div className="max-w-6xl mx-auto overflow-x-hidden">
       <Navbar />
 
-      <a href="https://smollaunchpad.com/projects/mathmagick?utm_source=badge" target="_blank" rel="noopener noreferrer" className="flex justify-center mt-6 md:mt-10">
-        <img src="https://smollaunchpad.com/smollaunchpad/images/badges/featured-on-light.svg" alt="Featured on Smol LaunchPad" style={{ height: "44px", width: "auto" }} />
-      </a>
 
       {/* ── HERO ── */}
       <div className="relative flex min-h-[44rem] md:h-[44rem] w-full justify-center bg-white dark:bg-black mt-3 overflow-hidden">
