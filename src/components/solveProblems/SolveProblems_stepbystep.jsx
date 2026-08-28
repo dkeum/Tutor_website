@@ -66,11 +66,62 @@ const SolveProblems_stepbystep = ({
 
   const [isSubmitting, setIsSubmitting] = useState(false); // NEW
 
+
+  // NEW — compact the AI chat into { role, text } turns for storage.
+  // Images are never sent to the backend here — just a marker, since the
+  // real file already lives in Supabase storage / stepImages if needed later.
+  const buildChatLogForBackend = (msgs) =>
+    msgs
+      .filter((m) => (m.role === "user" || m.role === "assistant") && !m.isSeed)
+      .map((m) => {
+        if (Array.isArray(m.content)) {
+          const textPart = m.content.find((c) => c.type === "text");
+          const hasImage = m.content.some((c) => c.type === "image_url");
+          const text = (textPart?.text || "").trim();
+          return {
+            role: m.role,
+            text: hasImage ? `${text} [image-attached]`.trim() : text,
+          };
+        }
+        return { role: m.role, text: m.content };
+      });
+
+  // NEW — persist the step-by-step chat for this question into a
+  // step_by_step_session row. Best-effort: never blocks Next/Submit.
+  const saveStepByStepChat = async () => {
+    const chatLog = buildChatLogForBackend(messages);
+    if (chatLog.length === 0) return; // student never touched the AI chat
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      await axios.post(
+        `${getBaseUrl()}/questions/step-by-step/chat`,
+        {
+          questionId: question?.id,
+          chatLog,
+        },
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        }
+      );
+    } catch (err) {
+      console.error("Failed to save step-by-step chat:", err?.response?.data || err.message);
+    }
+  };
+
   const handleHeaderNext = async () => {
     setIsSubmitting(true);
     try {
       // Check if any step was evaluated as "correct" by the AI
       const isAlreadyCorrect = Object.values(stepStatus).includes("correct");
+
+      // NEW — save this question's step-by-step chat before moving on
+      await saveStepByStepChat();
 
       if (isLastQuestion) {
         // If it's the last question, grab the current step to submit the final answer
@@ -113,6 +164,7 @@ const SolveProblems_stepbystep = ({
     if (question.image_url) {
       freshMessages.push({
         role: "user",
+        isSeed: true,
         content: [
           { type: "text", text: question.question },
           { type: "image_url", image_url: { url: question.image_url } },
@@ -121,6 +173,7 @@ const SolveProblems_stepbystep = ({
     } else {
       freshMessages.push({
         role: "user",
+        isSeed: true,
         content: `Here is the question: ${question.question}`,
       });
     }

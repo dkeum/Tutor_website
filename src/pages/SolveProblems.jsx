@@ -283,13 +283,19 @@ const SolveProblems = () => {
           }
         );
 
+
         const qs = res.data.questions || [];
         setQuestions(qs);
 
-        if (qs.length > 0) {
-          setTopicId(qs[0].topic_id);
-          setSectionId(qs[0].section_id);
+        console.log(res.data)
+
+        // Access the IDs directly from res.data, NOT from qs
+        if (res.data.topic_id && res.data.section_id) {
+          setTopicId(res.data.topic_id);
+          setSectionId(res.data.section_id);
         }
+
+
       }
     } catch (err) {
       console.error("Error fetching questions:", err);
@@ -472,34 +478,8 @@ const SolveProblems = () => {
       // 4. Safe to fetch questions
       setLoadingQuestions(true);
       try {
-        const { data: { session } } = await supabase.auth.getSession();
 
-        if (session?.user) {
-          const BASE_URL = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-            ? "http://localhost:3000"
-            : "https://mathamagic-backend.vercel.app";
-
-          // Wrapped 'topic' in encodeURIComponent to prevent URL breaking on special characters
-          const res = await axios.get(
-            `${BASE_URL}/questions/${encodeURIComponent(topic)}/${encodeURIComponent(section)}`,
-            {
-              withCredentials: true,
-              params: {
-                class: studentClassId, difficulty,
-                type: questionType,
-              },
-              headers: { Authorization: `Bearer ${session.access_token}` },
-            }
-          );
-
-          const qs = res.data.questions || [];
-          setQuestions(qs);
-
-          if (qs.length > 0) {
-            setTopicId(qs[0].topic_id);
-            setSectionId(qs[0].section_id);
-          }
-        }
+        await fetchQuestions();
       } catch (err) {
         console.error("Error fetching questions:", err);
       } finally {
@@ -573,6 +553,8 @@ const SolveProblems = () => {
     finalGrade =
       total > 0 ? Number(((correctCount / total) * 100).toFixed(2)) : 0;
 
+
+
     const payload = {
       topic_id: topicId,
       section_id: sectionId,
@@ -582,6 +564,8 @@ const SolveProblems = () => {
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       recordedAnswers: verifiedAttempts,
     };
+
+    console.log(payload)
 
     try {
       const { data: { session } } = await supabase.auth.getSession();

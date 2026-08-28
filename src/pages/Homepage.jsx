@@ -604,7 +604,13 @@ const Homepage = () => {
             )}
           </div>
         </div>
+
+        <a href="https://smollaunchpad.com/projects/mathmagick?utm_source=badge" target="_blank" rel="noopener noreferrer" className="flex justify-center mt-6 md:mt-10">
+          <img src="https://smollaunchpad.com/smollaunchpad/images/badges/featured-on-light.svg" alt="Featured on Smol LaunchPad" style={{ height: "44px", width: "auto" }} />
+        </a>
       </section>
+
+
       <Footer />
     </div>
   );

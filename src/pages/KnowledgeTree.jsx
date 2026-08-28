@@ -44,10 +44,20 @@ function TopicNode({ data }) {
 }
 
 function SectionNode({ data }) {
-    const { name, masteryScore, status, videoWatched, skillsObtained, skillsMissed } = data;
+    const navigate = useNavigate();
+    const { name, masteryScore, status, videoWatched, skillsObtained, skillsMissed, topicName } = data;
     const isLocked = status === 'locked';
     const isNext = status === 'next';
     const hasSkills = skillsObtained.length > 0 || skillsMissed.length > 0;
+
+    // Matches the /questions/:topic/:section fetch pattern used elsewhere,
+    // but routed to the question page with difficulty/type as query params.
+    const handleStartClick = (e) => {
+        e.stopPropagation(); // don't let ReactFlow treat this as a node-click/pan
+        navigate(
+            `/question/${encodeURIComponent(topicName)}?section=${encodeURIComponent(name)}&difficulty=medium&type=mixed`
+        );
+    };
 
     return (
         <div
@@ -61,7 +71,11 @@ function SectionNode({ data }) {
             </div>
 
             {isLocked && <div className="section-node__badge">Locked</div>}
-            {isNext && <div className="grade-badge">Go<span className="grade-badge__label">start here</span></div>}
+            {isNext && (
+                <button type="button" className="grade-badge grade-badge--clickable" onClick={handleStartClick}>
+                    Go<span className="grade-badge__label">start here</span>
+                </button>
+            )}
             {status === 'completed' && (
                 <div className="grade-badge">
                     {getLetterGrade(masteryScore)}
@@ -183,7 +197,7 @@ function buildTree(topics) {
                 id: sectionId,
                 type: 'section',
                 position: { x: sectionX, y: SECTION_ROW_Y },
-                data: section,
+                data: { ...section, topicName: topic.name }, // section node needs the topic name to build the question-bank URL
                 draggable: false,
             });
             edges.push({

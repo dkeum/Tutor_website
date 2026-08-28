@@ -41,6 +41,7 @@ const Settings = () => {
   const currentProfile = useSelector((state) => state.personDetail.profile_pic);
   const userId = useSelector((state) => state.personDetail.id);
   const plan_type = useSelector((s) => s.personDetail?.plan_type) ?? "self_study";
+  const is_on_trial = useSelector((s) => s.personDetail?.is_on_trial) ?? false;
 
   // Pro status & AI model resolution
   const isProStudent = plan_type === "student_pro";
@@ -509,7 +510,7 @@ const Settings = () => {
                     {/* Dynamic Upgrade/Downgrade Button */}
                     <button
                       onClick={handleToggleSubscriptionTier}
-                      disabled={subscriptionActionLoading || isPaused}
+                      disabled={subscriptionActionLoading || isPaused || is_on_trial}
                       className={`font-bold text-xs px-6 py-3 rounded-full transition-all shadow-sm disabled:opacity-40 whitespace-nowrap flex items-center justify-center gap-2 ${isCurrentPro
                         ? "bg-[#F3F3FA] text-gray-800 hover:bg-gray-200"
                         : "bg-[#6200EE] text-white hover:bg-[#5000c9]"
@@ -534,7 +535,7 @@ const Settings = () => {
                     {isPaused ? (
                       <button
                         onClick={handleResumeSubscription}
-                        disabled={subscriptionActionLoading}
+                        disabled={subscriptionActionLoading || is_on_trial}
                         className="bg-[#E6F4EA] text-[#137333] font-bold text-xs px-6 py-3 rounded-full border border-green-100 hover:bg-[#D4EDDA] transition-colors whitespace-nowrap disabled:opacity-40 flex items-center gap-2 justify-center"
                       >
                         {subscriptionActionLoading ? (
@@ -547,7 +548,7 @@ const Settings = () => {
                     ) : (
                       <button
                         onClick={handlePauseSubscription}
-                        disabled={subscriptionActionLoading || isCanceling}
+                        disabled={subscriptionActionLoading || isCanceling || is_on_trial}
                         className="bg-[#F2E7FE] text-[#6200EE] font-bold text-xs px-6 py-3 rounded-full border border-purple-100 hover:bg-[#EADDFF] transition-colors whitespace-nowrap disabled:opacity-40 flex items-center gap-2 justify-center"
                       >
                         {subscriptionActionLoading ? (
