@@ -18,6 +18,7 @@ const PROGRESS_LABELS = [
 
 const CLASS_MAP = {
   Math: {
+    "grade 7": ["Math 7"],
     "grade 9-12": ["Pre-Calculus 10", "Pre-Calculus 11", "Pre-Calculus 12", "AP Calculus AB", "AP Calculus BC"],
   },
 };
@@ -29,7 +30,7 @@ const STATIC_QUESTIONS = [
   },
   {
     question: "What's your grade level?",
-    options: ["grade 9-12"],
+    options: ["grade 7", "grade 9-12"],
   },
   {
     question: "Select the class you want",
@@ -103,56 +104,56 @@ const SurveyPersonalDetails = () => {
     handleTokenVerification();
   }, [searchParams, navigate]);
 
- const handleClick = async (selectedOption) => {
-  if (submitting) return; // guard against a stray double-click slipping through before re-render
+  const handleClick = async (selectedOption) => {
+    if (submitting) return; // guard against a stray double-click slipping through before re-render
 
-  const updatedAnswers = [...answers, selectedOption];
-  const nextQuestion = questionNumber + 1;
+    const updatedAnswers = [...answers, selectedOption];
+    const nextQuestion = questionNumber + 1;
 
-  if (nextQuestion < STATIC_QUESTIONS.length) {
-    setAnswers(updatedAnswers);
-    setQuestionNumber(nextQuestion);
-    return;
-  }
-
-  // Last question — submit using the locally computed array directly.
-  // Do NOT call setAnswers here: if this fails and the user retries,
-  // we want a clean 5-item array built from `answers` (unchanged),
-  // not a stacked one built on top of a failed attempt.
-  setSubmitting(true);
-
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session?.user) {
-      setSubmitting(false);
-      navigate("/login");
+    if (nextQuestion < STATIC_QUESTIONS.length) {
+      setAnswers(updatedAnswers);
+      setQuestionNumber(nextQuestion);
       return;
     }
 
-    const response = await axios.post(
-      import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-        ? "http://localhost:3000/survey-details"
-        : "https://mathamagic-backend.vercel.app/survey-details",
-      { answers: updatedAnswers, access_token: accessToken },
-      {
-        withCredentials: true,
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      }
-    );
+    // Last question — submit using the locally computed array directly.
+    // Do NOT call setAnswers here: if this fails and the user retries,
+    // we want a clean 5-item array built from `answers` (unchanged),
+    // not a stacked one built on top of a failed attempt.
+    setSubmitting(true);
 
-    if (response.status === 200) {
-      setAnswers(updatedAnswers); // commit only now, on confirmed success
-      navigate("/showpersonaldata");
-    } else {
-      console.error("Unexpected response status:", response.status);
-      setSubmitting(false);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session?.user) {
+        setSubmitting(false);
+        navigate("/login");
+        return;
+      }
+
+      const response = await axios.post(
+        import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+          ? "http://localhost:3000/survey-details"
+          : "https://mathamagic-backend.vercel.app/survey-details",
+        { answers: updatedAnswers, access_token: accessToken },
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        }
+      );
+
+      if (response.status === 200) {
+        setAnswers(updatedAnswers); // commit only now, on confirmed success
+        navigate("/showpersonaldata");
+      } else {
+        console.error("Unexpected response status:", response.status);
+        setSubmitting(false);
+      }
+    } catch (err) {
+      console.error("Failed to submit survey:", err);
+      setSubmitting(false); // safe retry — `answers` state was never polluted
     }
-  } catch (err) {
-    console.error("Failed to submit survey:", err);
-    setSubmitting(false); // safe retry — `answers` state was never polluted
-  }
-};
+  };
 
   const currentQuestion = STATIC_QUESTIONS[questionNumber];
   const currentOptions = getCurrentOptions();

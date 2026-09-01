@@ -13,7 +13,7 @@ const sideNavItems = [
   { path: "/showpersonaldata", icon: <LayoutDashboard size={20} />, label: "Dashboard", hasSubMenu: true },
   { path: "/lessons", icon: <BookOpenCheck size={20} />, label: "Lessons" },
   { path: "/practice-topics", icon: <SquarePen size={20} />, label: "Practice" },
-  { path: "/tutors", icon: <GraduationCap size={20} />, label: "Tutors" },
+  // { path: "/tutors", icon: <GraduationCap size={20} />, label: "Tutors" },
   { path: "/settings", icon: <Settings size={20} />, label: "Settings" },
 ];
 

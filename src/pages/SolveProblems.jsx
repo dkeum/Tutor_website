@@ -511,34 +511,30 @@ const SolveProblems = () => {
     let verifiedAttempts = [...finalAttempts];
     let finalGrade = 0;
 
-    const attemptsToVerify = finalAttempts.filter((a) => !a.is_correct);
-
     try {
-      if (attemptsToVerify.length > 0) {
-        const res = await axios.post(
-          `${getBaseUrl()}/ai/verify-answers`,
-          { attempts: attemptsToVerify, plan_type: studentPlanType },
-          { withCredentials: true }
+      // CHANGED — send everything, not just the client-side "wrong" ones
+      const res = await axios.post(
+        `${getBaseUrl()}/ai/verify-answers`,
+        { attempts: finalAttempts, plan_type: studentPlanType },
+        { withCredentials: true }
+      );
+      const results = res.data.results || [];
+
+      // CHANGED — every attempt now gets overwritten by the AI's verdict
+      // (falls back to the client-side guess only if the AI somehow
+      // didn't return a verdict for that question_id)
+      verifiedAttempts = finalAttempts.map((originalAttempt) => {
+        const aiEvaluation = results.find(
+          (r) => String(r.question_id) === String(originalAttempt.question_id)
         );
-        const results = res.data.results || [];
-
-        verifiedAttempts = finalAttempts.map((originalAttempt) => {
-          if (originalAttempt.is_correct) {
-            return originalAttempt;
-          }
-
-          const aiEvaluation = results.find(
-            (r) => r.question_id === originalAttempt.question_id
-          );
-          return {
-            ...originalAttempt,
-            is_correct:
-              aiEvaluation !== undefined
-                ? aiEvaluation.is_correct
-                : originalAttempt.is_correct,
-          };
-        });
-      }
+        return {
+          ...originalAttempt,
+          is_correct:
+            aiEvaluation !== undefined
+              ? aiEvaluation.is_correct
+              : originalAttempt.is_correct,
+        };
+      });
     } catch (aiError) {
       console.error(
         "AI evaluation failed, falling back to client-side logic:",
@@ -550,10 +546,7 @@ const SolveProblems = () => {
     const correctCount = verifiedAttempts.filter(
       (a) => a.is_correct === true
     ).length;
-    finalGrade =
-      total > 0 ? Number(((correctCount / total) * 100).toFixed(2)) : 0;
-
-
+    finalGrade = total > 0 ? Number(((correctCount / total) * 100).toFixed(2)) : 0;
 
     const payload = {
       topic_id: topicId,
@@ -565,17 +558,12 @@ const SolveProblems = () => {
       recordedAnswers: verifiedAttempts,
     };
 
-    console.log(payload)
-
     try {
       const { data: { session } } = await supabase.auth.getSession();
-
       if (session?.user) {
         await axios.post(`${getBaseUrl()}/questions/save-marks`, payload, {
           withCredentials: true,
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
+          headers: { Authorization: `Bearer ${session.access_token}` },
         });
       }
     } catch (apiError) {
@@ -585,7 +573,7 @@ const SolveProblems = () => {
       );
     }
 
-    return verifiedAttempts; // NEW — hand the AI-corrected data back to the caller
+    return verifiedAttempts;
   };
 
   // CHANGED — read the correct answer straight off the question row

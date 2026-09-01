@@ -65,6 +65,7 @@ const MobileUploadPage = lazy(() => import("./components/solveProblems/MobileUpl
 const KnowledgeTree = lazy(() => import("./pages/KnowledgeTree"))
 
 const StudentProgressReport = lazy(() => import("./pages/StudentProgressReport"))
+const TestQuestion = lazy(() => import("./pages/TestQuestions"))
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -127,6 +128,15 @@ createRoot(document.getElementById("root")).render(
                 element={
                   <ProtectedRoute>
                     <Settings />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/random/question/generate/image"
+                element={
+                  <ProtectedRoute>
+                    <TestQuestion />
                   </ProtectedRoute>
                 }
               />
