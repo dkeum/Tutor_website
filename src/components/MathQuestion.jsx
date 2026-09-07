@@ -130,20 +130,24 @@ const ACCENT = "#4441c4";
 // [{ label: "A", text: "..." }, ...]. onSelect/selected are optional,
 // pass them if you want the buttons to track the student's pick.
 const MathQuestion = ({ text, multiplechoice, options, onSelect, selected, accentColor = ACCENT }) => {
-
   if (!text) return null;
+
+  // NEW — options can arrive either as an array of {label, text} objects
+  // or as a plain object keyed by label (e.g. {A: "...", B: "..."}).
+  // Normalize to an array so the rest of the component doesn't care which.
+  const optionsArray = Array.isArray(options)
+    ? options
+    : options && typeof options === "object"
+      ? Object.entries(options).map(([label, text]) => ({ label, text }))
+      : [];
 
   return (
     <div>
       <MathText text={text} />
 
-      {multiplechoice && Array.isArray(options) && options.length > 0 && (
-        // NEW — pointer-events-auto: the parent Carousel sets
-        // pointer-events-none (so drag/swipe works), which was silently
-        // eating every click on these buttons. This overrides it locally
-        // so the options are actually clickable.
+      {multiplechoice && optionsArray.length > 0 && (
         <div className="mt-4 flex flex-col gap-2 pointer-events-auto">
-          {options.map((opt) => {
+          {optionsArray.map((opt) => {
             const isSelected = selected === opt.label;
             return (
               <button
@@ -154,8 +158,8 @@ const MathQuestion = ({ text, multiplechoice, options, onSelect, selected, accen
                 style={{
                   borderColor: isSelected ? accentColor : "#e5e7eb",
                   borderWidth: isSelected ? 2 : 1,
-                  backgroundColor: isSelected ? `${accentColor}0D` : "transparent", // ~5% tint
-                  boxShadow: isSelected ? `0 0 0 2px ${accentColor}26` : "none", // ~15% ring
+                  backgroundColor: isSelected ? `${accentColor}0D` : "transparent",
+                  boxShadow: isSelected ? `0 0 0 2px ${accentColor}26` : "none",
                 }}
               >
                 <span className="font-semibold mr-2" style={{ color: isSelected ? accentColor : undefined }}>

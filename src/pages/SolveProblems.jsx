@@ -938,7 +938,8 @@ const SolveProblems = () => {
                       display: "flex",
                       flexDirection: "column",
                       padding: "24px 24px 24px 32px",
-                      overflow: "hidden",
+                      overflowY: "auto",
+                      overflowX: "hidden",
                     }}
                   >
                     {/* Progress */}
@@ -1000,7 +1001,8 @@ const SolveProblems = () => {
                           flex: 1,
                           display: "flex",
                           flexDirection: "column",
-                          overflow: "hidden",
+                          overflowY: "auto",
+                          overflowX: "hidden",
                         }}
                       >
                         <Carousel
@@ -1030,8 +1032,8 @@ const SolveProblems = () => {
                                       color: TOKEN.onSurface,
                                       fontWeight: 500,
                                       margin: 0,
-                                      maxHeight: 500,
-                                      overflowY: "hidden",
+                                      // minHeight: 500,
+                                      // overflowY: "hidden",
                                     }}
                                   >
                                     {/* CHANGED — pass the real flag + options,
