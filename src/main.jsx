@@ -7,6 +7,9 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner"
 
+
+import ReactGA from "react-ga4";
+
 import store from "./app/store";
 import { Provider } from "react-redux";
 
@@ -75,6 +78,9 @@ const Loader = () => (
     <Loader2 className="animate-spin w-10 h-10 text-gray-600" />
   </div>
 );
+
+
+ReactGA.initialize("G-ZS25ZCV6E1");
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

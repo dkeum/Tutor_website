@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import ReactGA from "react-ga4";
 
 const COLORS = {
     bg: "#f8f9ff",
@@ -90,7 +91,17 @@ const Stars = ({ size = 14 }) => (
 
 const GroupTutoringSignUp = () => {
     const navigate = useNavigate();
-    const bookCall = () => navigate("/calendar-booking");
+
+
+    const bookCall = () => {
+        ReactGA.event({
+            category: "Booking",
+            action: "book_call_click",
+            label: "Group Tutoring Landing Page",
+        });
+
+        navigate("/calendar-booking");
+    };
 
     return (
         <div style={{ fontFamily: "'Inter', sans-serif", background: COLORS.bg }}>
