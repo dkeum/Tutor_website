@@ -220,7 +220,7 @@ const GroupTutoringSignUp = () => {
                             borderRadius: "14px 14px 0 0",
                         }}
                     >
-                        Watch The 5 Minute Video Below To See How
+                        Watch The 3 Minute Video Below To See How
                     </div>
 
                     {/* Dark video panel */}
@@ -259,7 +259,7 @@ const GroupTutoringSignUp = () => {
                             }}
                         >
                             <iframe
-                                src="https://youtu.be/M1AhNm2WMJA"
+                                src="https://www.youtube.com/embed/M1AhNm2WMJA"
                                 title="Mathmagick — How To Get Your Grade 9/10 Student Top Of The Class"
                                 style={{ width: "100%", height: "100%", border: "none" }}
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
