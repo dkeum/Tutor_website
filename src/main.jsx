@@ -80,7 +80,7 @@ const Loader = () => (
 );
 
 
-ReactGA.initialize("G-ZS25ZCV6E1");
+ReactGA.initialize("G-4HEPW2QJWG");
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
