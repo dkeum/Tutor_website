@@ -1,8 +1,8 @@
-import "katex/dist/katex.min.css";
+
 import { StrictMode, Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import App from "./App.jsx";
+
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner"
@@ -15,7 +15,10 @@ import { Provider } from "react-redux";
 
 import ProtectedRoute from "./components/ProtectRoute.jsx";
 import { AuthProvider } from "./hook/useAuthSession.jsx";
-import "katex/dist/katex.min.css";
+// import "katex/dist/katex.min.css";
+
+
+const App = lazy(() => import("./App.jsx"));
 
 // Lazy load the pages
 const Contactme = lazy(() => import("./pages/Contactme"));
@@ -89,13 +92,14 @@ createRoot(document.getElementById("root")).render(
         <BrowserRouter>
           <Suspense fallback={<Loader />}>
             <Routes>
+              <Route path="/book-a-call" element={<GroupTutoringSignUp />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
 
 
 
               <Route path="/" element={<App />} />
               <Route path="/contact" element={<Contactme />} />
-              <Route path="/book-a-call" element={<GroupTutoringSignUp />} />
+
               <Route path="/calendar-booking" element={<Calendar />} />
               <Route path="/about" element={<About />} />
               <Route path="/Waitlist" element={<Waitlist />} />
