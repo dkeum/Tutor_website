@@ -384,7 +384,7 @@ const GroupTutoringSignUp = () => {
                                 fontFamily: "inherit",
                             }}
                         >
-                            <span style={{ fontSize: "clamp(17px, 4.5vw, 20px)", fontWeight: 700 }}>BOOK A CALL</span>
+                            <span style={{ fontSize: "clamp(17px, 4.5vw, 20px)", fontWeight: 700 }}>BOOK A FREE CALL</span>
                             <span style={{ fontSize: "clamp(12px, 3vw, 14px)", fontWeight: 700 }}>Click Here To Save Your Spot</span>
                         </button>
                     </div>
@@ -639,7 +639,7 @@ const GroupTutoringSignUp = () => {
                             onMouseEnter={(e) => (e.target.style.background = COLORS.accentHover)}
                             onMouseLeave={(e) => (e.target.style.background = COLORS.accent)}
                         >
-                            <div style={{ fontSize: "clamp(15px, 3.8vw, 16px)", fontWeight: 700 }}>BOOK A CALL</div>
+                            <div style={{ fontSize: "clamp(15px, 3.8vw, 16px)", fontWeight: 700 }}>BOOK A FREECALL</div>
                             <div style={{ fontSize: "clamp(11px, 2.8vw, 12px)", fontWeight: 500, opacity: 0.9, marginTop: 2 }}>
                                 Takes Under 60 Seconds • No Commitment Required
                             </div>
