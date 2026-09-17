@@ -59,7 +59,7 @@ const REVIEWS = [
         quote:
             "Ethan had been stuck on the same stuff since 8th grade and I didn't even know it — turns out he'd just missed a couple of basics along the way. Once his mentor caught that, everything else started making sense to him. His teacher actually emailed me asking what had changed. We're really thankful.",
         name: "Elena Rostova",
-        role: "Mother of Grade 10 Honors Student",
+        role: "Mother of Grade 10 Student",
         img: "./ElenaRostova.png",
     },
 ];
