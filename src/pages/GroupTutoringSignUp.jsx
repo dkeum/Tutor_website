@@ -217,7 +217,7 @@ const GroupTutoringSignUp = () => {
             >
                 <div style={{ width: "100%", maxWidth: 860 }}>
                     {/* Logo */}
-                    <div className="flex flex-col items-center gap-4 mb-6">
+                    <div className="flex flex-row items-center gap-4 mb-6 justify-center">
                         <img
                             src="/logo.png"
                             alt="Mathmagick Logo"
@@ -233,7 +233,7 @@ const GroupTutoringSignUp = () => {
                         </h1>
                     </div>
 
-                    {/* Admissions Open Badge */}
+                    {/* Admissions Open Badge
                     <div style={{ display: "flex", justifyContent: "center", marginBottom: "clamp(16px, 4vw, 24px)", padding: "0 8px" }}>
                         <div className="mm-badge">
                             <span style={{ position: "relative", width: 10, height: 10, display: "inline-flex", flexShrink: 0 }}>
@@ -271,7 +271,7 @@ const GroupTutoringSignUp = () => {
                                 • Limited 25 Seats / Cohort
                             </span>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Headline */}
                     <h1
@@ -305,7 +305,7 @@ const GroupTutoringSignUp = () => {
                         </span>
                     </h1>
 
-                    {/* Value prop subtitle */}
+                    {/* Value prop subtitle
                     <p
                         className="mx-auto"
                         style={{
@@ -321,7 +321,7 @@ const GroupTutoringSignUp = () => {
                     >
                         Master foundational algebra, quadratic functions, and geometry intuition in under 12 weeks — backed
                         by a decade of teaching experience
-                    </p>
+                    </p> */}
 
                     {/* Blue "watch video" banner */}
                     <div
@@ -347,7 +347,7 @@ const GroupTutoringSignUp = () => {
                             boxSizing: "border-box",
                         }}
                     >
-                        <h2
+                        {/* <h2
                             style={{
                                 color: "#fff",
                                 textAlign: "center",
@@ -359,7 +359,7 @@ const GroupTutoringSignUp = () => {
                         >
                             HOW TO GET YOUR GRADE 9/10 STUDENT{" "}
                             <span style={{ color: "#5aa7ff" }}>TOP OF THE CLASS</span> IN MATH
-                        </h2>
+                        </h2> */}
 
                         <LazyYouTube
                             videoId="M1AhNm2WMJA"
