@@ -299,9 +299,9 @@ const GroupTutoringSignUp = () => {
                         >
                             The Best Way
                         </span>{" "}
-                        To Take A Grade 9 &amp; 10 Student From Struggling To The{" "}
+                        To Take A Grade 9 &amp; 10 Student From Struggling To Excelling{" "}
                         <span style={{ textDecoration: "underline", textDecorationColor: COLORS.accent, textDecorationThickness: 3, textUnderlineOffset: 4 }}>
-                            Top Of Their Class
+                            In Their Class
                         </span>
                     </h1>
 
