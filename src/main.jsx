@@ -76,6 +76,8 @@ const TestQuestion = lazy(() => import("./pages/TestQuestions"))
 const GroupTutoringSignUp = lazy(() => import("./pages/GroupTutoringSignUp"))
 const Calendar = lazy(() => import("./pages/Calendar"))
 
+const Drill = lazy(() => import("./pages/Drill"))
+
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
     <Loader2 className="animate-spin w-10 h-10 text-gray-600" />
@@ -101,6 +103,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="/contact" element={<Contactme />} />
 
               <Route path="/calendar-booking" element={<Calendar />} />
+              <Route path="/drill" element={<Drill />} />
               <Route path="/about" element={<About />} />
               <Route path="/Waitlist" element={<Waitlist />} />
               <Route path="/classes" element={<FreeResources />} />
