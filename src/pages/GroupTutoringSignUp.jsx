@@ -30,7 +30,7 @@ const PILLARS = [
     {
         num: "01",
         title: "Pinpoint Diagnostic Gap Analysis",
-        body: "Math is a subject that builds. Most Grade 9 and 10 difficulties stem from missed foundations in Grade 7/8 pre-algebra. Our free call finds these gaps in less than 30 minutes and we fix them forever.",
+        body: "Math is a subject that builds. Most Grade 9 and 10 difficulties stem from missed foundations in Grade 7/8 pre-algebra. Our free call finds these gaps in less than 30 minutes and we fix them.",
         note: "Fixes foundation without retaking full courses",
     },
     {
