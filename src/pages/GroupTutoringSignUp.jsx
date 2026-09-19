@@ -30,13 +30,13 @@ const PILLARS = [
     {
         num: "01",
         title: "Pinpoint Diagnostic Gap Analysis",
-        body: "High school math is cumulative. Most Grade 9 and 10 difficulties stem from a few subtle misconceptions in Grade 7/8 pre-algebra. Our diagnostic maps these gaps in 30 minutes.",
+        body: "Math is a subject that builds. Most Grade 9 and 10 difficulties stem from missed foundations in Grade 7/8 pre-algebra. Our free call finds these gaps in less than 30 minutes and we fix them forever.",
         note: "Fixes foundation without retaking full courses",
     },
     {
         num: "02",
         title: "1-on-1 Socratic Intuition Coaching",
-        body: "No boring lectures. Our mentors use precision questioning to guide students to discover mathematical concepts on their own.",
+        body: "Asking the right questions guides the students into discovering the math concepts. We don't just give answers — we teach students to think like mathematicians & engineers, so they can solve problems on their own.",
         note: "Turns passive watchers into active thinkers",
     },
     {
@@ -66,8 +66,8 @@ const REVIEWS = [
 
 const CALL_STEPS = [
     {
-        title: "Curriculum Review",
-        body: "We look at their textbook, syllabus, and recent quizzes, then build a clear plan to improve their next exam.",
+        title: "Foundations Review",
+        body: "We assess your child's current understanding of the material and identify any gaps in their knowledge. This ensures that we can focus on the areas that will have the most impact on their performance.",
     },
     {
         title: "Live Diagnostic",
@@ -75,7 +75,7 @@ const CALL_STEPS = [
     },
     {
         title: "Free Access to Math Software",
-        body: "You'll also get free but limited access to our homework software alongside a math roadmap — so your student can start putting it into practice right away, whether you enroll with us or not.",
+        body: "You'll also get free access to our homework software alongside a math roadmap — so your student can start putting it into practice right away, whether you enroll with us or not.",
     },
 ];
 
@@ -496,7 +496,7 @@ const GroupTutoringSignUp = () => {
                     <div style={{ marginTop: "clamp(40px, 9vw, 64px)" }}>
                         <div style={{ textAlign: "center", maxWidth: 560, margin: "0 auto clamp(24px, 6vw, 32px)", padding: "0 8px" }}>
                             <div style={{ fontSize: "clamp(11px, 2.8vw, 12px)", fontWeight: 700, color: COLORS.primary, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                                Why Traditional Tutoring Fails
+                                How our program works
                             </div>
                             <h2 style={{ fontSize: "clamp(21px, 5.5vw, 26px)", fontWeight: 800, color: COLORS.ink, margin: "8px 0" }}>
                                 The 3-Pillar Mathmagick Framework
