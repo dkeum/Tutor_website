@@ -22,8 +22,8 @@ const COLORS = {
 
 const STATS = [
     { value: "94%", label: "Jump 1+ Letter Grades", sub: "within 10-week mentorship" },
-    { value: "200+", label: "Grade 9 & 10 Students", sub: "successfully coached since 2017" },
-    { value: "10 Weeks", label: "Average Time to Mastery", sub: "from failing marks to top 10%" },
+    { value: "200+", label: "Grade 9 & 10 Students", sub: "successfully mentored since 2017" },
+    { value: "10 Weeks", label: "Average Time to Mastery", sub: "from failing marks to top 15%" },
 ];
 
 const PILLARS = [
@@ -299,7 +299,7 @@ const GroupTutoringSignUp = () => {
                         >
                             The Best Way
                         </span>{" "}
-                        To Take A Grade 9 &amp; 10 Student From Struggling To Excelling{" "}
+                        To Take A Grade 9 &amp; 10 Student From Struggling To Success{" "}
                         <span style={{ textDecoration: "underline", textDecorationColor: COLORS.accent, textDecorationThickness: 3, textUnderlineOffset: 4 }}>
                             In Their Class
                         </span>
@@ -409,6 +409,87 @@ const GroupTutoringSignUp = () => {
                                 <div style={{ fontSize: "clamp(10.5px, 2.6vw, 11px)", color: COLORS.muted, marginTop: 2 }}>{s.sub}</div>
                             </div>
                         ))}
+                    </div>
+
+                    {/* Meet Your Mentor */}
+                    <div style={{ marginTop: "clamp(40px, 9vw, 64px)" }}>
+                        <div style={{ textAlign: "center", marginBottom: "clamp(20px, 5vw, 28px)", padding: "0 8px" }}>
+                            <div style={{ fontSize: "clamp(11px, 2.8vw, 12px)", fontWeight: 700, color: COLORS.primary, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                                Who's Teaching Your Child
+                            </div>
+                            <h2 style={{ fontSize: "clamp(21px, 5.5vw, 26px)", fontWeight: 800, color: COLORS.ink, margin: "8px 0" }}>
+                                Meet Your Mentor
+                            </h2>
+                        </div>
+
+                        <div
+                            style={{
+                                background: COLORS.card,
+                                borderRadius: 16,
+                                padding: "clamp(20px, 5vw, 28px)",
+                                boxShadow: "0 1px 6px rgba(15,23,42,0.06)",
+                                display: "grid",
+                                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                                gap: "clamp(20px, 5vw, 32px)",
+                                alignItems: "center",
+                            }}
+                        >
+                            <div style={{ display: "flex", justifyContent: "center" }}>
+                                <div
+                                    style={{
+                                        width: "clamp(160px, 30vw, 220px)",
+                                        height: "clamp(160px, 30vw, 220px)",
+                                        borderRadius: 16,
+                                        overflow: "hidden",
+                                        boxShadow: "0 1px 6px rgba(15,23,42,0.08)",
+                                    }}
+                                >
+                                    <img
+                                        src="./my_picture.jpg"
+                                        alt="Daniel, founder of Mathmagick"
+                                        loading="lazy"
+                                        width="220"
+                                        height="220"
+                                        style={{
+                                            width: "100%",
+                                            height: "100%",
+                                            objectFit: "cover",
+                                            display: "block",
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 style={{ fontSize: "clamp(17px, 4.2vw, 19px)", fontWeight: 700, color: COLORS.ink, margin: "0 0 10px" }}>
+                                    Daniel
+                                </h3>
+                                <p style={{ fontSize: "clamp(13px, 3.2vw, 14px)", color: COLORS.inkSoft, lineHeight: 1.6, margin: "0 0 16px" }}>
+                                    I'm an engineer and classroom teacher who's spent 10+ years teaching high school math
+                                    in Vancouver. Along the way I noticed most students weren't struggling with new
+                                    material — they were missing foundations from a year or two earlier, and nobody
+                                    had caught it. I built this program to fix that: rebuild the fundamentals, then
+                                    build the discipline to keep improving.
+                                </p>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                    {["10+ Years Teaching", "Vancouver-Based", "Engineer & Educator"].map((badge) => (
+                                        <span
+                                            key={badge}
+                                            style={{
+                                                fontSize: "clamp(11px, 2.7vw, 12px)",
+                                                fontWeight: 600,
+                                                color: COLORS.primary,
+                                                background: COLORS.primaryLight,
+                                                borderRadius: 999,
+                                                padding: "6px 12px",
+                                            }}
+                                        >
+                                            {badge}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* 3-Pillar Method */}
@@ -617,11 +698,10 @@ const GroupTutoringSignUp = () => {
                         }}
                     >
                         <h2 style={{ fontSize: "clamp(22px, 5.5vw, 32px)", fontWeight: 800, color: "#fff", margin: "0 0 12px", lineHeight: 1.3 }}>
-                            Give Your Child The Confidence To Lead Their Math Class
+                            Give Your Child The Confidence To Ace Their Math Class
                         </h2>
                         <p style={{ fontSize: "clamp(13px, 3.2vw, 14px)", color: "rgba(255,255,255,0.7)", maxWidth: 460, margin: "0 auto clamp(20px, 5vw, 28px)", lineHeight: 1.6 }}>
-                            Every week spent struggling widens the cumulative gap. Secure one of the remaining 25 spots
-                            in this term's cohort today.
+                            Every week spent struggling widens the gap between your child and their peers. Book a free call to see how we can help them catch up and excel.
                         </p>
                         <button
                             onClick={bookCall}
