@@ -98,13 +98,13 @@ const Navbar = () => {
               </NavigationMenuItem>
 
               {/* Conditionally render Pricing item only in DEVELOPMENT */}
-              {isDevelopment && (
-                <NavigationMenuItem>
-                  <NavigationMenuLink asChild>
-                    <a className="font-semibold px-4 py-2 hover:text-[#2b56de] transition-colors" href="/pricing">Pricing</a>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              )}
+
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <a className="font-semibold px-4 py-2 hover:text-[#2b56de] transition-colors" href="/drill">Arithmetic Practice</a>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+
 
             </NavigationMenuList>
           </NavigationMenu>
