@@ -581,7 +581,7 @@ const GroupTutoringSignUp = () => {
                                 />
                                 <div>
                                     <div style={{ fontSize: "clamp(12.5px, 3.1vw, 13px)", fontWeight: 600, color: COLORS.ink }}>Claire &amp; Lucas Vance</div>
-                                    <div style={{ fontSize: "clamp(11.5px, 2.9vw, 12px)", color: COLORS.muted }}>Oakridge High School, Grade 10 Parent</div>
+                                    <div style={{ fontSize: "clamp(11.5px, 2.9vw, 12px)", color: COLORS.muted }}>Killarney High School, Grade 10 Parent</div>
                                 </div>
                             </div>
                         </div>
