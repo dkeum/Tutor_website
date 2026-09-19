@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ReactGA from "react-ga4";
+import { useScrollDepthTracking } from "./useScrollDepthTracking";
 
 const COLORS = {
     bg: "#f8f9ff",
@@ -97,6 +98,16 @@ const Stars = ({ size = 14 }) => (
 const LazyYouTube = ({ videoId, title }) => {
     const [loaded, setLoaded] = useState(false);
 
+    const handlePlay = () => {
+        if (loaded) return;
+        setLoaded(true);
+        ReactGA.event({
+            category: "Video",
+            action: "video_play",
+            label: title,
+        });
+    };
+
     return (
         <div
             style={{
@@ -110,7 +121,7 @@ const LazyYouTube = ({ videoId, title }) => {
                 cursor: loaded ? "default" : "pointer",
                 background: "#000",
             }}
-            onClick={() => !loaded && setLoaded(true)}
+            onClick={handlePlay}
             role={loaded ? undefined : "button"}
             aria-label={loaded ? undefined : `Play video: ${title}`}
         >
@@ -172,12 +183,13 @@ const LazyYouTube = ({ videoId, title }) => {
 
 const GroupTutoringSignUp = () => {
     const navigate = useNavigate();
+    useScrollDepthTracking("Group Tutoring Landing Page");
 
-    const bookCall = () => {
+    const bookCall = (ctaLocation) => {
         ReactGA.event({
             category: "Booking",
             action: "book_call_click",
-            label: "Group Tutoring Landing Page",
+            label: `Group Tutoring Landing Page - ${ctaLocation}`,
         });
 
         navigate("/calendar-booking");
@@ -370,7 +382,7 @@ const GroupTutoringSignUp = () => {
                     {/* Primary CTA */}
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "clamp(20px, 5vw, 28px)" }}>
                         <button
-                            onClick={bookCall}
+                            onClick={() => bookCall("Top CTA")}
                             className="flex flex-col bg-[#29b673] hover:bg-[#1f9a5f] transition-colors duration-200"
                             style={{
                                 width: "100%",
@@ -704,7 +716,7 @@ const GroupTutoringSignUp = () => {
                             Every week spent struggling widens the gap between your child and their peers. Book a free call to see how we can help them catch up and excel.
                         </p>
                         <button
-                            onClick={bookCall}
+                            onClick={() => bookCall("Bottom CTA")}
                             style={{
                                 width: "100%",
                                 maxWidth: 360,
