@@ -10,7 +10,7 @@ const PrivacyPolicy = () => {
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-3">1. Introduction</h2>
         <p className="text-gray-600 leading-relaxed">
-          Welcome to Mathmagick ("we," "us," or "our"). We operate the website mathamagic.vercel.app
+          Welcome to Mathmagick ("we," "us," or "our"). We operate the website mathmagick.com
           and are committed to protecting the privacy of our users, including students who may be minors.
           This Privacy Policy explains what information we collect, how we use it, and your rights
           regarding that information.
@@ -30,7 +30,7 @@ const PrivacyPolicy = () => {
         <p className="text-gray-600 leading-relaxed">
           Mathmagick is an educational platform intended for use by students, including minors under
           the age of 13. <strong>We do not knowingly allow children under 13 to create accounts without
-          verifiable parental consent.</strong> If a parent or guardian believes their child has provided
+            verifiable parental consent.</strong> If a parent or guardian believes their child has provided
           us with personal information without consent, please contact us immediately and we will delete
           that information.
         </p>
