@@ -8,7 +8,6 @@ import { Loader2 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner"
 
 
-import ReactGA from "react-ga4";
 
 import store from "./app/store";
 import { Provider } from "react-redux";
@@ -85,7 +84,7 @@ const Loader = () => (
 );
 
 
-ReactGA.initialize("G-4HEPW2QJWG");
+
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

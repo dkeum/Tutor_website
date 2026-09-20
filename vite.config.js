@@ -3,7 +3,6 @@ import tailwindcss from "@tailwindcss/vite"
 import react from '@vitejs/plugin-react'
 import { defineConfig } from "vite"
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
@@ -27,4 +26,12 @@ export default defineConfig({
   optimizeDeps: {
     include: ["remark-math", "rehype-katex", "react-markdown"],
   },
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "index.html"),
+        booking: path.resolve(__dirname, "book-a-call.html"),
+      }
+    }
+  }
 })

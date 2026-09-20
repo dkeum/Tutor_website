@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import ReactGA from "react-ga4";
 import { useScrollDepthTracking } from "./useScrollDepthTracking";
 
@@ -128,7 +127,7 @@ const LazyYouTube = ({ videoId, title }) => {
             {loaded ? (
                 <iframe
                     src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`}
-                    fetchpriority="high"
+                    fetchPriority="high"
                     title={title}
                     style={{ width: "100%", height: "100%", border: "none" }}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -140,7 +139,7 @@ const LazyYouTube = ({ videoId, title }) => {
                         src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`}
                         alt={title}
 
-                        fetchpriority="high"
+                        fetchPriority="high"
                         width="480"
                         height="270"
                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
@@ -184,17 +183,12 @@ const LazyYouTube = ({ videoId, title }) => {
 };
 
 const GroupTutoringSignUp = () => {
-    const navigate = useNavigate();
+
     useScrollDepthTracking("Group Tutoring Landing Page");
 
     const bookCall = (ctaLocation) => {
-        ReactGA.event({
-            category: "Booking",
-            action: "book_call_click",
-            label: `Group Tutoring Landing Page - ${ctaLocation}`,
-        });
-
-        navigate("/calendar-booking");
+        ReactGA.event({ category: "Booking", action: "book_call_click", label: `Group Tutoring Landing Page - ${ctaLocation}` });
+        window.location.href = "/calendar-booking";
     };
 
     return (
