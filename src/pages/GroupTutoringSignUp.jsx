@@ -555,7 +555,7 @@ const GroupTutoringSignUp = () => {
                         </div>
                     </div>
 
-                    {/* Before / After case study */}
+                    {/* Before / After case study
                     <div
                         style={{
                             marginTop: "clamp(40px, 9vw, 64px)",
@@ -616,7 +616,7 @@ const GroupTutoringSignUp = () => {
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Parent reviews */}
                     <div style={{ marginTop: "clamp(40px, 9vw, 64px)" }}>
