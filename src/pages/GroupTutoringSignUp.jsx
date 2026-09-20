@@ -127,7 +127,8 @@ const LazyYouTube = ({ videoId, title }) => {
         >
             {loaded ? (
                 <iframe
-                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+                    src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`}
+                    fetchpriority="high"
                     title={title}
                     style={{ width: "100%", height: "100%", border: "none" }}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -138,7 +139,8 @@ const LazyYouTube = ({ videoId, title }) => {
                     <img
                         src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`}
                         alt={title}
-                        loading="lazy"
+
+                        fetchpriority="high"
                         width="480"
                         height="270"
                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
