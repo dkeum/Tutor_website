@@ -104,8 +104,6 @@ const LeadSignup = () => {
             <div className="absolute inset-0 math-grid pointer-events-none z-0" />
             <div className="pointer-events-none absolute inset-0 bg-[#f9f9ff] [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] [-webkit-mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
 
-
-
             <div className="flex-1 relative z-10 w-full max-w-6xl mx-auto px-6 py-10 md:py-16">
                 <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-16 items-start">
                     {/* Left: pitch */}
@@ -114,8 +112,6 @@ const LeadSignup = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.45 }}
                     >
-
-
                         <h1 className="mt-5 text-4xl md:text-5xl font-extrabold leading-[1.08] text-[#101b30]">
                             Six weeks to turn a slipping math grade around.
                         </h1>
@@ -166,100 +162,127 @@ const LeadSignup = () => {
                         <h2 className="text-2xl font-extrabold text-[#101b30]">
                             Reserve a free spot
                         </h2>
-                        <p className="mt-2 text-sm text-[#494456]">
-                            Spots are limited for this cohort. We'll follow up within one
-                            business day with your diagnostic link.
-                        </p>
 
-                        <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
-                            <LabelInputContainer>
-                                <Label htmlFor="fullname" className="text-sm font-medium text-[#101b30]">
-                                    Student's full name
-                                </Label>
-                                <Input
-                                    id="fullname"
-                                    placeholder="John Smith"
-                                    type="text"
-                                    value={fullName}
-                                    onChange={(e) => setFullName(e.target.value)}
-                                    className="w-full px-4 py-3 bg-[#f0f3ff] border-2 border-transparent rounded-xl text-[#101b30] text-base outline-none focus-visible:ring-0 focus:border-[#2b56de] focus:bg-white transition-all"
-                                />
-                                {errors.fullName && (
-                                    <p className="text-sm text-red-500 font-medium">{errors.fullName}</p>
-                                )}
-                            </LabelInputContainer>
-
-                            <LabelInputContainer>
-                                <Label className="text-sm font-medium text-[#101b30]">Grade</Label>
-                                <div className="flex gap-3">
-                                    {["9", "10"].map((g) => (
-                                        <button
-                                            type="button"
-                                            key={g}
-                                            onClick={() => setGrade(g)}
-                                            className={cn(
-                                                "flex-1 rounded-xl border-2 py-3 text-sm font-semibold transition-all",
-                                                grade === g
-                                                    ? "border-[#2b56de] bg-[#eef1ff] text-[#2b56de]"
-                                                    : "border-transparent bg-[#f0f3ff] text-[#494456] hover:bg-[#e8edff]"
-                                            )}
-                                        >
-                                            Grade {g}
-                                        </button>
-                                    ))}
-                                </div>
-                                {errors.grade && (
-                                    <p className="text-sm text-red-500 font-medium">{errors.grade}</p>
-                                )}
-                            </LabelInputContainer>
-
-                            <LabelInputContainer>
-                                <Label htmlFor="email" className="text-sm font-medium text-[#101b30]">
-                                    Email
-                                </Label>
-                                <Input
-                                    id="email"
-                                    placeholder="you@example.com"
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full px-4 py-3 bg-[#f0f3ff] border-2 border-transparent rounded-xl text-[#101b30] text-base outline-none focus-visible:ring-0 focus:border-[#2b56de] focus:bg-white transition-all"
-                                />
-                                {errors.email && (
-                                    <p className="text-sm text-red-500 font-medium">{errors.email}</p>
-                                )}
-                            </LabelInputContainer>
-
-                            <LabelInputContainer>
-                                <Label htmlFor="phone" className="text-sm font-medium text-[#101b30]">
-                                    Phone number
-                                </Label>
-                                <Input
-                                    id="phone"
-                                    placeholder="(604) 555-0100"
-                                    type="tel"
-                                    value={phone}
-                                    onChange={(e) => setPhone(e.target.value)}
-                                    className="w-full px-4 py-3 bg-[#f0f3ff] border-2 border-transparent rounded-xl text-[#101b30] text-base outline-none focus-visible:ring-0 focus:border-[#2b56de] focus:bg-white transition-all"
-                                />
-                                {errors.phone && (
-                                    <p className="text-sm text-red-500 font-medium">{errors.phone}</p>
-                                )}
-                            </LabelInputContainer>
-
-                            <button
-                                className="text-base group/btn relative block h-12 w-full rounded-xl bg-[#2b56de] font-bold text-white shadow-md shadow-blue-100 transition-all hover:bg-[#1a43c7] active:scale-[0.98]"
-                                type="submit"
-                                disabled={isSubmitting || isSent}
+                        {isSent ? (
+                            <motion.div
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mt-8 flex flex-col items-center text-center py-6"
                             >
-                                {isSent ? "You're in — check your email" : isSubmitting ? "Reserving..." : "Claim my free spot"}
-                                <BottomGradient />
-                            </button>
+                                <div className="h-14 w-14 rounded-full bg-[#eef1ff] flex items-center justify-center mb-4">
+                                    <svg
+                                        className="h-7 w-7 text-[#2b56de]"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth={2.5}
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-extrabold text-[#101b30]">Spot confirmed</h3>
+                                <p className="mt-2 text-sm text-[#494456] max-w-xs">
+                                    We'll email your diagnostic link within one business day. Check {email} for details.
+                                </p>
+                            </motion.div>
+                        ) : (
+                            <>
+                                <p className="mt-2 text-sm text-[#494456]">
+                                    Spots are limited for this cohort. We'll follow up within one
+                                    business day with your diagnostic link.
+                                </p>
 
-                            <p className="text-xs text-center text-[#8a879a]">
-                                No cost, no credit card. Cancel anytime.
-                            </p>
-                        </form>
+                                <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
+                                    <LabelInputContainer>
+                                        <Label htmlFor="fullname" className="text-sm font-medium text-[#101b30]">
+                                            Student's full name
+                                        </Label>
+                                        <Input
+                                            id="fullname"
+                                            placeholder="John Smith"
+                                            type="text"
+                                            value={fullName}
+                                            onChange={(e) => setFullName(e.target.value)}
+                                            className="w-full px-4 py-3 bg-[#f0f3ff] border-2 border-transparent rounded-xl text-[#101b30] text-base outline-none focus-visible:ring-0 focus:border-[#2b56de] focus:bg-white transition-all"
+                                        />
+                                        {errors.fullName && (
+                                            <p className="text-sm text-red-500 font-medium">{errors.fullName}</p>
+                                        )}
+                                    </LabelInputContainer>
+
+                                    <LabelInputContainer>
+                                        <Label className="text-sm font-medium text-[#101b30]">Grade</Label>
+                                        <div className="flex gap-3">
+                                            {["9", "10"].map((g) => (
+                                                <button
+                                                    type="button"
+                                                    key={g}
+                                                    onClick={() => setGrade(g)}
+                                                    className={cn(
+                                                        "flex-1 rounded-xl border-2 py-3 text-sm font-semibold transition-all",
+                                                        grade === g
+                                                            ? "border-[#2b56de] bg-[#eef1ff] text-[#2b56de]"
+                                                            : "border-transparent bg-[#f0f3ff] text-[#494456] hover:bg-[#e8edff]"
+                                                    )}
+                                                >
+                                                    Grade {g}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {errors.grade && (
+                                            <p className="text-sm text-red-500 font-medium">{errors.grade}</p>
+                                        )}
+                                    </LabelInputContainer>
+
+                                    <LabelInputContainer>
+                                        <Label htmlFor="email" className="text-sm font-medium text-[#101b30]">
+                                            Email
+                                        </Label>
+                                        <Input
+                                            id="email"
+                                            placeholder="you@example.com"
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            className="w-full px-4 py-3 bg-[#f0f3ff] border-2 border-transparent rounded-xl text-[#101b30] text-base outline-none focus-visible:ring-0 focus:border-[#2b56de] focus:bg-white transition-all"
+                                        />
+                                        {errors.email && (
+                                            <p className="text-sm text-red-500 font-medium">{errors.email}</p>
+                                        )}
+                                    </LabelInputContainer>
+
+                                    <LabelInputContainer>
+                                        <Label htmlFor="phone" className="text-sm font-medium text-[#101b30]">
+                                            Phone number
+                                        </Label>
+                                        <Input
+                                            id="phone"
+                                            placeholder="(604) 555-0100"
+                                            type="tel"
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            className="w-full px-4 py-3 bg-[#f0f3ff] border-2 border-transparent rounded-xl text-[#101b30] text-base outline-none focus-visible:ring-0 focus:border-[#2b56de] focus:bg-white transition-all"
+                                        />
+                                        {errors.phone && (
+                                            <p className="text-sm text-red-500 font-medium">{errors.phone}</p>
+                                        )}
+                                    </LabelInputContainer>
+
+                                    <button
+                                        className="text-base group/btn relative block h-12 w-full rounded-xl bg-[#2b56de] font-bold text-white shadow-md shadow-blue-100 transition-all hover:bg-[#1a43c7] active:scale-[0.98]"
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                    >
+                                        {isSubmitting ? "Reserving..." : "Claim my free spot"}
+                                        <BottomGradient />
+                                    </button>
+
+                                    <p className="text-xs text-center text-[#8a879a]">
+                                        No cost, no credit card. Cancel anytime.
+                                    </p>
+                                </form>
+                            </>
+                        )}
                     </motion.div>
                 </div>
             </div>
