@@ -1,21 +1,23 @@
 import { StrictMode, Suspense, lazy } from "react"
 import { createRoot } from "react-dom/client"
 import "./index.css"
-import { Loader2 } from "lucide-react"
-import { Toaster } from "@/components/ui/sonner"
-import ReactGA from "react-ga4";
+
+
+
 
 const GroupTutoringSignUp = lazy(() => import("./pages/GroupTutoringSignUp"))
 
 const Loader = () => (
     <div className="flex justify-center items-center h-screen">
-        <Loader2 className="animate-spin w-10 h-10 text-gray-600" />
+        <div className="w-10 h-10 border-4 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
     </div>
+);
 
-
-)
+let gaInitialized = false;
 
 window.addEventListener('load', () => {
+    if (gaInitialized) return;
+    gaInitialized = true;
     import('react-ga4').then(({ default: ReactGA }) => ReactGA.initialize("G-4HEPW2QJWG"))
 })
 
@@ -24,6 +26,5 @@ createRoot(document.getElementById("root")).render(
         <Suspense fallback={<Loader />}>
             <GroupTutoringSignUp />
         </Suspense>
-        <Toaster />
     </StrictMode>
 )
