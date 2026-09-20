@@ -298,8 +298,6 @@ const GroupTutoringSignUp = () => {
                             padding: "0 4px",
                         }}
                     >
-                        After Working With <span style={{ color: COLORS.primary }}>Hundreds Of Students</span>, We've
-                        Built{" "}
                         <span
                             style={{
                                 color: COLORS.accent,
@@ -309,11 +307,11 @@ const GroupTutoringSignUp = () => {
                                 display: "inline-block",
                             }}
                         >
-                            The Best Way
+                            Build Strong Foundations.
                         </span>{" "}
-                        To Take A Grade 9 &amp; 10 Student From Struggling To Success{" "}
+                        <br />
                         <span style={{ textDecoration: "underline", textDecorationColor: COLORS.accent, textDecorationThickness: 3, textUnderlineOffset: 4 }}>
-                            In Their Class
+                            Get Better at Math.
                         </span>
                     </h1>
 
