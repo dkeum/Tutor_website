@@ -30,21 +30,21 @@ const STATS = [
 const PILLARS = [
     {
         num: "01",
-        title: "Pinpoint Diagnostic Gap Analysis",
-        body: "Math is a subject that builds. Most Grade 9 and 10 difficulties stem from missed foundations in Grade 7/8 pre-algebra. Our free call finds these gaps in less than 30 minutes and we fix them.",
-        note: "Fixes foundation without retaking full courses",
+        title: "Find the Gaps",
+        body: "Before we teach new concepts, we uncover exactly where the foundation is breaking down. We identify the specific skills a student missed in previous grades and rebuild them — without making them repeat an entire course.",
+        note: "Build the foundation without starting from scratch",
     },
     {
         num: "02",
-        title: "1-on-1 Socratic Intuition Coaching",
-        body: "Asking the right questions guides the students into discovering the math concepts. We don't just give answers — we teach students to think like mathematicians & engineers, so they can solve problems on their own.",
-        note: "Turns passive watchers into active thinkers",
+        title: "Build Math From the Ground Up",
+        body: "We connect each new concept to something the student already understands. Instead of memorizing isolated formulas and steps, students learn to recognize patterns, make connections, and understand the reasoning behind the math.",
+        note: "Turn disconnected formulas into a connected understanding",
     },
     {
         num: "03",
-        title: "Practice Under Real Test Conditions",
-        body: "We run timed practice tests so exam day doesn't feel new. Students learn to work faster, stay calm, and leave time to double-check their answers.",
-        note: "Less anxiety, better scores on test day",
+        title: "Make the Foundation Stick",
+        body: "Understanding something once isn't enough. Students apply their new foundation to increasingly challenging problems until the concepts become natural. We then put those skills into practice with real Grade 9 & 10 problems.",
+        note: "Build confidence through understanding, not memorization",
     },
 ];
 
@@ -512,8 +512,8 @@ const GroupTutoringSignUp = () => {
                                 The 3-Pillar Mathmagick Framework
                             </h2>
                             <p style={{ fontSize: "clamp(13px, 3.2vw, 14px)", color: COLORS.inkSoft, lineHeight: 1.6 }}>
-                                High school math isn't about memorizing formulas; it's about pattern recognition and
-                                confidence under timed conditions.
+                                Grade 9 & 10 math gets easier when the foundation underneath it is strong. Our approach builds understanding from the ground up — so students don't just memorize what to do, they understand
+                                why it works.
                             </p>
                         </div>
 
