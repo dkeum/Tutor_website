@@ -3,8 +3,6 @@ import { createRoot } from "react-dom/client"
 import "./index.css"
 
 
-
-
 const GroupTutoringSignUp = lazy(() => import("./pages/GroupTutoringSignUp"))
 
 const Loader = () => (

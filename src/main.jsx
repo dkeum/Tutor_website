@@ -77,6 +77,8 @@ const Calendar = lazy(() => import("./pages/Calendar"))
 
 const Drill = lazy(() => import("./pages/Drill"))
 
+const LeadSignUp = lazy(() => import("./pages/LeadSignup"))
+
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
     <Loader2 className="animate-spin w-10 h-10 text-gray-600" />
@@ -93,6 +95,7 @@ createRoot(document.getElementById("root")).render(
         <BrowserRouter>
           <Suspense fallback={<Loader />}>
             <Routes>
+              <Route path="/free-6-weeks-transformation" element={<LeadSignUp />} />
               <Route path="/book-a-call" element={<GroupTutoringSignUp />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
 
