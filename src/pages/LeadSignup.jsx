@@ -189,13 +189,13 @@ const LeadSignup = () => {
                             <>
                                 <p className="mt-2 text-sm text-[#494456]">
                                     Spots are limited for this cohort. We'll follow up within one
-                                    business day with your diagnostic link.
+                                    business day an email
                                 </p>
 
                                 <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
                                     <LabelInputContainer>
                                         <Label htmlFor="fullname" className="text-sm font-medium text-[#101b30]">
-                                            Student's full name
+                                            Name
                                         </Label>
                                         <Input
                                             id="fullname"
