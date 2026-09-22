@@ -11,18 +11,17 @@ import axios from "axios";
 const leadSchema = z.object({
     fullName: z.string().min(2, "Full name is required."),
     email: z.string().email("Invalid email address."),
-    phone: z.string().min(7, "Enter a phone number so we can reach you."),
     grade: z.enum(["9", "10"], { errorMap: () => ({ message: "Select a grade." }) }),
 });
 
 const BENEFITS = [
     {
-        title: "A plan built around your exact gaps",
-        body: "A short diagnostic finds precisely where marks are slipping — factoring, linear systems, trig identities — and the six weeks are built around that, not a generic syllabus.",
+        title: "A customized plan for your child's understanding",
+        body: "We identify the exact concepts your child is struggling with and build a six-week plan to address them, so they can see improvement within two tests.",
     },
     {
-        title: "Weekly live problem-solving",
-        body: "One live session a week with our lead tutor, working through the problems that actually show up on quizzes and tests.",
+        title: "Weekly Online Group Tutoring",
+        body: "One live session per week with our experienced tutor, working through the problems that actually show up on quizzes and tests.",
     },
     {
         title: "Mistakes caught before test day",
@@ -40,7 +39,6 @@ const STEPS = [
 const LeadSignup = () => {
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
-    const [phone, setPhone] = useState("");
     const [grade, setGrade] = useState("");
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,7 +49,7 @@ const LeadSignup = () => {
         setIsSubmitting(true);
         setIsSent(false);
 
-        const formData = { fullName, email, phone, grade };
+        const formData = { fullName, email, grade };
         const result = leadSchema.safeParse(formData);
 
         if (!result.success) {
@@ -73,7 +71,7 @@ const LeadSignup = () => {
             .post("https://mathamagic-backend.vercel.app/email", {
                 fullName,
                 email,
-                message: `New free 6-week program lead.\nGrade: ${grade}\nPhone: ${phone}`,
+                message: `New free 6-week program lead.\nGrade: ${grade}`,
             })
             .then((response) => {
                 console.log("Server response:", response.data);
@@ -117,9 +115,8 @@ const LeadSignup = () => {
                         </h1>
 
                         <p className="mt-4 text-lg text-[#494456] max-w-lg">
-                            A free, structured program for Grade 9 and 10 students — built
-                            around exactly where your marks are dropping, not a generic
-                            review course.
+                            A free, structured program for Grade 9/10 students in Vancouver, Richmond, Surrey or Tricities
+                            built around the exact concepts needs to succeed in math
                         </p>
 
                         <div className="mt-8 space-y-5">
@@ -248,23 +245,6 @@ const LeadSignup = () => {
                                         />
                                         {errors.email && (
                                             <p className="text-sm text-red-500 font-medium">{errors.email}</p>
-                                        )}
-                                    </LabelInputContainer>
-
-                                    <LabelInputContainer>
-                                        <Label htmlFor="phone" className="text-sm font-medium text-[#101b30]">
-                                            Phone number
-                                        </Label>
-                                        <Input
-                                            id="phone"
-                                            placeholder="(604) 555-0100"
-                                            type="tel"
-                                            value={phone}
-                                            onChange={(e) => setPhone(e.target.value)}
-                                            className="w-full px-4 py-3 bg-[#f0f3ff] border-2 border-transparent rounded-xl text-[#101b30] text-base outline-none focus-visible:ring-0 focus:border-[#2b56de] focus:bg-white transition-all"
-                                        />
-                                        {errors.phone && (
-                                            <p className="text-sm text-red-500 font-medium">{errors.phone}</p>
                                         )}
                                     </LabelInputContainer>
 
