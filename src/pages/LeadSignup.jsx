@@ -24,8 +24,8 @@ const BENEFITS = [
         body: "One live session per week with our experienced tutor, working through the problems that actually show up on quizzes and tests.",
     },
     {
-        title: "Mistakes caught before test day",
-        body: "Step-by-step homework feedback flags errors in the moment, so a small misunderstanding doesn't compound for six weeks.",
+        title: "Bi-Weekly Check-ins",
+        body: "A 15-minute call with our tutor to review your child's progress and adjust the plan as needed.",
     },
 ];
 
@@ -33,7 +33,7 @@ const STEPS = [
     { n: "1", label: "5-minute diagnostic", body: "A handful of Grade 9/10 questions to find your starting point." },
     { n: "2", label: "Personalized plan", body: "A six-week schedule built around your gaps, sent the same day." },
     { n: "3", label: "Weekly sessions", body: "Live tutoring plus short lessons to work through each week." },
-    { n: "4", label: "Track the change", body: "Weekly check-ins so you can see marks move before the term ends." },
+    { n: "4", label: "Track the change", body: "Bi-weekly check-ins so you can see marks move before the term ends." },
 ];
 
 const LeadSignup = () => {
@@ -114,8 +114,14 @@ const LeadSignup = () => {
                             Six weeks to turn a slipping math grade around.
                         </h1>
 
+                        <img
+                            src="./OnlineTutor.png"
+                            alt="Students in a live online math tutoring session"
+                            className="mt-6 w-full h-auto max-h-[420px] object-cover rounded-2xl shadow-[0_8px_30px_rgba(43,86,222,0.08)] border border-[#e8edff]"
+                        />
+
                         <p className="mt-4 text-lg text-[#494456] max-w-lg">
-                            A free, structured program for Grade 9/10 students in Vancouver, Richmond, Surrey or Tricities
+                            A free, structured group program for Grade 9/10 students in Vancouver, Richmond, Surrey or Tricities
                             built around the exact concepts needs to succeed in math
                         </p>
 
