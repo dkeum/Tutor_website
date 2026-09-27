@@ -179,6 +179,23 @@ export const styles = `
   }
 `;
 
+
+
+function findOption(question, label) {
+  const options = question?.options;
+  if (!Array.isArray(options) || !label) return null;
+  return options.find((o) => o?.label === label) || null;
+}
+
+function getCorrectOption(question) {
+  const options = question?.options;
+  if (!Array.isArray(options)) return null;
+  return options.find((o) => o?.correct === true) || null;
+}
+
+
+
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 const SolveProblems = () => {
   const dispatch = useDispatch();
@@ -581,22 +598,23 @@ const SolveProblems = () => {
   // from the removed `answer` table join.
   const handleNextOrSubmit = async () => {
     if (isSubmittingMain) return;
-
-    // NEW — for multiple choice, require a selection before allowing submit
     if (isMultipleChoice && !selectedOption) return;
 
-    const correctAnswer = currentQuestion?.answer || "";
     const studentAnswer = isMultipleChoice ? selectedOption : latex;
+    const selectedOptionObj = isMultipleChoice ? findOption(currentQuestion, selectedOption) : null;
 
+    // Local optimistic guess — for MC this is now exact, since correctness lives
+    // on the option itself rather than a separate `answer` field.
     const isCorrect = isMultipleChoice
-      ? studentAnswer === correctAnswer
-      : normalizeLatex(studentAnswer) === normalizeLatex(correctAnswer);
+      ? selectedOptionObj?.correct === true
+      : normalizeLatex(studentAnswer) === normalizeLatex(currentQuestion?.answer || "");
 
     setIsSubmittingMain(true);
     try {
       const newAttempt = {
         question_id: currentQuestion.id,
-        answer_given: studentAnswer,
+        answer_given: isMultipleChoice ? (selectedOptionObj?.text ?? "") : studentAnswer,
+        selected_label: isMultipleChoice ? selectedOption : undefined, // NEW — the letter, for the record
         is_correct: isCorrect,
         time_spent_seconds: secondsElapsed,
         used_ai_video: usedAIVideo,
