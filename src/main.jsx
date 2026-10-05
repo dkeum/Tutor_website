@@ -79,6 +79,8 @@ const Drill = lazy(() => import("./pages/Drill"))
 
 const LeadSignUp = lazy(() => import("./pages/LeadSignup"))
 
+const Assessment = lazy(() => import("./pages/Assessment"))
+
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
     <Loader2 className="animate-spin w-10 h-10 text-gray-600" />
@@ -100,7 +102,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="/auth/callback" element={<AuthCallback />} />
 
 
-
+              <Route path="/assessment-9" element={<Assessment />} />
               <Route path="/" element={<App />} />
               <Route path="/contact" element={<Contactme />} />
 
