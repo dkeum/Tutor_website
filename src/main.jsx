@@ -83,6 +83,9 @@ const Assessment = lazy(() => import("./pages/Assessment"))
 
 const AssessmentTen = lazy(() => import("./pages/AssessmentTen"))
 
+
+const HomeworkGroupTutoring = lazy(() => import("./pages/HomeworkGroupTutoring"))
+
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
     <Loader2 className="animate-spin w-10 h-10 text-gray-600" />
@@ -117,6 +120,9 @@ createRoot(document.getElementById("root")).render(
               <Route path="/classes" element={<FreeResources />} />
               {/* <Route path="/freeResources/:subject" element={<Subject />} /> */}
               <Route path="/pricing" element={<Pricing />} />
+
+              <Route path="/homework/:code" element={<HomeworkGroupTutoring />} />
+
               <Route
                 path="/showpersonaldata"
                 element={

@@ -1,11 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import katex from 'katex'
+import 'katex/dist/katex.min.css'
 import questions from '../assets/questions.json'
-
-// If you host the diagram images somewhere other than /assessment-images/,
-// update this base path. The images folder delivered alongside this file
-// should be dropped into your public directory at this path (or adjust the
-// path / swap this for an import map if you run them through a bundler).
-
 
 const ASSESSMENT_DURATION_SECONDS = 60 * 60 // 1 hour
 
@@ -27,6 +23,144 @@ const colors = {
   incorrect: '#B23A3A',
   muted: '#6F6B5E',
 }
+
+/* ------------------------------------------------------------------ */
+/* Math rendering                                                      */
+/* ------------------------------------------------------------------ */
+
+const InlineMath = ({ math }) => {
+  const html = katex.renderToString(math, { throwOnError: false })
+  return <span dangerouslySetInnerHTML={{ __html: html }} />
+}
+
+const BlockMath = ({ math }) => {
+  const html = katex.renderToString(math, {
+    throwOnError: false,
+    displayMode: true,
+  })
+  return <div dangerouslySetInnerHTML={{ __html: html }} />
+}
+
+// NOTE: "a" is intentionally NOT in this list, otherwise $a = -46$ is
+// treated as English and rendered as plain text.
+const ENGLISH_CONNECTOR_WORDS =
+  /\b(to|per|for|of|and|or|is|are|the|an|in|on|at|with|from|by|as|you|your|will|would|need)\b/i
+
+const looksLikeMath = (content) => {
+  const trimmed = content.trim()
+  if (!trimmed) return false
+
+  if (/\\[a-zA-Z]+/.test(trimmed)) return true
+
+  const MATH_OPERATOR_PATTERN = /[a-zA-Z0-9]\s*[\^*/]\s*[a-zA-Z0-9]/
+  if (MATH_OPERATOR_PATTERN.test(trimmed) && trimmed.length <= 40) {
+    if (/\.\s/.test(trimmed)) return false
+    if (/[a-zA-Z]{4,}\s+[a-zA-Z]{4,}\s+[a-zA-Z]{4,}/.test(trimmed)) return false
+    return true
+  }
+
+  if (ENGLISH_CONNECTOR_WORDS.test(trimmed)) return false
+  if (/\.\s/.test(trimmed)) return false
+  if (/[a-zA-Z]{4,}\s+[a-zA-Z]{4,}\s+[a-zA-Z]{4,}/.test(trimmed)) return false
+  if (trimmed.length > 40) return false
+  return true
+}
+
+const parseMathParts = (text) => {
+  if (!text) return []
+
+  const parts = []
+  // The single-dollar alternative treats "\" + any char as one unit, so an
+  // escaped dollar (\$) stays inside the math instead of closing it.
+  const regex =
+    /\\\[([\s\S]*?)\\\]|\\\(([\s\S]*?)\\\)|\$\$([\s\S]*?)\$\$|\$((?:\\[\s\S]|[^$\\])+?)\$/g
+  let lastIndex = 0
+  let match
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ type: 'text', content: text.slice(lastIndex, match.index) })
+    }
+
+    const isSingleDollar = match[4] !== undefined
+    const isBlock = match[0].startsWith('\\[') || match[0].startsWith('$$')
+    let content = match[1] ?? match[2] ?? match[3] ?? match[4]
+
+    if (isSingleDollar && !looksLikeMath(content)) {
+      parts.push({ type: 'text', content: match[0] })
+      lastIndex = match.index + match[0].length
+      continue
+    }
+
+    content = content.replace(
+      /([a-zA-Z0-9_^{}()\.\+\-]+)\s*\/\s*([a-zA-Z0-9_^{}()\.\+\-]+)/g,
+      '\\frac{$1}{$2}'
+    )
+
+    parts.push({ type: 'math', content, block: isBlock })
+    lastIndex = match.index + match[0].length
+  }
+
+  if (lastIndex < text.length) {
+    parts.push({ type: 'text', content: text.slice(lastIndex) })
+  }
+
+  const finalParts = []
+  parts.forEach((part) => {
+    if (part.type === 'math') {
+      finalParts.push(part)
+      return
+    }
+
+    const subText = part.content
+    const inlineMathRegex =
+      /([a-zA-Z0-9_]+)\^([a-zA-Z0-9_]+)|([a-zA-Z0-9_]+)\s*\/\s*([a-zA-Z0-9_]+)/g
+    let subLastIndex = 0
+    let subMatch
+
+    while ((subMatch = inlineMathRegex.exec(subText)) !== null) {
+      if (subMatch.index > subLastIndex) {
+        finalParts.push({ type: 'text', content: subText.slice(subLastIndex, subMatch.index) })
+      }
+
+      if (subMatch[1] && subMatch[2]) {
+        finalParts.push({ type: 'math', content: `${subMatch[1]}^${subMatch[2]}`, block: false })
+      } else if (subMatch[3] && subMatch[4]) {
+        finalParts.push({
+          type: 'math',
+          content: `\\frac{${subMatch[3]}}{${subMatch[4]}}`,
+          block: false,
+        })
+      }
+
+      subLastIndex = subMatch.index + subMatch[0].length
+    }
+
+    if (subLastIndex < subText.length) {
+      finalParts.push({ type: 'text', content: subText.slice(subLastIndex) })
+    }
+  })
+
+  return finalParts
+}
+
+const MathText = ({ text }) => (
+  <span>
+    {parseMathParts(text).map((part, i) =>
+      part.type === 'text' ? (
+        <span key={i}>{part.content}</span>
+      ) : part.block ? (
+        <BlockMath key={i} math={part.content} />
+      ) : (
+        <InlineMath key={i} math={part.content} />
+      )
+    )}
+  </span>
+)
+
+/* ------------------------------------------------------------------ */
+/* Assessment                                                          */
+/* ------------------------------------------------------------------ */
 
 export default function Assessment() {
   const [index, setIndex] = useState(0)
@@ -87,8 +221,6 @@ export default function Assessment() {
     )
   }
 
-  console.log(`../assets/${current.image}`)
-
   return (
     <div style={styles.page}>
       {/* Timer bar */}
@@ -120,7 +252,9 @@ export default function Assessment() {
         </div>
 
         <div style={styles.card}>
-          <h2 style={styles.prompt}>{current.prompt}</h2>
+          <h2 style={styles.prompt}>
+            <MathText text={current.prompt} />
+          </h2>
 
           {current.image && (
             <div style={styles.imageWrap}>
@@ -145,7 +279,9 @@ export default function Assessment() {
                   <span style={styles.optionLetter(selected)}>
                     {opt.id.toUpperCase()}
                   </span>
-                  <span style={styles.optionText}>{opt.text}</span>
+                  <span style={styles.optionText}>
+                    <MathText text={opt.text} />
+                  </span>
                 </button>
               )
             })}

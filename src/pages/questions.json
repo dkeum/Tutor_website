@@ -1,0 +1,544 @@
+[
+    {
+        "type": "num",
+        "q": "$\\sqrt{81} = $",
+        "a": 9
+    },
+    {
+        "type": "num",
+        "q": "$\\sqrt{169} = $",
+        "a": 13
+    },
+    {
+        "type": "num",
+        "q": "$\\sqrt{225} = $",
+        "a": 15
+    },
+    {
+        "type": "num",
+        "q": "Round $\\sqrt{40}$ to the nearest tenth:",
+        "a": 6.3,
+        "tol": 0.001
+    },
+    {
+        "type": "num",
+        "q": "Round $\\sqrt{7}$ to the nearest tenth:",
+        "a": 2.6,
+        "tol": 0.001
+    },
+    {
+        "type": "num",
+        "q": "$\\sqrt{1.21} = $",
+        "a": 1.1
+    },
+    {
+        "type": "frac",
+        "q": "$\\sqrt{\\dfrac{9}{25}} = $",
+        "a": "3/5"
+    },
+    {
+        "type": "num",
+        "q": "$\\sqrt{0.64} = $",
+        "a": 0.8
+    },
+    {
+        "type": "frac",
+        "q": "$\\sqrt{\\dfrac{81}{16}} = $",
+        "a": "9/4"
+    },
+    {
+        "type": "num",
+        "q": "$\\sqrt{2.56} = $",
+        "a": 1.6
+    },
+    {
+        "type": "frac",
+        "q": "$\\sqrt{\\dfrac{1}{36}} = $",
+        "a": "1/6"
+    },
+    {
+        "type": "num",
+        "q": "$\\sqrt{0.25} = $",
+        "a": 0.5
+    },
+    {
+        "type": "frac",
+        "q": "$\\sqrt{\\dfrac{100}{64}} = $",
+        "a": "5/4"
+    },
+    {
+        "type": "num",
+        "q": "$\\sqrt{3.61} = $",
+        "a": 1.9
+    },
+    {
+        "type": "frac",
+        "q": "$\\sqrt{\\dfrac{4}{121}} = $",
+        "a": "2/11"
+    },
+    {
+        "type": "num",
+        "q": "$\\sqrt{2.89} = $",
+        "a": 1.7
+    },
+    {
+        "type": "frac",
+        "q": "$\\sqrt{\\dfrac{36}{49}} = $",
+        "a": "6/7"
+    },
+    {
+        "type": "frac",
+        "q": "$\\sqrt{\\dfrac{144}{25}} = $",
+        "a": "12/5"
+    },
+    {
+        "type": "frac",
+        "q": "$\\sqrt{\\dfrac{225}{64}} = $",
+        "a": "15/8"
+    },
+    {
+        "type": "frac",
+        "q": "$\\sqrt{\\dfrac{196}{81}} = $",
+        "a": "14/9"
+    },
+    {
+        "type": "frac",
+        "q": "$\\sqrt{\\dfrac{324}{121}} = $",
+        "a": "18/11"
+    },
+    {
+        "type": "num",
+        "q": "$\\sqrt{0.0196} = $",
+        "a": 0.14
+    },
+    {
+        "type": "num",
+        "q": "$\\sqrt{0.0289} = $",
+        "a": 0.17
+    },
+    {
+        "type": "num",
+        "q": "$\\sqrt{1.69} = $",
+        "a": 1.3
+    },
+    {
+        "type": "num",
+        "q": "$\\sqrt{4.41} = $",
+        "a": 2.1
+    },
+    {
+        "type": "tf",
+        "q": "Is $\\dfrac{48}{120}$ a perfect square?",
+        "a": "No",
+        "note": "Explain your reasoning",
+        "why": "48/120 = 2/5, and 2 and 5 are not perfect squares."
+    },
+    {
+        "type": "tf",
+        "q": "Is $1.6$ a perfect square?",
+        "a": "No",
+        "note": "Explain your reasoning",
+        "why": "1.6 = 16/10 = 8/5, and 8 and 5 are not perfect squares."
+    },
+    {
+        "type": "tf",
+        "q": "Is $\\dfrac{49}{100}$ a perfect square?",
+        "a": "Yes",
+        "note": "Explain your reasoning",
+        "why": "Both 49 and 100 are perfect squares ($7^2$ and $10^2$)."
+    },
+    {
+        "type": "tf",
+        "q": "Is $0.04$ a perfect square?",
+        "a": "Yes",
+        "note": "Explain your reasoning",
+        "why": "0.04 = 4/100, and both are perfect squares, so it equals $0.2^2$."
+    },
+    {
+        "type": "tf",
+        "q": "Is $\\dfrac{144}{24}$ a perfect square?",
+        "a": "No",
+        "note": "Explain your reasoning",
+        "why": "144/24 = 6, and 6 is not a perfect square."
+    },
+    {
+        "type": "tf",
+        "q": "Is $2.5$ a perfect square?",
+        "a": "No",
+        "note": "Explain your reasoning",
+        "why": "2.5 = 5/2, and 5 and 2 are not perfect squares."
+    },
+    {
+        "type": "tf",
+        "q": "Is $\\dfrac{50}{225}$ a perfect square?",
+        "a": "No",
+        "note": "Explain your reasoning",
+        "why": "50/225 = 2/9, and 2 is not a perfect square."
+    },
+    {
+        "type": "tf",
+        "q": "Is $1.96$ a perfect square?",
+        "a": "Yes",
+        "note": "Explain your reasoning",
+        "why": "1.96 = 196/100, and both are perfect squares, so it equals $1.4^2$."
+    },
+    {
+        "type": "tf",
+        "q": "Is $\\dfrac{63}{28}$ a perfect square?",
+        "a": "Yes",
+        "note": "Explain your reasoning",
+        "why": "63/28 = 9/4, and both are perfect squares, so it equals $1.5^2$."
+    },
+    {
+        "type": "cmp",
+        "q": "Choose the symbol: $\\sqrt{30}$ ___ $5$",
+        "a": ">"
+    },
+    {
+        "type": "cmp",
+        "q": "Choose the symbol: $\\sqrt{45}$ ___ $7$",
+        "a": "<"
+    },
+    {
+        "type": "cmp",
+        "q": "Choose the symbol: $\\sqrt{12}$ ___ $3.5$",
+        "a": "<"
+    },
+    {
+        "type": "between",
+        "q": "$\\sqrt{28}$ is between which two consecutive whole numbers?",
+        "a": [
+            5,
+            6
+        ],
+        "rev": true,
+        "nl": {
+            "min": 4,
+            "max": 7,
+            "pts": [
+                {
+                    "v": 5.2915,
+                    "l": "√28"
+                }
+            ]
+        }
+    },
+    {
+        "type": "between",
+        "q": "$\\sqrt{75}$ is between which two consecutive whole numbers?",
+        "a": [
+            8,
+            9
+        ],
+        "rev": true,
+        "nl": {
+            "min": 7,
+            "max": 10,
+            "pts": [
+                {
+                    "v": 8.6603,
+                    "l": "√75"
+                }
+            ]
+        }
+    },
+    {
+        "type": "between",
+        "q": "$\\sqrt{130}$ is between which two consecutive whole numbers?",
+        "a": [
+            11,
+            12
+        ],
+        "rev": true,
+        "nl": {
+            "min": 10,
+            "max": 13,
+            "pts": [
+                {
+                    "v": 11.4018,
+                    "l": "√130"
+                }
+            ]
+        }
+    },
+    {
+        "type": "pick",
+        "full": true,
+        "q": "Which point on the number line is closest to $\\sqrt{20}$?",
+        "a": "B",
+        "nl": {
+            "min": 3,
+            "max": 7,
+            "pts": [
+                {
+                    "v": 3.5,
+                    "l": "A"
+                },
+                {
+                    "v": 4.5,
+                    "l": "B"
+                },
+                {
+                    "v": 5.5,
+                    "l": "C"
+                },
+                {
+                    "v": 6.5,
+                    "l": "D"
+                }
+            ]
+        }
+    },
+    {
+        "type": "est",
+        "q": "Use benchmarks to approximate $\\sqrt{3.8}$ to the nearest tenth.",
+        "a": 1.949,
+        "tol": 0.1,
+        "disp": "about 1.9",
+        "note": "Benchmarks you used"
+    },
+    {
+        "type": "est",
+        "q": "Use benchmarks to approximate $\\sqrt{33.8}$ to the nearest tenth.",
+        "a": 5.814,
+        "tol": 0.1,
+        "disp": "about 5.8",
+        "note": "Benchmarks you used"
+    },
+    {
+        "type": "est",
+        "q": "Use benchmarks to approximate $\\sqrt{133.8}$ to the nearest tenth.",
+        "a": 11.567,
+        "tol": 0.1,
+        "disp": "about 11.6",
+        "note": "Benchmarks you used"
+    },
+    {
+        "type": "est",
+        "q": "Use benchmarks to approximate $\\sqrt{233.8}$ to the nearest tenth.",
+        "a": 15.29,
+        "tol": 0.1,
+        "disp": "about 15.3",
+        "note": "Benchmarks you used"
+    },
+    {
+        "type": "est",
+        "q": "Estimate $\\sqrt{\\dfrac{77}{10}}$ as a fraction or decimal.",
+        "a": 2.775,
+        "tol": 0.2,
+        "disp": "about 2.8",
+        "note": "Benchmarks you used"
+    },
+    {
+        "type": "est",
+        "q": "Estimate $\\sqrt{\\dfrac{18}{11}}$ as a fraction or decimal.",
+        "a": 1.279,
+        "tol": 0.2,
+        "disp": "about 1.3",
+        "note": "Benchmarks you used"
+    },
+    {
+        "type": "est",
+        "q": "Estimate $\\sqrt{\\dfrac{15}{39}}$ as a fraction or decimal.",
+        "a": 0.62,
+        "tol": 0.2,
+        "disp": "about 0.6",
+        "note": "Benchmarks you used"
+    },
+    {
+        "type": "est",
+        "q": "Estimate $\\sqrt{\\dfrac{83}{19}}$ as a fraction or decimal.",
+        "a": 2.09,
+        "tol": 0.2,
+        "disp": "about 2.1",
+        "note": "Benchmarks you used"
+    },
+    {
+        "type": "est",
+        "q": "Estimate $\\sqrt{\\dfrac{28}{103}}$ as a fraction or decimal.",
+        "a": 0.521,
+        "tol": 0.2,
+        "disp": "about 0.5",
+        "note": "Benchmarks you used"
+    },
+    {
+        "type": "est",
+        "q": "Estimate $\\sqrt{\\dfrac{50}{63}}$ as a fraction or decimal.",
+        "a": 0.891,
+        "tol": 0.2,
+        "disp": "about 0.9",
+        "note": "Benchmarks you used"
+    },
+    {
+        "type": "est",
+        "q": "Estimate $\\sqrt{5.9}$.",
+        "a": 2.429,
+        "tol": 0.2,
+        "disp": "about 2.4",
+        "note": "Strategy you used, and why"
+    },
+    {
+        "type": "est",
+        "q": "Estimate $\\sqrt{\\dfrac{7}{20}}$.",
+        "a": 0.592,
+        "tol": 0.2,
+        "disp": "about 0.6",
+        "note": "Strategy you used, and why"
+    },
+    {
+        "type": "est",
+        "q": "Estimate $\\sqrt{0.65}$.",
+        "a": 0.806,
+        "tol": 0.2,
+        "disp": "about 0.8",
+        "note": "Strategy you used, and why"
+    },
+    {
+        "type": "est",
+        "q": "Estimate $\\sqrt{\\dfrac{21}{51}}$.",
+        "a": 0.642,
+        "tol": 0.2,
+        "disp": "about 0.6",
+        "note": "Strategy you used, and why"
+    },
+    {
+        "type": "est",
+        "q": "Estimate $\\sqrt{23.2}$.",
+        "a": 4.817,
+        "tol": 0.2,
+        "disp": "about 4.8",
+        "note": "Strategy you used, and why"
+    },
+    {
+        "type": "est",
+        "q": "Estimate $\\sqrt{\\dfrac{88}{10}}$.",
+        "a": 2.966,
+        "tol": 0.2,
+        "disp": "about 3.0",
+        "note": "Strategy you used, and why"
+    },
+    {
+        "type": "check",
+        "q": "Is $\\sqrt{2.4} \\approx 1.5$ correct to the nearest tenth?",
+        "a": "Correct",
+        "why": "√2.4 ≈ 1.549, which rounds to 1.5."
+    },
+    {
+        "type": "check",
+        "q": "Is $\\sqrt{1.6} \\approx 0.4$ correct to the nearest tenth?",
+        "a": "Incorrect",
+        "fix": 1.3,
+        "why": "√1.6 ≈ 1.265, which rounds to 1.3."
+    },
+    {
+        "type": "check",
+        "q": "Is $\\sqrt{156.8} \\approx 15.6$ correct to the nearest tenth?",
+        "a": "Incorrect",
+        "fix": 12.5,
+        "why": "√156.8 ≈ 12.522, which rounds to 12.5."
+    },
+    {
+        "type": "check",
+        "q": "Is $\\sqrt{47.8} \\approx 6.9$ correct to the nearest tenth?",
+        "a": "Correct",
+        "why": "√47.8 ≈ 6.914, which rounds to 6.9."
+    },
+    {
+        "type": "num",
+        "q": "Find the unknown length $h$ to the nearest tenth (cm).",
+        "a": 3.0,
+        "tol": 0.05,
+        "tri": {
+            "v": 2.5,
+            "h": 1.6,
+            "vl": "2.5 cm",
+            "hl": "1.6 cm",
+            "cl": "h"
+        },
+        "why": "$h^2 = 2.5^2 + 1.6^2 = 8.81$, so $h \\approx 3.0$ cm."
+    },
+    {
+        "type": "num",
+        "q": "Find the unknown length $s$ to the nearest tenth (cm).",
+        "a": 4.2,
+        "tol": 0.05,
+        "tri": {
+            "v": 0.9,
+            "h": 4.1,
+            "vl": "0.9 cm",
+            "hl": "4.1 cm",
+            "cl": "s"
+        },
+        "why": "$s^2 = 4.1^2 + 0.9^2 = 17.62$, so $s \\approx 4.2$ cm."
+    },
+    {
+        "type": "order",
+        "full": true,
+        "q": "Write the letters from least to greatest, like this: B, A, D, C",
+        "items": [
+            "$3$",
+            "$\\sqrt{5}$",
+            "$2.5$",
+            "$\\sqrt{8}$"
+        ],
+        "a": "BCDA",
+        "rev": true,
+        "nl": {
+            "min": 2,
+            "max": 3,
+            "pts": [
+                {
+                    "v": 3,
+                    "l": "A 3"
+                },
+                {
+                    "v": 2.2361,
+                    "l": "B √5"
+                },
+                {
+                    "v": 2.5,
+                    "l": "C 2.5"
+                },
+                {
+                    "v": 2.8284,
+                    "l": "D √8"
+                }
+            ]
+        }
+    },
+    {
+        "type": "order",
+        "full": true,
+        "q": "Write the letters from least to greatest.",
+        "items": [
+            "$\\sqrt{50}$",
+            "$7$",
+            "$6.5$",
+            "$\\sqrt{40}$"
+        ],
+        "a": "DCBA",
+        "rev": true,
+        "nl": {
+            "min": 6,
+            "max": 8,
+            "pts": [
+                {
+                    "v": 7.0711,
+                    "l": "A √50"
+                },
+                {
+                    "v": 7,
+                    "l": "B 7"
+                },
+                {
+                    "v": 6.5,
+                    "l": "C 6.5"
+                },
+                {
+                    "v": 6.3246,
+                    "l": "D √40"
+                }
+            ]
+        }
+    }
+]
