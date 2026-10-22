@@ -86,6 +86,8 @@ const AssessmentTen = lazy(() => import("./pages/AssessmentTen"))
 
 const HomeworkGroupTutoring = lazy(() => import("./pages/HomeworkGroupTutoring"))
 
+const ProgramOffer = lazy(() => import("./pages/ProgramOffer"))
+
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
     <Loader2 className="animate-spin w-10 h-10 text-gray-600" />
@@ -109,6 +111,7 @@ createRoot(document.getElementById("root")).render(
 
               <Route path="/assessment-9" element={<Assessment />} />
               <Route path="/assessment-10" element={<AssessmentTen />} />
+              <Route path="/program-offer" element={<ProgramOffer />} />
 
               <Route path="/" element={<App />} />
               <Route path="/contact" element={<Contactme />} />

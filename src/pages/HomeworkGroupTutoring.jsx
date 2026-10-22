@@ -5,8 +5,15 @@ import 'katex/dist/katex.min.css'
 import './HomeworkGroupTutoring.css'
 import { supabase } from '../db/supabaseclient' // <- adjust to wherever your browser Supabase client lives
 
+// GRADE 8: 
+// CODES: FRAC8
 
-//CODES: EXP09
+
+// GRADE 9 
+//CODES: SQRT9 , EXPO9, 
+
+
+//  GRADE 10 
 
 /* ---------- helpers ---------- */
 
