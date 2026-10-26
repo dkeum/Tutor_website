@@ -12,7 +12,7 @@ const API_BASE =
         : 'https://mathamagic-backend.vercel.app'
 
 // GRADE 8: 
-// CODES: FRAC8
+// CODES: FRAC8, FDP8, DECOPS8
 
 
 // GRADE 9 
@@ -219,6 +219,9 @@ const OPTIONS = {
 
 function Field({ q, value, onChange }) {
     const { type } = q
+    // Multiple-choice questions use the "order" type with a one-letter answer
+    const singleLetter = type === 'order' && String(q.a).length === 1
+
     if (type === 'between') {
         const v = value || ['', '']
         return (
@@ -251,7 +254,7 @@ function Field({ q, value, onChange }) {
                             value={v[1]}
                             className="hgt-wide"
                             placeholder="correct value"
-                            inputMode="decimal"
+                            inputMode={q.neg ? 'text' : 'decimal'}
                             aria-label="Corrected value"
                             onChange={(e) => onChange([v[0], e.target.value])}
                         />
@@ -263,10 +266,14 @@ function Field({ q, value, onChange }) {
     return (
         <input
             value={value || ''}
-            className={type === 'order' || type === 'est' ? 'hgt-wide' : ''}
-            inputMode={type === 'order' ? 'text' : 'decimal'}
-            placeholder={type === 'order' ? 'e.g. BCDA' : type === 'frac' ? 'e.g. 3/4' : ''}
-            maxLength={type === 'order' ? 12 : undefined}
+            className={(type === 'order' && !singleLetter) || type === 'est' ? 'hgt-wide' : ''}
+            inputMode={type === 'order' || q.neg ? 'text' : 'decimal'}
+            placeholder={
+                type === 'order'
+                    ? singleLetter ? 'Type a letter' : 'e.g. BCDA'
+                    : type === 'frac' ? 'e.g. 3/4' : ''
+            }
+            maxLength={type === 'order' ? (singleLetter ? 1 : 12) : undefined}
             autoComplete="off"
             aria-label="Your answer"
             onChange={(e) => onChange(e.target.value)}
