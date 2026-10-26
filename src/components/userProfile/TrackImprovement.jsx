@@ -15,8 +15,7 @@ import {
 import TrackingDottedGraph from "./TrackData/TrackingDottedGraph";
 import TrackingLoggedInActivtiy_Progress from "./TrackData/TrackingLoggedInActivtiy_Progress";
 import QuadrantScatterPlot from "./TrackData/QuadrantScatterPlot";
-import Sidebar from "../Sidebar";
-import NavbarLoggedIn from "../NavbarLoggedIn";
+
 
 import { supabase } from "../../db/supabaseclient";
 import LoggedInLayout from "../LoggedInLayout";

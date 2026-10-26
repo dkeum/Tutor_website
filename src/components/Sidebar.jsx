@@ -6,8 +6,13 @@ import {
   GraduationCap, Settings, ChevronRight, ChevronDown,
   HelpCircle, TrendingUp, AlertTriangle, BookOpen,
   FileText, CheckCircle2,
+  DrillIcon,
+  BookOpenIcon,
+  Target,
+  ClipboardCheck,
 } from 'lucide-react';
 import { useSelector } from 'react-redux';
+import { path } from 'd3';
 
 const sideNavItems = [
   { path: "/showpersonaldata", icon: <LayoutDashboard size={20} />, label: "Dashboard", hasSubMenu: true },
@@ -15,12 +20,17 @@ const sideNavItems = [
   { path: "/practice-topics", icon: <SquarePen size={20} />, label: "Practice" },
   // { path: "/tutors", icon: <GraduationCap size={20} />, label: "Tutors" },
   { path: "/settings", icon: <Settings size={20} />, label: "Settings" },
+  { path: "/drill/logged-in", icon: <DrillIcon size={20} />, label: "Drills" },
+  { path: "/homework/logged-in", icon: <BookOpenIcon size={20} />, label: "Worksheets" },
+
 ];
 
 const dashboardSubItems = [
   { path: "/track-improvement", icon: <TrendingUp size={16} />, label: "Track Improvement" },
   { path: "/correct-mistakes", icon: <AlertTriangle size={16} />, label: "Correct Mistakes" },
   { path: "/homework-help", icon: <BookOpen size={16} />, label: "Homework Help" },
+  { path: "/drill/performance", icon: <Target size={16} />, label: "Drill Performance" },
+  { path: "/homework/logged-in/performance", icon: <ClipboardCheck size={16} />, label: "Worksheet Performance" },
   { path: "/final-exam-prep", icon: <FileText size={16} />, label: "Final Exam Prep" },
 ];
 

@@ -83,10 +83,15 @@ const Assessment = lazy(() => import("./pages/Assessment"))
 
 const AssessmentTen = lazy(() => import("./pages/AssessmentTen"))
 
-
 const HomeworkGroupTutoring = lazy(() => import("./pages/HomeworkGroupTutoring"))
-
 const ProgramOffer = lazy(() => import("./pages/ProgramOffer"))
+
+const DrillLoggedIn = lazy(() => import("./pages/DrillLoggedIn"))
+const HomeworkGroupLoggedIn = lazy(() => import("./pages/HomeWorkGroupLoggedIn"))
+
+const DrillPerformance = lazy(() => import("./pages/DrillPerformance"))
+
+const HomeWorkGroupLoggedInPerformance = lazy(() => import("./pages/HomeWorkGroupLoggedInPerformance"))
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -113,6 +118,8 @@ createRoot(document.getElementById("root")).render(
               <Route path="/assessment-10" element={<AssessmentTen />} />
               <Route path="/program-offer" element={<ProgramOffer />} />
 
+
+
               <Route path="/" element={<App />} />
               <Route path="/contact" element={<Contactme />} />
 
@@ -124,7 +131,12 @@ createRoot(document.getElementById("root")).render(
               {/* <Route path="/freeResources/:subject" element={<Subject />} /> */}
               <Route path="/pricing" element={<Pricing />} />
 
+              <Route path="/drill/logged-in" element={<DrillLoggedIn />} />
+              <Route path="/homework/logged-in" element={<HomeworkGroupLoggedIn />} />
               <Route path="/homework/:code" element={<HomeworkGroupTutoring />} />
+
+              <Route path="/drill/performance" element={<DrillPerformance />} />
+              <Route path="/homework/logged-in/performance" element={<HomeWorkGroupLoggedInPerformance />} />
 
               <Route
                 path="/showpersonaldata"

@@ -42,7 +42,7 @@ const YouTubeModal = ({ section, onClose, onWatched }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
@@ -266,10 +266,10 @@ const Lessons = () => {
   const handleCloseModal = useCallback(() => setActiveSection(null), []);
 
   return (
-    <div className="min-h-screen w-full text-[#191d1d] flex font-sans ">
+    <div className="min-h-screen w-full text-[#191d1d] flex flex-col font-sans ">
       <LoggedInLayout>
-        <div className="flex-1 flex flex-col min-h-screen relative overflow-hidden">
-          <main className=" w-full mx-auto flex-1 z-10 flex flex-col gap-8">
+        <div className="flex-1 min-w-0 flex justify-center min-h-screen relative overflow-hidden">
+          <main className="w-full max-w-7xl py-6 md:py-10 z-10 flex flex-col gap-8">
 
             <section className="text-center max-w-2xl mx-auto mt-4 mb-2">
               <h1 className="text-3xl font-extrabold text-[#191c1d] tracking-tight sm:text-4xl">

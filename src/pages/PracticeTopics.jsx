@@ -10,8 +10,7 @@ import {
   Play,
   SparklesIcon,
 } from "lucide-react";
-import Sidebar from "../components/Sidebar";
-import NavbarLoggedIn from "../components/NavbarLoggedIn";
+
 import { useNavigate } from "react-router-dom";
 import LoggedInLayout from "../components/LoggedInLayout";
 import { supabase } from "../db/supabaseclient";
@@ -202,7 +201,7 @@ const PracticeTopics = () => {
   };
 
   return (
-    <div className="min-h-screen w-full text-[#101b30] flex bg-slate-50/30">
+    <div className="min-h-screen w-full text-[#101b30] flex flex-col bg-slate-50/30">
       <style>{`
         .math-grid {
           background-image: 
