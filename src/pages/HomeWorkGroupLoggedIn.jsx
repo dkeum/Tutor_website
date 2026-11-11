@@ -16,14 +16,16 @@ const API_BASE =
 
 
 // GRADE 9 
-//CODES: SQRT9 , EXPO9, 
+//CODES: SQRT9 , EXPO9, POLY9
 
 
 //  GRADE 10 
+// CODES: SLOPE10 (4.1), ROC10 (4.2), LINFN10 (4.3)
 
 /* ---------- helpers ---------- */
 
 // Renders text with inline LaTeX, e.g. "Round $\sqrt{40}$ to the nearest tenth."
+// NOTE: a literal dollar sign in question text will be read as the start of LaTeX, so write "dollars" instead of "$".
 const Tex = ({ text }) => (
     <>
         {String(text)
@@ -60,20 +62,31 @@ const plain = (t) =>
 const esc = (s) =>
     String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
-// Accepts "1.5", "3/4" and "2 3/4"
+// Accepts "1.5", "3/4", "2 3/4", negatives such as "-3/4", and "2,750" / "$11.50"
 const toNumber = (s) => {
-    s = String(s).trim().replace(',', '.')
-    let m = s.match(/^(\d+)\s+(\d+)\s*\/\s*(\d+)$/)
-    if (m) return Number(m[1]) + Number(m[2]) / Number(m[3])
-    m = s.match(/^(\d+)\s*\/\s*(\d+)$/)
+    s = String(s)
+        .trim()
+        .replace('−', '-') // typographic minus
+        .replace(/^\$/, '')
+        .replace(/(\d),(\d{3})(?!\d)/g, '$1$2') // thousands separator
+        .replace(',', '.')
+    let m = s.match(/^(-?)(\d+)\s+(\d+)\s*\/\s*(\d+)$/)
+    if (m) return (m[1] ? -1 : 1) * (Number(m[2]) + Number(m[3]) / Number(m[4]))
+    m = s.match(/^(-?\d+)\s*\/\s*(\d+)$/)
     if (m) return Number(m[1]) / Number(m[2])
     return s === '' ? NaN : Number(s)
 }
 
 const letters = (v) => String(v || '').toUpperCase().replace(/[^A-D]/g, '')
 
+// graph questions: how many points the student still has to place (a question may give one point for free)
+const same = (a, b) => a[0] === b[0] && a[1] === b[1]
+const ptText = (p) => `(${p[0]}, ${p[1]})`
+const plotNeed = (q) => 2 - (q.given || []).length
+
 const filled = (q, v) => {
     if (!v) return false
+    if (q.type === 'plot') return Array.isArray(v) && v.length === plotNeed(q)
     if (q.type === 'between') return !!(v[0] && v[1])
     if (q.type === 'check')
         return v[0] === 'Correct' || (v[0] === 'Incorrect' && String(v[1] || '').trim() !== '')
@@ -92,18 +105,36 @@ function grade(q, v) {
             return letters(v) === q.a
         case 'check':
             return !!v && v[0] === q.a && (q.a === 'Correct' || Math.abs(toNumber(v[1]) - q.fix) <= 0.001)
+        case 'plot': {
+            // q.line = two points on the target line.
+            // Default: ANY two different points on that line are accepted.
+            // q.exact = true: the student must plot exactly the two points in q.line.
+            if (!filled(q, v)) return false
+            const pts = [...(q.given || []), ...v]
+            if (same(pts[0], pts[1])) return false
+            if (q.exact) return q.line.every((t) => pts.some((p) => same(p, t)))
+            const [a, b] = q.line
+            return pts.every(
+                (p) => Math.abs((b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0])) < 1e-6
+            )
+        }
         default: // tf, cmp, pick
             return v === q.a
     }
 }
 
 const showAnswer = (q, v) => {
+    if (q.type === 'plot') return [...(q.given || []), ...v].map(ptText).join(' and ')
     if (q.type === 'between') return v.join(' and ')
     if (q.type === 'order') return letters(v).split('').join(', ')
     if (q.type === 'check') return v[0] === 'Correct' ? 'Correct' : `Incorrect, should be ${v[1]}`
     return fracTex(String(v))
 }
 const showCorrect = (q) => {
+    if (q.type === 'plot')
+        return q.exact
+            ? q.line.map(ptText).join(' and ')
+            : `Any two points on the line through ${q.line.map(ptText).join(' and ')}`
     if (q.type === 'between') return q.a.join(' and ')
     if (q.type === 'order') return q.a.split('').join(', ')
     if (q.type === 'check') return q.a === 'Correct' ? 'Correct' : `Incorrect, should be ${q.fix}`
@@ -155,6 +186,125 @@ function triangle(t) {
     )
 }
 
+/* ---------- coordinate grid (graph questions) ---------- */
+
+// Default grid is -6..6 on both axes. A question can override any of this with q.grid, e.g.
+// { xmin: 0, xmax: 10, ymin: 0, ymax: 30000, ystep: 2500, xlabel: 'Years', ylabel: 'Value ($)' }
+// Every grid line is a spot the student can click, so points must sit on a multiple of xstep / ystep.
+const GRID = { xmin: -6, xmax: 6, ymin: -6, ymax: 6, xstep: 1, ystep: 1 }
+
+// Geometry shared by drawing and click-snapping. spec = anything with an optional .grid
+function graphGeom(spec) {
+    const g = { ...GRID, ...(spec.grid || {}) }
+    const W = 380
+    const H = 368
+    const PL = 56 // room for y labels
+    const PR = 16
+    const PT = 16
+    const PB = 44 // room for x labels
+    const PW = W - PL - PR
+    const PH = H - PT - PB
+    const xc = Math.round((g.xmax - g.xmin) / g.xstep) // number of cells across
+    const yc = Math.round((g.ymax - g.ymin) / g.ystep)
+    const X = (v) => PL + ((v - g.xmin) / (g.xmax - g.xmin)) * PW
+    const Y = (v) => PT + PH - ((v - g.ymin) / (g.ymax - g.ymin)) * PH
+    // svg pixel -> nearest grid intersection (null if the click was outside the grid)
+    const snap = (px, py) => {
+        if (px < PL - 12 || px > PL + PW + 12 || py < PT - 12 || py > PT + PH + 12) return null
+        const cx = Math.min(xc, Math.max(0, Math.round(((px - PL) / PW) * xc)))
+        const cy = Math.min(yc, Math.max(0, Math.round(((PT + PH - py) / PH) * yc)))
+        return [Number((g.xmin + cx * g.xstep).toFixed(6)), Number((g.ymin + cy * g.ystep).toFixed(6))]
+    }
+    return { g, W, H, PL, PT, PW, PH, xc, yc, X, Y, snap }
+}
+
+// Extends the line through point p with direction d until it leaves the grid box b (Liang-Barsky clipping)
+function clipLine(p, d, b) {
+    let t0 = -Infinity
+    let t1 = Infinity
+    const axis = (p0, dd, lo, hi) => {
+        if (dd === 0) return p0 >= lo && p0 <= hi
+        let a = (lo - p0) / dd
+        let c = (hi - p0) / dd
+        if (a > c) [a, c] = [c, a]
+        t0 = Math.max(t0, a)
+        t1 = Math.min(t1, c)
+        return t0 <= t1
+    }
+    if (!axis(p[0], d[0], b.xmin, b.xmax) || !axis(p[1], d[1], b.ymin, b.ymax)) return null
+    return [[p[0] + t0 * d[0], p[1] + t0 * d[1]], [p[0] + t1 * d[0], p[1] + t1 * d[1]]]
+}
+
+// o = {
+//   given: points drawn hollow (locked),
+//   pts:   the student's points (filled),
+//   line:  [p1, p2], line drawn solid through two points, extended to the edges of the grid,
+//   key:   [p1, p2], correct line drawn dashed (results + downloads only)
+// }
+function graphSvg(spec, o = {}) {
+    const { g, W, H, PL, PT, PW, PH, xc, yc, X, Y } = graphGeom(spec)
+    const n = (v) => String(Number(v.toFixed(6)))
+    const sx = Math.ceil((xc + 1) / 13) // label every n-th grid line so long axes stay readable
+    const sy = Math.ceil((yc + 1) / 13)
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Coordinate grid">`
+
+    for (let i = 0; i <= xc; i++) {
+        const v = g.xmin + i * g.xstep
+        const px = X(v).toFixed(1)
+        s += `<line x1="${px}" x2="${px}" y1="${PT}" y2="${PT + PH}" stroke="currentColor" stroke-opacity=".18"/>`
+        if (i % sx === 0) s += `<text x="${px}" y="${PT + PH + 16}" text-anchor="middle" font-size="12" fill="currentColor">${n(v)}</text>`
+    }
+    for (let i = 0; i <= yc; i++) {
+        const v = g.ymin + i * g.ystep
+        const py = Y(v).toFixed(1)
+        s += `<line x1="${PL}" x2="${PL + PW}" y1="${py}" y2="${py}" stroke="currentColor" stroke-opacity=".18"/>`
+        if (i % sy === 0) s += `<text x="${PL - 8}" y="${(Y(v) + 4).toFixed(1)}" text-anchor="end" font-size="12" fill="currentColor">${n(v)}</text>`
+    }
+    // axes (only drawn when 0 is inside the grid) and a frame
+    if (g.xmin <= 0 && g.xmax >= 0) s += `<line x1="${X(0).toFixed(1)}" x2="${X(0).toFixed(1)}" y1="${PT}" y2="${PT + PH}" stroke="currentColor" stroke-width="2"/>`
+    if (g.ymin <= 0 && g.ymax >= 0) s += `<line x1="${PL}" x2="${PL + PW}" y1="${Y(0).toFixed(1)}" y2="${Y(0).toFixed(1)}" stroke="currentColor" stroke-width="2"/>`
+    s += `<rect x="${PL}" y="${PT}" width="${PW}" height="${PH}" fill="none" stroke="currentColor" stroke-opacity=".5"/>`
+    if (g.xlabel) s += `<text x="${PL + PW / 2}" y="${H - 6}" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">${esc(g.xlabel)}</text>`
+    if (g.ylabel) s += `<text x="12" y="${PT + PH / 2}" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor" transform="rotate(-90 12 ${PT + PH / 2})">${esc(g.ylabel)}</text>`
+
+    const line = (pair, dashed) => {
+        if (!pair || pair.length < 2 || same(pair[0], pair[1])) return ''
+        const c = clipLine(pair[0], [pair[1][0] - pair[0][0], pair[1][1] - pair[0][1]], g)
+        if (!c) return ''
+        return `<line x1="${X(c[0][0]).toFixed(1)}" y1="${Y(c[0][1]).toFixed(1)}" x2="${X(c[1][0]).toFixed(1)}" y2="${Y(c[1][1]).toFixed(1)}" stroke-linecap="round" ${dashed
+            ? 'stroke="currentColor" stroke-width="2" stroke-dasharray="7 5"'
+            : 'stroke-width="3" style="stroke:var(--hgt-ac,#0b7a8c)"'}/>`
+    }
+    const dot = (p, hollow) => {
+        const px = X(p[0])
+        const py = Y(p[1])
+        const right = px > W - 90
+        return (
+            `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${hollow ? 5 : 6}" ` +
+            (hollow ? 'fill="none" stroke-width="2.5" style="stroke:var(--hgt-ac,#0b7a8c)"' : 'style="fill:var(--hgt-ac,#0b7a8c)"') +
+            '/>' +
+            `<text x="${(right ? px - 9 : px + 9).toFixed(1)}" y="${Math.max(PT + 12, py - 9).toFixed(1)}" text-anchor="${right ? 'end' : 'start'}" font-size="12" font-weight="700" fill="currentColor">${ptText(p.map((v) => Number(v.toFixed(6))))}</text>`
+        )
+    }
+
+    s += line(o.key, true) + line(o.line, false)
+        ; (o.given || []).forEach((p) => (s += dot(p, true)))
+        ; (o.pts || []).forEach((p) => (s += dot(p, false)))
+    return s + '</svg>'
+}
+
+// the interactive plot figure: given points + student's points, with the line drawn once two points exist
+const plotSvg = (q, v, reveal) => {
+    const given = q.given || []
+    const pts = Array.isArray(v) ? v : []
+    const both = [...given, ...pts]
+    return graphSvg(q, { given, pts, line: both.length === 2 ? both : null, key: reveal ? q.line : null })
+}
+
+// a read-only graph for "find the slope / intercept of this line" questions
+// q.graph = { grid?, pts: [[x, y], ...] (points marked on the line), line: [p1, p2] }
+const staticSvg = (q) => graphSvg(q.graph, { given: q.graph.pts, line: q.graph.line })
+
 /* ---------- downloads ---------- */
 
 function buildDownload(Q, hw, res) {
@@ -163,6 +313,7 @@ function buildDownload(Q, hw, res) {
         const blank = {
             num: '______', frac: '______', est: '______', between: '____ and ____', cmp: '____',
             pick: '____', order: '__________', tf: 'Yes / No', check: 'Correct / Incorrect: ______',
+            plot: 'Plot on the grid below',
         }[q.type]
         const answerLine = r
             ? `Your answer: ${esc(filled(q, r.v) ? plain(showAnswer(q, r.v)) : '(blank)')} &nbsp; <b>${r.ok ? '✓ Correct' : '✗ Correct answer: ' + esc(plain(showCorrect(q)))
@@ -175,7 +326,10 @@ function buildDownload(Q, hw, res) {
         const why = r && q.why ? `<p><i>${esc(plain(q.why))}</i></p>` : ''
         const fig = q.tri ? `<div class="fig">${triangle(q.tri)}</div>` : ''
         const nl = q.nl && (q.type === 'pick' || res) ? `<div class="fig">${numberLine(q.nl.min, q.nl.max, q.nl.pts)}</div>` : ''
-        return `<div class="q"><b>${i + 1}.</b> ${esc(plain(q.q))}${items}${fig}${nl}<p>${answerLine}</p>${note}${why}</div>`
+        const graph = q.type === 'plot'
+            ? `<div class="fig">${plotSvg(q, r ? r.v : null, !!r)}</div>`
+            : q.graph ? `<div class="fig">${staticSvg(q)}</div>` : ''
+        return `<div class="q"><b>${i + 1}.</b> ${esc(plain(q.q))}${items}${fig}${nl}${graph}<p>${answerLine}</p>${note}${why}</div>`
     }).join('')
     const top = res
         ? `<p><b>Score: ${res.filter((r) => r.ok).length} / ${Q.length}</b></p>`
@@ -217,10 +371,57 @@ const OPTIONS = {
     check: ['Correct', 'Incorrect'],
 }
 
+// Click the grid to place points (they snap to the nearest grid intersection).
+// Once there are two points (given + placed) a line is drawn through them.
+// Click a placed point to remove it. If the student clicks a third spot, the oldest placed point is replaced.
+// The answer stored for the question is just the array of points the student placed, e.g. [[0, -3], [2, 5]]
+function GraphField({ q, value, onChange }) {
+    const need = plotNeed(q)
+    const pts = Array.isArray(value) ? value : []
+    const geom = graphGeom(q)
+
+    const place = (e) => {
+        const box = e.currentTarget.querySelector('svg').getBoundingClientRect()
+        const p = geom.snap(
+            ((e.clientX - box.left) / box.width) * geom.W,
+            ((e.clientY - box.top) / box.height) * geom.H
+        )
+        if (!p || (q.given || []).some((g) => same(g, p))) return
+        const hit = pts.findIndex((x) => same(x, p))
+        onChange(hit >= 0 ? pts.filter((_, j) => j !== hit) : [...pts, p].slice(-need))
+    }
+
+    const left = need - pts.length
+    return (
+        <div>
+            <div
+                className="hgt-graph hgt-click"
+                role="group"
+                aria-label="Coordinate grid. Click to place points."
+                onClick={place}
+                dangerouslySetInnerHTML={{ __html: plotSvg(q, pts, false) }}
+            />
+            <p className="hgt-sub">
+                {left > 0
+                    ? `Click the grid to place ${left} more point${left > 1 ? 's' : ''}.`
+                    : 'Line drawn. Click a point to remove it, or click another spot to replace the oldest point.'}
+                {pts.length > 0 && <> Your points: {pts.map(ptText).join(', ')}</>}
+            </p>
+            {pts.length > 0 && (
+                <button type="button" className="hgt-alt" onClick={() => onChange([])}>
+                    Clear points
+                </button>
+            )}
+        </div>
+    )
+}
+
 function Field({ q, value, onChange }) {
     const { type } = q
     // Multiple-choice questions use the "order" type with a one-letter answer
     const singleLetter = type === 'order' && String(q.a).length === 1
+
+    if (type === 'plot') return <GraphField q={q} value={value} onChange={onChange} />
 
     if (type === 'between') {
         const v = value || ['', '']
@@ -361,6 +562,9 @@ const Worksheet = ({ homework, onExit }) => {
                             {q.why && <p className="hgt-res hgt-mut"><Tex text={q.why} /></p>}
                             {q.tri && <Figure className="hgt-fig" svg={triangle(q.tri)} />}
                             {q.nl && (q.rev || q.type === 'pick') && <Figure className="hgt-nl" svg={numberLine(q.nl.min, q.nl.max, q.nl.pts)} />}
+                            {q.graph && <Figure className="hgt-graph" svg={staticSvg(q)} />}
+                            {/* student's line is solid, the correct line is dashed */}
+                            {q.type === 'plot' && <Figure className="hgt-graph" svg={plotSvg(q, v, true)} />}
                         </div>
                     ))}
                 </div>
@@ -383,6 +587,7 @@ const Worksheet = ({ homework, onExit }) => {
                     <div key={i} className={`hgt-q${q.full ? ' hgt-full' : ''}`}>
                         <p className="hgt-text"><span className="hgt-n">{i + 1}.</span><Tex text={q.q} /></p>
                         <Items q={q} />
+                        {q.graph && <Figure className="hgt-graph" svg={staticSvg(q)} />}
                         <Field q={q} value={answers[i]} onChange={(v) => setAnswer(i, v)} />
                         {q.note && (
                             <input
@@ -394,7 +599,7 @@ const Worksheet = ({ homework, onExit }) => {
                             />
                         )}
                         {q.tri && <Figure className="hgt-fig" svg={triangle(q.tri)} />}
-                        {q.type === 'pick' && <Figure className="hgt-nl" svg={numberLine(q.nl.min, q.nl.max, q.nl.pts)} />}
+                        {q.type === 'pick' && q.nl && <Figure className="hgt-nl" svg={numberLine(q.nl.min, q.nl.max, q.nl.pts)} />}
                     </div>
                 ))}
             </div>
