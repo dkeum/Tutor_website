@@ -246,7 +246,8 @@ function graphSvg(spec, o = {}) {
     const n = (v) => String(Number(v.toFixed(6)))
     const sx = Math.ceil((xc + 1) / 13) // label every n-th grid line so long axes stay readable
     const sy = Math.ceil((yc + 1) / 13)
-    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Coordinate grid">`
+    // inline sizing so the graph shows even if .hgt-graph has no CSS yet
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="display:block;width:100%;max-width:${W}px;height:auto" role="img" aria-label="Coordinate grid">`
 
     for (let i = 0; i <= xc; i++) {
         const v = g.xmin + i * g.xstep

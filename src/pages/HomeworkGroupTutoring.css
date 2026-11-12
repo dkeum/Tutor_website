@@ -211,3 +211,17 @@
 .hgt-msg {
   color: var(--hgt-mut);
 }
+
+.hgt-graph {
+  max-width: 380px;
+}
+
+.hgt-graph svg {
+  width: 100%;
+  height: auto;
+}
+
+.hgt-click {
+  cursor: crosshair;
+  touch-action: manipulation;
+}
