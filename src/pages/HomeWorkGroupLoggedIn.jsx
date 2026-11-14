@@ -12,7 +12,7 @@ const API_BASE =
         : 'https://mathamagic-backend.vercel.app'
 
 // GRADE 8: 
-// CODES: FRAC8, FDP8, DECOPS8
+// CODES: FRAC8, FDP8, DECOPS8, GEOM8
 
 
 // GRADE 9 
@@ -57,6 +57,10 @@ const plain = (t) =>
         .replace(/\\dfrac\{([^}]*)\}\{([^}]*)\}/g, '($1/$2)')
         .replace(/\\sqrt\{([^}]*)\}/g, '√($1)')
         .replace(/\\approx/g, '≈')
+        .replace(/\\text\{([^}]*)\}/g, '$1')
+        .replace(/\\pi/g, 'π')
+        .replace(/\\times/g, '×')
+        .replace(/\^2/g, '²')
         .replace(/\$/g, '')
 
 const esc = (s) =>
@@ -306,6 +310,164 @@ const plotSvg = (q, v, reveal) => {
 // q.graph = { grid?, pts: [[x, y], ...] (points marked on the line), line: [p1, p2] }
 const staticSvg = (q) => graphSvg(q.graph, { given: q.graph.pts, line: q.graph.line })
 
+/* ---------- geometry diagrams: prisms, parallelogram, triangle, circle ---------- */
+
+// A question opts in with q.shape = { kind, ...sizes, labels }
+//   rprism        { l, w, h, labels: { l, w, h } }                 rectangular prism
+//   tprism        { b, h, len, right?, labels: { b, h, s, l } }    triangular prism (right: true = right-angle ends)
+//   parallelogram { b, h, labels: { b, h, s } }
+//   triangle      { b, h, apex?, labels: { b, h } }                apex 0 = right triangle, default 0.4
+//   circle        { show?: 'r' | 'd', labels: { r, d } }
+// The numbers only set the proportions of the drawing. The text students read comes from labels,
+// so use '?' for an unknown side, e.g. labels: { h: '? cm' }.
+
+const FIG_W = 300
+const FIG_H = 200
+
+const fx = (n) => Number(n).toFixed(1)
+const ftext = (t, x, y, anchor = 'middle') =>
+    t ? `<text x="${fx(x)}" y="${fx(y)}" text-anchor="${anchor}" font-size="14" fill="currentColor">${esc(t)}</text>` : ''
+const fseg = (a, b, dashed) =>
+    `<line x1="${fx(a[0])}" y1="${fx(a[1])}" x2="${fx(b[0])}" y2="${fx(b[1])}" stroke="currentColor" stroke-width="2"${dashed ? ' stroke-dasharray="5 4" stroke-opacity=".7"' : ''}/>`
+const fpoly = (pts, op) =>
+    `<polygon points="${pts.map((p) => fx(p[0]) + ',' + fx(p[1])).join(' ')}" fill-opacity="${op}" style="fill:var(--hgt-ac,#0b7a8c)" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>`
+// small right-angle square at corner p; sx and sy are +1 or -1 and point into the shape
+const fsquare = (p, sx, sy) =>
+    `<path d="M${fx(p[0] + sx * 9)} ${fx(p[1])}L${fx(p[0] + sx * 9)} ${fx(p[1] + sy * 9)}L${fx(p[0])} ${fx(p[1] + sy * 9)}" fill="none" stroke="currentColor"/>`
+
+function rPrismFig(s) {
+    const L = s.labels || {}
+    const m = Math.max(s.l, s.w, s.h)
+    const fw = 50 + 100 * (s.l / m)
+    const fh = 30 + 70 * (s.h / m)
+    const dx = 18 + 30 * (s.w / m)
+    const dy = dx * 0.6
+    const x0 = 46
+    const y0 = FIG_H - 30
+    const A = [x0, y0]
+    const B = [x0 + fw, y0]
+    const C = [x0 + fw, y0 - fh]
+    const D = [x0, y0 - fh]
+    const o = (p) => [p[0] + dx, p[1] - dy]
+    const A2 = o(A)
+    const B2 = o(B)
+    const C2 = o(C)
+    const D2 = o(D)
+    return (
+        fpoly([D, C, C2, D2], 0.08) + fpoly([B, B2, C2, C], 0.22) + fpoly([A, B, C, D], 0.12) +
+        fseg(A, A2, true) + fseg(A2, B2, true) + fseg(A2, D2, true) + // hidden edges
+        ftext(L.l, x0 + fw / 2, y0 + 18) +
+        ftext(L.h, x0 - 8, y0 - fh / 2 + 5, 'end') +
+        ftext(L.w, B[0] + dx / 2 + 8, B[1] - dy / 2 + 16, 'start')
+    )
+}
+
+function tPrismFig(s) {
+    const L = s.labels || {}
+    const m = Math.max(s.b, s.h)
+    const bw = 70 + 70 * (s.b / m)
+    const th = 45 + 40 * (s.h / m)
+    const dx = 24 + 24 * (s.len / Math.max(s.len, s.b, s.h))
+    const dy = dx * 0.5
+    const x0 = 46
+    const y0 = FIG_H - 34
+    const P = [x0, y0]
+    const Q = [x0 + bw, y0]
+    const T = [x0 + (s.right ? 0 : bw / 2), y0 - th]
+    const o = (p) => [p[0] + dx, p[1] - dy]
+    const P2 = o(P)
+    const Q2 = o(Q)
+    const T2 = o(T)
+    const faceMid = [(T[0] + Q[0]) / 2 + dx / 2, (T[1] + Q[1]) / 2 - dy / 2]
+    let g =
+        fpoly([T, Q, Q2, T2], 0.22) + fpoly([P, Q, T], 0.12) +
+        fseg(P, P2, true) + fseg(P2, Q2, true) + fseg(P2, T2, true) // hidden edges
+    if (s.right) {
+        g += fsquare(P, 1, -1) + ftext(L.h, x0 - 8, y0 - th / 2 + 5, 'end')
+    } else {
+        g += fseg(T, [T[0], y0], true) + fsquare([T[0], y0], 1, -1) + ftext(L.h, T[0] + 6, y0 - th / 2 + 5, 'start')
+    }
+    return (
+        g +
+        ftext(L.b, x0 + bw / 2, y0 + 18) +
+        ftext(L.s, faceMid[0], faceMid[1] + 5) +
+        ftext(L.l, (Q[0] + Q2[0]) / 2 + 8, (Q[1] + Q2[1]) / 2 + 16, 'start')
+    )
+}
+
+function parallelogramFig(s) {
+    const L = s.labels || {}
+    const bw = 140
+    const ph = Math.max(55, Math.min(95, bw * (s.h / s.b)))
+    const skew = 40
+    const x0 = 40
+    const y0 = FIG_H - 40
+    const P1 = [x0, y0]
+    const P2 = [x0 + bw, y0]
+    const P3 = [x0 + bw + skew, y0 - ph]
+    const P4 = [x0 + skew, y0 - ph]
+    return (
+        fpoly([P1, P2, P3, P4], 0.15) +
+        fseg(P4, [P4[0], y0], true) + fsquare([P4[0], y0], 1, -1) +
+        ftext(L.b, x0 + bw / 2, y0 + 20) +
+        ftext(L.h, P4[0] + 6, y0 - ph / 2 + 5, 'start') +
+        ftext(L.s, (P2[0] + P3[0]) / 2 + 10, (P2[1] + P3[1]) / 2 + 5, 'start')
+    )
+}
+
+// named areaTriangleFig because triangle() above already draws the right triangle used in other worksheets
+function areaTriangleFig(s) {
+    const L = s.labels || {}
+    const apex = s.apex === undefined ? 0.4 : s.apex
+    const bw = 150
+    const th = Math.max(60, Math.min(100, bw * (s.h / s.b)))
+    const x0 = 50
+    const y0 = FIG_H - 40
+    const P = [x0, y0]
+    const Q = [x0 + bw, y0]
+    const T = [x0 + bw * apex, y0 - th]
+    let g = fpoly([P, Q, T], 0.15)
+    if (apex > 0 && apex < 1) {
+        const left = apex > 0.5
+        g += fseg(T, [T[0], y0], true) + fsquare([T[0], y0], left ? -1 : 1, -1) +
+            ftext(L.h, T[0] + (left ? -6 : 6), y0 - th / 2 + 5, left ? 'end' : 'start')
+    } else {
+        const atLeft = apex === 0
+        g += fsquare(atLeft ? P : Q, atLeft ? 1 : -1, -1) +
+            ftext(L.h, atLeft ? x0 - 8 : x0 + bw + 8, y0 - th / 2 + 5, atLeft ? 'end' : 'start')
+    }
+    return g + ftext(L.b, x0 + bw / 2, y0 + 20)
+}
+
+function circleFig(s) {
+    const L = s.labels || {}
+    const cx = FIG_W / 2
+    const cy = FIG_H / 2
+    const r = 72
+    const showD = s.show === 'd'
+    const a = showD ? [cx - r, cy] : [cx, cy]
+    const b = [cx + r, cy]
+    return (
+        `<circle cx="${cx}" cy="${cy}" r="${r}" fill-opacity="0.15" style="fill:var(--hgt-ac,#0b7a8c)" stroke="currentColor" stroke-width="2"/>` +
+        fseg(a, b) +
+        `<circle cx="${cx}" cy="${cy}" r="3.5" fill="currentColor"/>` +
+        ftext(showD ? L.d : L.r, (a[0] + b[0]) / 2, cy - 8)
+    )
+}
+
+const FIGS = {
+    rprism: rPrismFig,
+    tprism: tPrismFig,
+    parallelogram: parallelogramFig,
+    triangle: areaTriangleFig,
+    circle: circleFig,
+}
+
+const shapeSvg = (s) =>
+    FIGS[s.kind]
+        ? `<svg viewBox="0 0 ${FIG_W} ${FIG_H}" width="${FIG_W}" height="${FIG_H}" style="display:block;width:100%;max-width:${FIG_W}px;height:auto" role="img" aria-label="${esc(s.kind)} diagram">${FIGS[s.kind](s)}</svg>`
+        : ''
+
 /* ---------- downloads ---------- */
 
 function buildDownload(Q, hw, res) {
@@ -330,7 +492,8 @@ function buildDownload(Q, hw, res) {
         const graph = q.type === 'plot'
             ? `<div class="fig">${plotSvg(q, r ? r.v : null, !!r)}</div>`
             : q.graph ? `<div class="fig">${staticSvg(q)}</div>` : ''
-        return `<div class="q"><b>${i + 1}.</b> ${esc(plain(q.q))}${items}${fig}${nl}${graph}<p>${answerLine}</p>${note}${why}</div>`
+        const shape = q.shape ? `<div class="fig">${shapeSvg(q.shape)}</div>` : ''
+        return `<div class="q"><b>${i + 1}.</b> ${esc(plain(q.q))}${items}${fig}${nl}${graph}${shape}<p>${answerLine}</p>${note}${why}</div>`
     }).join('')
     const top = res
         ? `<p><b>Score: ${res.filter((r) => r.ok).length} / ${Q.length}</b></p>`
@@ -564,6 +727,7 @@ const Worksheet = ({ homework, onExit }) => {
                             {q.tri && <Figure className="hgt-fig" svg={triangle(q.tri)} />}
                             {q.nl && (q.rev || q.type === 'pick') && <Figure className="hgt-nl" svg={numberLine(q.nl.min, q.nl.max, q.nl.pts)} />}
                             {q.graph && <Figure className="hgt-graph" svg={staticSvg(q)} />}
+                            {q.shape && <Figure className="hgt-fig" svg={shapeSvg(q.shape)} />}
                             {/* student's line is solid, the correct line is dashed */}
                             {q.type === 'plot' && <Figure className="hgt-graph" svg={plotSvg(q, v, true)} />}
                         </div>
@@ -589,6 +753,7 @@ const Worksheet = ({ homework, onExit }) => {
                         <p className="hgt-text"><span className="hgt-n">{i + 1}.</span><Tex text={q.q} /></p>
                         <Items q={q} />
                         {q.graph && <Figure className="hgt-graph" svg={staticSvg(q)} />}
+                        {q.shape && <Figure className="hgt-fig" svg={shapeSvg(q.shape)} />}
                         <Field q={q} value={answers[i]} onChange={(v) => setAnswer(i, v)} />
                         {q.note && (
                             <input
