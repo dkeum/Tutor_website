@@ -10,7 +10,7 @@ const API_BASE =
         ? "http://localhost:3000"
         : "https://mathamagic-backend.vercel.app";
 
-const HOMEWORK_ROUTE = "/homework"; // adjust to wherever the enter-a-code page lives
+const HOMEWORK_ROUTE = "/homework/logged-in"; // adjust to wherever the enter-a-code page lives
 const PURPLE_SHADOW_THEME = "0 8px 24px rgba(93, 63, 211, 0.12)";
 const HEADING_FONT = { fontFamily: "'Plus Jakarta Sans', sans-serif" };
 
@@ -498,8 +498,8 @@ const HomeWorkGroupLoggedInPerformance = () => {
                                                         key={h.access_code}
                                                         onClick={() => setCodeFilter(active ? null : h.access_code)}
                                                         className={`text-left p-4 rounded-2xl border transition-all cursor-pointer ${active
-                                                                ? "border-purple-300 ring-2 ring-purple-100"
-                                                                : "border-gray-100 hover:border-purple-200"
+                                                            ? "border-purple-300 ring-2 ring-purple-100"
+                                                            : "border-gray-100 hover:border-purple-200"
                                                             }`}
                                                     >
                                                         <div className="flex items-center justify-between gap-2 mb-1">
