@@ -12,7 +12,7 @@ const API_BASE =
         : 'https://mathamagic-backend.vercel.app'
 
 // GRADE 8: 
-// CODES: FRAC8, FDP8, DECOPS8, GEOM8
+// CODES: FRAC8, FDP8, DECOPS8, GEOM8, GEOM8B
 
 
 // GRADE 9 
@@ -318,6 +318,7 @@ const staticSvg = (q) => graphSvg(q.graph, { given: q.graph.pts, line: q.graph.l
 //   parallelogram { b, h, labels: { b, h, s } }
 //   triangle      { b, h, apex?, labels: { b, h } }                apex 0 = right triangle, default 0.4
 //   circle        { show?: 'r' | 'd', labels: { r, d } }
+//   cylinder      { r, h, show?: 'r' | 'd', labels: { r, d, h } }   (r and h only set the proportions)
 // The numbers only set the proportions of the drawing. The text students read comes from labels,
 // so use '?' for an unknown side, e.g. labels: { h: '? cm' }.
 
@@ -455,12 +456,35 @@ function circleFig(s) {
     )
 }
 
+function cylinderFig(s) {
+    const L = s.labels || {}
+    const rx = 55
+    const ry = 16
+    const cx = 110
+    const bodyH = Math.max(55, Math.min(105, 2 * rx * (s.h / (2 * s.r))))
+    const topY = 52
+    const botY = topY + bodyH
+    const showD = s.show === 'd'
+    const a = showD ? [cx - rx, topY] : [cx, topY]
+    const b = [cx + rx, topY]
+    return (
+        `<path d="M${cx - rx} ${topY}V${botY}A${rx} ${ry} 0 0 0 ${cx + rx} ${botY}V${topY}" fill-opacity=".15" style="fill:var(--hgt-ac,#0b7a8c)" stroke="currentColor" stroke-width="2"/>` +
+        `<ellipse cx="${cx}" cy="${topY}" rx="${rx}" ry="${ry}" fill-opacity=".08" style="fill:var(--hgt-ac,#0b7a8c)" stroke="currentColor" stroke-width="2"/>` +
+        `<path d="M${cx - rx} ${botY}A${rx} ${ry} 0 0 1 ${cx + rx} ${botY}" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="5 4" stroke-opacity=".7"/>` +
+        fseg(a, b) +
+        `<circle cx="${cx}" cy="${topY}" r="3" fill="currentColor"/>` +
+        ftext(showD ? L.d : L.r, (a[0] + b[0]) / 2, topY - ry - 6) +
+        ftext(L.h, cx + rx + 10, topY + bodyH / 2 + 5, 'start')
+    )
+}
+
 const FIGS = {
     rprism: rPrismFig,
     tprism: tPrismFig,
     parallelogram: parallelogramFig,
     triangle: areaTriangleFig,
     circle: circleFig,
+    cylinder: cylinderFig,
 }
 
 const shapeSvg = (s) =>
@@ -654,6 +678,7 @@ const Worksheet = ({ homework, onExit }) => {
     const [notes, setNotes] = useState({})
     const [results, setResults] = useState(null)
     const [saveStatus, setSaveStatus] = useState('idle') // idle | saving | saved | error
+    const [saveError, setSaveError] = useState('') // reason from the server, shown when saving fails
 
     const setAnswer = (i, v) => setAnswers((a) => ({ ...a, [i]: v }))
     const setNote = (i, v) => setNotes((n) => ({ ...n, [i]: v }))
@@ -665,6 +690,7 @@ const Worksheet = ({ homework, onExit }) => {
         window.scrollTo(0, 0)
 
         setSaveStatus('saving')
+        setSaveError('')
         axios
             .post(
                 `${API_BASE}/worksheet/submit-marks`,
@@ -677,6 +703,7 @@ const Worksheet = ({ homework, onExit }) => {
             .then(() => setSaveStatus('saved'))
             .catch((err) => {
                 console.error('Error saving worksheet score:', err)
+                setSaveError(err.response?.data?.error || err.message || '')
                 setSaveStatus('error')
             })
     }
@@ -685,6 +712,7 @@ const Worksheet = ({ homework, onExit }) => {
         setNotes({})
         setResults(null)
         setSaveStatus('idle')
+        setSaveError('')
         window.scrollTo(0, 0)
     }
 
@@ -704,7 +732,7 @@ const Worksheet = ({ homework, onExit }) => {
                     <p className="hgt-sub">
                         {saveStatus === 'saving' && 'Saving your score…'}
                         {saveStatus === 'saved' && 'Score saved'}
-                        {saveStatus === 'error' && "Couldn't save your score"}
+                        {saveStatus === 'error' && `Couldn't save your score${saveError ? ` (${saveError})` : ''}`}
                     </p>
                 </div>
                 <div className="hgt-bar">
