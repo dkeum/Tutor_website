@@ -93,6 +93,8 @@ const DrillPerformance = lazy(() => import("./pages/DrillPerformance"))
 
 const HomeWorkGroupLoggedInPerformance = lazy(() => import("./pages/HomeWorkGroupLoggedInPerformance"))
 
+const TrackingLeads = lazy(() => import("./pages/TrackLeads"))
+
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
     <Loader2 className="animate-spin w-10 h-10 text-gray-600" />
@@ -117,7 +119,6 @@ createRoot(document.getElementById("root")).render(
               <Route path="/assessment-9" element={<Assessment />} />
               <Route path="/assessment-10" element={<AssessmentTen />} />
               <Route path="/program-offer" element={<ProgramOffer />} />
-
 
 
               <Route path="/" element={<App />} />
@@ -161,6 +162,18 @@ createRoot(document.getElementById("root")).render(
                   </ProtectedRoute>
                 }
               />
+
+
+              <Route
+                path="/track-leads"
+                element={
+                  <ProtectedRoute>
+                    <TrackingLeads />
+                  </ProtectedRoute>
+                }
+              />
+
+
               <Route path="/login" element={<Login />} />
               <Route
                 path="/track-improvement"
