@@ -1,14 +1,34 @@
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import { TOKEN } from "./HomeWorkSolveProblems";
+
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { X } from "lucide-react";
-import { supabase } from "../../db/supabaseclient";
+import { supabase } from "../db/supabaseclient";
 import { useDispatch } from "react-redux";
-import { setCredits } from "../../features/auth/personDetails";
+import { setCredits } from "../features/auth/personDetails";
+
+const TOKEN = {
+  primary: "#4441c4",
+  primaryContainer: "#5d5cde",
+  onPrimary: "#ffffff",
+  tertiary: "#632ecd",
+  tertiaryContainer: "#7c4ce6",
+  onTertiary: "#ffffff",
+  surface: "#f7f9fb",
+  surfaceContainerLow: "#f2f4f6",
+  surfaceContainer: "#eceef0",
+  surfaceContainerHigh: "#e6e8ea",
+  surfaceContainerHighest: "#e0e3e5",
+  onSurface: "#191c1e",
+  onSurfaceVariant: "#464554",
+  outlineVariant: "#c7c4d6",
+  outline: "#777585",
+  secondary: "#974800",
+  secondaryContainer: "#fc8f40",
+};
 
 const getBaseUrl = () =>
   import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
