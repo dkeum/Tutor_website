@@ -3,10 +3,8 @@ import React, { useEffect, useState } from "react";
 
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -14,7 +12,6 @@ import {
 
 import SolveProblems_stepbystep from "../solveProblems/SolveProblems_stepbystep";
 import { Loader2, X } from "lucide-react";
-import LoggedInLayout from "../LoggedInLayout";
 import MathQuestion from "../MathQuestion";
 import AISidebar from "./AISidebar";
 import DropDownTool from "../solveProblems/DropDownTool";
@@ -32,10 +29,17 @@ const getBaseUrl = () =>
 
 const STORAGE_BUCKET = "Mathmagick image attachments";
 
-// Upload a Blob/File to Supabase Storage and return its public URL + path (for later cleanup)
+const formatMultiPartText = (text = "") =>
+  String(text)
+    .replace(/\s+(?=\(?[a-e]\)\s)/gi, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
 const uploadImageToStorage = async (blob, userId, extHint = "jpeg") => {
   const fileExt = (blob.type && blob.type.split("/")[1]) || extHint;
-  const filePath = `${userId}/image-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+  const filePath = `${userId}/image-${Date.now()}-${Math.random()
+    .toString(36)
+    .substring(7)}.${fileExt}`;
 
   const { error: uploadError } = await supabase.storage
     .from(STORAGE_BUCKET)
@@ -46,18 +50,21 @@ const uploadImageToStorage = async (blob, userId, extHint = "jpeg") => {
     throw new Error("Failed to upload image.");
   }
 
-  const { data: publicUrlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filePath);
+  const { data: publicUrlData } = supabase.storage
+    .from(STORAGE_BUCKET)
+    .getPublicUrl(filePath);
 
   return { publicUrl: publicUrlData.publicUrl, filePath };
 };
 
 const deleteImageFromStorage = async (filePath) => {
   if (!filePath) return;
-  const { error } = await supabase.storage.from(STORAGE_BUCKET).remove([filePath]);
+  const { error } = await supabase.storage
+    .from(STORAGE_BUCKET)
+    .remove([filePath]);
   if (error) console.error("Failed to clean up temporary image:", error);
 };
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
 export const TOKEN = {
   primary: "#4441c4",
   primaryContainer: "#5d5cde",
@@ -119,7 +126,6 @@ export const styles = `
   }
 `;
 
-// ─── Main Component ───────────────────────────────────────────────────────────
 const HomeWorkSolveProblems = ({ file }) => {
   const dispatch = useDispatch();
 
@@ -147,21 +153,18 @@ const HomeWorkSolveProblems = ({ file }) => {
     });
   };
 
-  const fileToDataUrl = (file) =>
+  const fileToDataUrl = (targetFile) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
-
       reader.onload = () => resolve(reader.result);
       reader.onerror = reject;
-
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(targetFile);
     });
 
   useEffect(() => {
     if (!file) return;
 
     const readQuestionFromImage = async () => {
-      // Local dataURL is only used for the on-screen preview — never sent to the backend
       const localPreviewUrl = await fileToDataUrl(file);
 
       setIsReadingQuestion(true);
@@ -174,9 +177,14 @@ const HomeWorkSolveProblems = ({ file }) => {
           data: { session },
         } = await supabase.auth.getSession();
 
-        if (!session?.user) throw new Error("User must be logged in to read a question.");
+        if (!session?.user) {
+          throw new Error("User must be logged in to read a question.");
+        }
 
-        const { publicUrl, filePath } = await uploadImageToStorage(file, session.user.id);
+        const { publicUrl, filePath } = await uploadImageToStorage(
+          file,
+          session.user.id
+        );
         uploadedPath = filePath;
 
         const res = await axios.post(
@@ -196,7 +204,7 @@ const HomeWorkSolveProblems = ({ file }) => {
           }
         }
 
-        const questionText = (res.data?.question || "").trim();
+        const questionText = formatMultiPartText(res.data?.question || "");
 
         setCurrentQuestion({
           id: `homework-${Date.now()}`,
@@ -213,13 +221,11 @@ const HomeWorkSolveProblems = ({ file }) => {
     };
 
     readQuestionFromImage();
-
-    return () => {};
-  }, [file]);
+  }, [file, dispatch]);
 
   const handleNextOrSubmit_solvetab = async (
     studentAnswerText = "",
-    attachedImageUrl = null, // a local dataURL from the step tool (draw/graph/upload)
+    attachedImageUrl = null,
     isAlreadyCorrect = false
   ) => {
     let isCorrect = isAlreadyCorrect;
@@ -236,7 +242,9 @@ const HomeWorkSolveProblems = ({ file }) => {
             data: { session },
           } = await supabase.auth.getSession();
 
-          if (!session?.user) throw new Error("User must be logged in to verify an answer.");
+          if (!session?.user) {
+            throw new Error("User must be logged in to verify an answer.");
+          }
 
           let publicImageUrl = null;
           if (attachedImageUrl) {
@@ -270,7 +278,10 @@ const HomeWorkSolveProblems = ({ file }) => {
 
           isCorrect = !!res.data.is_correct;
         } catch (err) {
-          console.error("Answer verification failed:", err?.response?.data || err.message);
+          console.error(
+            "Answer verification failed:",
+            err?.response?.data || err.message
+          );
           isCorrect = false;
         } finally {
           if (uploadedPath) await deleteImageFromStorage(uploadedPath);
@@ -344,7 +355,7 @@ const HomeWorkSolveProblems = ({ file }) => {
                     isLastQuestion={true}
                     videoStreamUrl={null}
                     isVideoLoading={false}
-                    onGenerateVideo={() => {}}
+                    onGenerateVideo={() => { }}
                   />
                 </DialogContent>
               </Dialog>
@@ -352,9 +363,7 @@ const HomeWorkSolveProblems = ({ file }) => {
               <DropDownTool
                 activeTools={activeTools}
                 onToggleTool={toggleTool}
-                onOpenAIChat={() => {
-                  // if AISidebar exposes a ref/prop to scroll-into-view or focus its chat input, call it here
-                }}
+                onOpenAIChat={() => { }}
               />
             </div>
 
@@ -390,7 +399,7 @@ const HomeWorkSolveProblems = ({ file }) => {
                   display: "flex",
                   flexDirection: "column",
                   padding: "24px 24px 24px 32px",
-                  overflow: "hidden",
+                  overflow: "auto",
                 }}
               >
                 {isReadingQuestion ? (
@@ -415,15 +424,21 @@ const HomeWorkSolveProblems = ({ file }) => {
                       flex: 1,
                       display: "flex",
                       flexDirection: "column",
-                      overflow: "hidden",
                     }}
                   >
                     {readError && (
-                      <div style={{ fontSize: 12, color: "#ef4444", marginBottom: 10 }}>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: "#ef4444",
+                          marginBottom: 10,
+                        }}
+                      >
                         {readError}
                       </div>
                     )}
                     <div
+                      className="whitespace-pre-line"
                       style={{
                         fontSize: 16,
                         lineHeight: 1.65,
@@ -439,7 +454,12 @@ const HomeWorkSolveProblems = ({ file }) => {
                         src={currentQuestion.image_url}
                         alt="Uploaded question"
                         style={{
+                          width: "auto",
+                          height: "auto",
+                          maxWidth: "100%",
                           maxHeight: 260,
+                          objectFit: "contain",
+                          alignSelf: "flex-start",
                           marginTop: 16,
                           borderRadius: 10,
                           border: `1px solid ${TOKEN.outlineVariant}`,
@@ -495,7 +515,9 @@ const HomeWorkSolveProblems = ({ file }) => {
                         flexDirection: "column",
                         overflow: "hidden",
                         borderRight:
-                          activeTools.length > 1 ? `1px solid ${TOKEN.outlineVariant}` : "none",
+                          activeTools.length > 1
+                            ? `1px solid ${TOKEN.outlineVariant}`
+                            : "none",
                       }}
                     >
                       <div
@@ -511,7 +533,13 @@ const HomeWorkSolveProblems = ({ file }) => {
                           flexShrink: 0,
                         }}
                       >
-                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                          }}
+                        >
                           <ToolIcon size={14} />
                           {tool.label}
                         </span>
@@ -544,14 +572,22 @@ const HomeWorkSolveProblems = ({ file }) => {
               </div>
             )}
 
-            <div style={{ flex: activeTools.length > 0 ? "0 0 75%" : "1 1 auto", overflow: "hidden", minHeight: 0 }}>
+            <div
+              style={{
+                flex: activeTools.length > 0 ? "0 0 75%" : "1 1 auto",
+                overflow: "hidden",
+                minHeight: 0,
+              }}
+            >
               <AISidebar
                 currentQuestion={currentQuestion}
                 onOpenStepByStep={() => setIsDialogOpen(true)}
                 compact={activeTools.length > 0}
                 attachments={chatAttachments}
                 onRemoveAttachment={(indexToRemove) => {
-                  setChatAttachments((prev) => prev.filter((_, i) => i !== indexToRemove));
+                  setChatAttachments((prev) =>
+                    prev.filter((_, i) => i !== indexToRemove)
+                  );
                 }}
                 onClearAttachments={() => setChatAttachments([])}
               />

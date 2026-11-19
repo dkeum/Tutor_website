@@ -1,19 +1,27 @@
 import { useState, useRef, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import { TOKEN } from "../pages/SolveProblems";
+import { TOKEN } from "./HomeWorkSolveProblems";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { X } from "lucide-react";
-import { supabase } from "../db/supabaseclient";
-import { setCredits } from "../features/auth/personDetails";
+import { supabase } from "../../db/supabaseclient";
+import { useDispatch } from "react-redux";
+import { setCredits } from "../../features/auth/personDetails";
 
 const getBaseUrl = () =>
   import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
     ? "http://localhost:3000"
     : "https://mathamagic-backend.vercel.app";
+
+const STORAGE_BUCKET = "Mathmagick image attachments";
+
+const formatMultiPartText = (text = "") =>
+  String(text)
+    .replace(/\s+(?=\(?[a-e]\)\s)/gi, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 
 function AISidebar({
   topic,
@@ -31,7 +39,6 @@ function AISidebar({
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef(null);
-  const studentPlanType = useSelector((s) => s.personDetail?.plan_type);
 
   useEffect(() => {
     setMessages([
@@ -48,96 +55,118 @@ function AISidebar({
 
   const quickPrompts = ["Explain step-by-step", "Give me a hint"];
 
+  const uploadAttachmentsToStorage = async (dataUrls, userId) => {
+    const uploadedUrls = [];
+    const uploadedPaths = [];
+
+    for (const dataUrl of dataUrls) {
+      if (!dataUrl) continue;
+      if (dataUrl.startsWith("http://") || dataUrl.startsWith("https://")) {
+        uploadedUrls.push(dataUrl);
+        continue;
+      }
+
+      const blobResponse = await fetch(dataUrl);
+      const blob = await blobResponse.blob();
+      const fileExt = (blob.type && blob.type.split("/")[1]) || "jpeg";
+      const filePath = `${userId}/chat-${Date.now()}-${Math.random()
+        .toString(36)
+        .substring(7)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(filePath, blob, { contentType: blob.type || "image/jpeg" });
+
+      if (uploadError) {
+        console.error("Supabase attachment upload error:", uploadError);
+        throw new Error("Failed to upload chat attachment.");
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(filePath);
+
+      uploadedUrls.push(publicUrlData.publicUrl);
+      uploadedPaths.push(filePath);
+    }
+
+    return { uploadedUrls, uploadedPaths };
+  };
+
+  const cleanupUploadedAttachments = async (filePaths) => {
+    if (!filePaths || filePaths.length === 0) return;
+    const { error } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .remove(filePaths);
+    if (error) {
+      console.error("Failed to clean up chat attachments:", error);
+    }
+  };
+
   const sendMessage = async (text) => {
-    if (!text.trim() && attachments.length === 0) return;
+    const trimmedText = (text || "").trim();
+    if (!trimmedText && attachments.length === 0) return;
+    if (loading) return;
 
     if (setUsedAIChat) setUsedAIChat(true);
 
     const currentAttachments = [...attachments];
-    // Keep local attachments for immediate UI rendering
-    const userMsg = { role: "user", text, attachments: currentAttachments };
+    const userMsg = {
+      role: "user",
+      text: trimmedText,
+      attachments: currentAttachments,
+    };
 
+    const previousMessagesSnapshot = [...messages];
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     if (onClearAttachments) onClearAttachments();
     setLoading(true);
 
+    let uploadedPaths = [];
+
     try {
-      const history = messages.map((msg) => ({
-        role: msg.role,
-        text: msg.text,
-      }));
-
-      let payloadAttachments = [...currentAttachments];
-      let uploadedFilePath = null; // Track the file path for cleanup
-
-      // 1. Get the session FIRST so we have the user's ID for the folder path
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (!session?.user) throw new Error("User must be logged in to chat.");
-
-      // Upload the last attachment to Supabase if one exists
-      if (currentAttachments.length > 0) {
-        const lastAttachmentIndex = currentAttachments.length - 1;
-        const lastAttachment = currentAttachments[lastAttachmentIndex];
-
-        const response = await fetch(lastAttachment);
-        const blob = await response.blob();
-
-        const fileExt = blob.type.split("/")[1] || "jpeg";
-
-        // 2. Prepend the user ID to the file path to match the RLS policy
-        uploadedFilePath = `${session.user.id}/image-${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(7)}.${fileExt}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("Mathmagick image attachments")
-          .upload(uploadedFilePath, blob, {
-            contentType: blob.type,
-          });
-
-        if (uploadError) {
-          console.error("Supabase upload error:", uploadError);
-          throw new Error("Failed to upload image attachment.");
-        }
-
-        const { data: publicUrlData } = supabase.storage
-          .from("Mathmagick image attachments")
-          .getPublicUrl(uploadedFilePath);
-
-        payloadAttachments[lastAttachmentIndex] = publicUrlData.publicUrl;
+      if (!session?.user) {
+        throw new Error("User must be logged in to use AI Tutor.");
       }
+
+      const { uploadedUrls, uploadedPaths: paths } =
+        await uploadAttachmentsToStorage(currentAttachments, session.user.id);
+      uploadedPaths = paths;
+
+      const sanitizedQuestion = currentQuestion
+        ? {
+          id: currentQuestion.id,
+          question: formatMultiPartText(currentQuestion.question || ""),
+          formula: currentQuestion.formula,
+          hint: currentQuestion.hint,
+        }
+        : null;
+
+      const history = previousMessagesSnapshot.slice(-10).map((msg) => ({
+        role: msg.role,
+        text: msg.text || "",
+      }));
 
       const res = await axios.post(
         `${getBaseUrl()}/ai/chat`,
         {
-          topic: decodeURIComponent(topic || ""),
-          section: decodeURIComponent(section || ""),
-          currentQuestion,
+          topic: topic ? decodeURIComponent(topic) : undefined,
+          section: section ? decodeURIComponent(section) : undefined,
+          currentQuestion: sanitizedQuestion,
           history,
-          message: text,
-          attachments: payloadAttachments,
-          plan_type: studentPlanType,
+          message: trimmedText || "Check out this image.",
+          attachments: uploadedUrls,
         },
         {
           withCredentials: true,
           headers: { Authorization: `Bearer ${session.access_token}` },
         }
       );
-
-      // 3. Temporarily stored: Delete the image immediately after the backend AI processes it
-      if (uploadedFilePath) {
-        const { error: deleteError } = await supabase.storage
-          .from("Mathmagick image attachments")
-          .remove([uploadedFilePath]);
-
-        if (deleteError) {
-          console.error("Failed to clean up temporary image:", deleteError);
-        }
-      }
 
       const remainingHeader = res.headers["x-ai-credits-remaining"];
       if (remainingHeader !== undefined) {
@@ -147,13 +176,16 @@ function AISidebar({
         }
       }
 
-      const aiText = res.data?.text || "I couldn't process that. Try again!";
-      setMessages((prev) => [...prev, { role: "ai", text: aiText }]);
+      const rawReply =
+        res.data?.text ||
+        res.data?.reply ||
+        res.data?.message ||
+        "I couldn't process that. Try again!";
+      const formattedReply = formatMultiPartText(rawReply);
+
+      setMessages((prev) => [...prev, { role: "ai", text: formattedReply }]);
     } catch (error) {
-      console.error(
-        "AI chat request failed:",
-        error?.response?.data || error.message
-      );
+      console.error("AI Tutor Error:", error?.response?.data || error.message);
       setMessages((prev) => [
         ...prev,
         {
@@ -162,6 +194,7 @@ function AISidebar({
         },
       ]);
     } finally {
+      await cleanupUploadedAttachments(uploadedPaths);
       setLoading(false);
     }
   };
@@ -233,9 +266,6 @@ function AISidebar({
           >
             AI Tutor
           </div>
-          <div className="sp-mono" style={{ color: TOKEN.tertiary }}>
-            {decodeURIComponent(topic || "")}
-          </div>
         </div>
       </div>
 
@@ -280,6 +310,7 @@ function AISidebar({
                   AI Tutor
                 </div>
                 <div
+                  className="whitespace-pre-line"
                   style={{
                     fontSize: 14,
                     lineHeight: 1.6,
@@ -288,7 +319,7 @@ function AISidebar({
                 >
                   <ReactMarkdown
                     remarkPlugins={[remarkMath]}
-                    rehypePlugins={[[rehypeKatex, { output: "htmlAndMathml" }]]}
+                    rehypePlugins={[rehypeKatex]}
                   >
                     {msg.text}
                   </ReactMarkdown>
@@ -327,6 +358,7 @@ function AISidebar({
                 )}
                 {msg.text && (
                   <p
+                    className="whitespace-pre-line"
                     style={{
                       fontSize: 14,
                       lineHeight: 1.6,
@@ -384,6 +416,7 @@ function AISidebar({
         ))}
       </div>
 
+      {/* Attachments Preview Strip */}
       {attachments?.length > 0 && (
         <div
           style={{

@@ -18,6 +18,11 @@ const getBaseUrl = () =>
     ? "http://localhost:3000"
     : "https://mathamagic-backend.vercel.app";
 
+const formatMultiPartText = (text = "") =>
+  String(text)
+    .replace(/\s+(?=\(?[a-e]\)\s)/gi, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 
 const INITIAL_MESSAGES = [
   {
@@ -50,7 +55,7 @@ const SolveProblems_stepbystep = ({
 }) => {
   const dispatch = useDispatch();
   const [steps, setSteps] = useState([""]);
-  const [stepImages, setStepImages] = useState({}); // { [index]: { dataUrl, sourceLabel } }
+  const [stepImages, setStepImages] = useState({});
   const [loadingStep, setLoadingStep] = useState(null);
   const [stepStatus, setStepStatus] = useState({});
   const [errorSteps, setErrorSteps] = useState(new Set());
@@ -62,14 +67,20 @@ const SolveProblems_stepbystep = ({
   const [activeTool, setActiveTool] = useState(null);
   const [hintsUsed, setHintsUsed] = useState({});
   const [hintLoading, setHintLoading] = useState(false);
-  const [toolState, setToolState] = useState({}); // { graph: { equation }, draw: {...}, ... }
+  const [toolState, setToolState] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [isSubmitting, setIsSubmitting] = useState(false); // NEW
+  // Strip heavy base64 image_url from question before sending JSON payloads
+  const buildLightweightQuestionPayload = (q) => {
+    if (!q) return null;
+    return {
+      id: q.id,
+      question: formatMultiPartText(q.question || ""),
+      formula: q.formula,
+      hint: q.hint,
+    };
+  };
 
-
-  // NEW — compact the AI chat into { role, text } turns for storage.
-  // Images are never sent to the backend here — just a marker, since the
-  // real file already lives in Supabase storage / stepImages if needed later.
   const buildChatLogForBackend = (msgs) =>
     msgs
       .filter((m) => (m.role === "user" || m.role === "assistant") && !m.isSeed)
@@ -86,11 +97,9 @@ const SolveProblems_stepbystep = ({
         return { role: m.role, text: m.content };
       });
 
-  // NEW — persist the step-by-step chat for this question into a
-  // step_by_step_session row. Best-effort: never blocks Next/Submit.
   const saveStepByStepChat = async () => {
     const chatLog = buildChatLogForBackend(messages);
-    if (chatLog.length === 0) return; // student never touched the AI chat
+    if (chatLog.length === 0) return;
 
     try {
       const {
@@ -110,30 +119,31 @@ const SolveProblems_stepbystep = ({
         }
       );
     } catch (err) {
-      console.error("Failed to save step-by-step chat:", err?.response?.data || err.message);
+      console.error(
+        "Failed to save step-by-step chat:",
+        err?.response?.data || err.message
+      );
     }
   };
 
   const handleHeaderNext = async () => {
     setIsSubmitting(true);
     try {
-      // Check if any step was evaluated as "correct" by the AI
       const isAlreadyCorrect = Object.values(stepStatus).includes("correct");
-
-      // NEW — save this question's step-by-step chat before moving on
       await saveStepByStepChat();
 
       if (isLastQuestion) {
-        // If it's the last question, grab the current step to submit the final answer
         const lastIdx = steps.length - 1;
         const attachedImage = stepImages[lastIdx];
         const studentAnswerText = steps[lastIdx] || "";
 
-        // Pass the isAlreadyCorrect flag as the third argument
-        await handleNextOrSubmit(studentAnswerText, attachedImage?.dataUrl || null, isAlreadyCorrect);
+        await handleNextOrSubmit(
+          studentAnswerText,
+          attachedImage?.dataUrl || null,
+          isAlreadyCorrect
+        );
         setIsDialogOpen(false);
       } else {
-        // If it's just 'Next Question', move forward, but still pass the correct flag
         await handleNextOrSubmit("", null, isAlreadyCorrect);
       }
     } finally {
@@ -141,11 +151,9 @@ const SolveProblems_stepbystep = ({
     }
   };
 
-
   useEffect(() => {
     if (!question) return;
 
-    // 1. Reset all local state for the new question
     setSteps([""]);
     setStepImages({});
     setLoadingStep(null);
@@ -158,7 +166,7 @@ const SolveProblems_stepbystep = ({
     setHintLoading(false);
     setToolState({});
 
-    // 2. Set up the fresh chat messages
+    const formattedQuestionText = formatMultiPartText(question.question || "");
     const freshMessages = [...INITIAL_MESSAGES];
 
     if (question.image_url) {
@@ -166,7 +174,7 @@ const SolveProblems_stepbystep = ({
         role: "user",
         isSeed: true,
         content: [
-          { type: "text", text: question.question },
+          { type: "text", text: formattedQuestionText },
           { type: "image_url", image_url: { url: question.image_url } },
         ],
       });
@@ -174,7 +182,7 @@ const SolveProblems_stepbystep = ({
       freshMessages.push({
         role: "user",
         isSeed: true,
-        content: `Here is the question: ${question.question}`,
+        content: `Here is the question: ${formattedQuestionText}`,
       });
     }
 
@@ -189,18 +197,16 @@ const SolveProblems_stepbystep = ({
 
   const addStep = () => setSteps((s) => [...s, ""]);
 
-  // NEW: attach an image (from draw/graph/upload) to the current (last) step
   const handleAttachImage = (dataUrl, sourceLabel = "attachment") => {
     if (!dataUrl) return;
     const index = steps.length - 1;
     setStepImages((prev) => ({ ...prev, [index]: { dataUrl, sourceLabel } }));
 
-    // NEW — surface the attachment in the AI chat feed immediately
     setMessages((prev) => [
       ...prev,
       {
         role: "user",
-        isAttachment: true, // tag so InlineChatTool knows to render this even though it's a "user" message
+        isAttachment: true,
         content: [
           { type: "text", text: `Attached ${sourceLabel} for step ${index + 1}` },
           { type: "image_url", image_url: { url: dataUrl } },
@@ -208,7 +214,7 @@ const SolveProblems_stepbystep = ({
       },
     ]);
 
-    setActiveTool("chat"); // switch to chat so the attachment is visible right away
+    setActiveTool("chat");
   };
 
   const removeStepImage = (index) => {
@@ -218,6 +224,21 @@ const SolveProblems_stepbystep = ({
       return next;
     });
   };
+
+  const formatHistoryForBackend = (msgs) =>
+    msgs.slice(-12).map((msg) => {
+      let textContent = "";
+      if (typeof msg.content === "string") {
+        textContent = msg.content;
+      } else if (Array.isArray(msg.content)) {
+        const textPart = msg.content.find((c) => c.type === "text");
+        if (textPart) textContent = textPart.text;
+      }
+      return {
+        role: msg.role === "assistant" ? "ai" : msg.role,
+        text: textContent,
+      };
+    });
 
   const checkStep = async (index) => {
     const userStep = steps[index];
@@ -231,7 +252,6 @@ const SolveProblems_stepbystep = ({
     const stepText = `Step ${index + 1}: ${userStep ? userStep : `(see attached ${attachedImage.sourceLabel})`
       }`;
 
-    // Format local UI messages
     const stepContent = attachedImage
       ? [
         { type: "text", text: stepText },
@@ -239,21 +259,22 @@ const SolveProblems_stepbystep = ({
       ]
       : stepText;
 
-    const updatedMessages = [...messages, { role: "user", content: stepContent }];
-    setMessages(updatedMessages);
+    const historySnapshot = [...messages];
+    setMessages((prev) => [...prev, { role: "user", content: stepContent }]);
+
+    let uploadedFilePath = null;
 
     try {
-      // 1. Get the session for backend auth and user folder path
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (!session?.user) throw new Error("User must be logged in to check steps.");
+      if (!session?.user) {
+        throw new Error("User must be logged in to check steps.");
+      }
 
-      let uploadedFilePath = null;
       let payloadAttachments = [];
 
-      // 2. Upload attachment to Supabase if it exists
       if (attachedImage?.dataUrl) {
         const response = await fetch(attachedImage.dataUrl);
         const blob = await response.blob();
@@ -281,26 +302,12 @@ const SolveProblems_stepbystep = ({
         payloadAttachments.push(publicUrlData.publicUrl);
       }
 
-      // Format history array to match the backend expectation
-      const history = messages.map((msg) => {
-        let textContent = "";
-        if (typeof msg.content === "string") {
-          textContent = msg.content;
-        } else if (Array.isArray(msg.content)) {
-          const textPart = msg.content.find((c) => c.type === "text");
-          if (textPart) textContent = textPart.text;
-        }
-        return {
-          role: msg.role === "assistant" ? "ai" : msg.role,
-          text: textContent
-        };
-      });
+      const history = formatHistoryForBackend(historySnapshot);
 
-      // 3. Make the API Request
       const res = await axios.post(
         `${getBaseUrl()}/ai/chat`,
         {
-          currentQuestion: question,
+          currentQuestion: buildLightweightQuestionPayload(question),
           history,
           message: stepText,
           attachments: payloadAttachments,
@@ -311,18 +318,6 @@ const SolveProblems_stepbystep = ({
         }
       );
 
-      // 4. Clean up temporary image right away
-      if (uploadedFilePath) {
-        const { error: deleteError } = await supabase.storage
-          .from("Mathmagick image attachments")
-          .remove([uploadedFilePath]);
-
-        if (deleteError) {
-          console.error("Failed to clean up temporary image:", deleteError);
-        }
-      }
-
-      // 5. Update Credit Balance from Headers
       const remainingHeader = res.headers["x-ai-credits-remaining"];
       if (remainingHeader !== undefined) {
         const remaining = Number(remainingHeader);
@@ -331,14 +326,15 @@ const SolveProblems_stepbystep = ({
         }
       }
 
-      // 6. Parse Response content
-      const raw = res.data?.text || "";
+      const raw = formatMultiPartText(res.data?.text || "");
 
       const answerMatch = raw.match(/^\s*Answer\s*:\s*(.+)\s*$/im);
-      const expMatch = raw.match(/^\s*(?:Explaination|Explanation)\s*:\s*([\s\S]*)$/im);
+      const expMatch = raw.match(
+        /^\s*(?:Explaination|Explanation)\s*:\s*([\s\S]*)$/im
+      );
 
       const answer = (answerMatch?.[1] || "").trim();
-      const explanation = (expMatch?.[1] || raw).trim();
+      const explanation = formatMultiPartText((expMatch?.[1] || raw).trim());
       const normalized = answer.toLowerCase();
 
       setStepStatus((prev) => ({ ...prev, [index]: normalized }));
@@ -365,11 +361,23 @@ const SolveProblems_stepbystep = ({
       }
 
       setAiText(explanation);
-      setMessages((prev) => [...prev, { role: "assistant", content: `Explanation: ${explanation}` }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: `Explanation: ${explanation}` },
+      ]);
     } catch (err) {
       console.error("AI Error:", err?.response?.data || err.message);
       setAiText("Sorry, I hit an error while checking that step.");
     } finally {
+      if (uploadedFilePath) {
+        const { error: deleteError } = await supabase.storage
+          .from("Mathmagick image attachments")
+          .remove([uploadedFilePath]);
+
+        if (deleteError) {
+          console.error("Failed to clean up temporary image:", deleteError);
+        }
+      }
       setLoadingStep(null);
     }
   };
@@ -399,27 +407,16 @@ const SolveProblems_stepbystep = ({
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (!session?.user) throw new Error("User must be logged in to request a hint.");
+      if (!session?.user) {
+        throw new Error("User must be logged in to request a hint.");
+      }
 
-      // Same history-shaping as checkStep, built from messages BEFORE this hint request
-      const history = messages.map((msg) => {
-        let textContent = "";
-        if (typeof msg.content === "string") {
-          textContent = msg.content;
-        } else if (Array.isArray(msg.content)) {
-          const textPart = msg.content.find((c) => c.type === "text");
-          if (textPart) textContent = textPart.text;
-        }
-        return {
-          role: msg.role === "assistant" ? "ai" : msg.role,
-          text: textContent,
-        };
-      });
+      const history = formatHistoryForBackend(messages);
 
       const res = await axios.post(
         `${getBaseUrl()}/ai/chat`,
         {
-          currentQuestion: question,
+          currentQuestion: buildLightweightQuestionPayload(question),
           history,
           message: hintText,
           attachments: [],
@@ -438,7 +435,9 @@ const SolveProblems_stepbystep = ({
         }
       }
 
-      const raw = res.data?.text || "Sorry, couldn't get a hint right now.";
+      const raw = formatMultiPartText(
+        res.data?.text || "Sorry, couldn't get a hint right now."
+      );
 
       setMessages((prev) => [
         ...prev,
@@ -450,15 +449,15 @@ const SolveProblems_stepbystep = ({
       console.error("Hint error:", err?.response?.data || err.message);
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Sorry, couldn't get a hint right now." },
+        {
+          role: "assistant",
+          content: "Sorry, couldn't get a hint right now.",
+        },
       ]);
     } finally {
       setHintLoading(false);
     }
   };
-
-
-
 
   const lastIndex = steps.length - 1;
   const lastStatus = stepStatus[lastIndex];
@@ -468,28 +467,39 @@ const SolveProblems_stepbystep = ({
       <div className="flex items-center justify-between mt-4">
         <div>
           <div className="text-xl font-medium">Step by Step</div>
-          <div className="text-sm text-slate-400">Solve step by step with our AI Assistant</div>
+          <div className="text-sm text-slate-400">
+            Solve step by step with our AI Assistant
+          </div>
         </div>
-        <Button onClick={handleHeaderNext} variant="outline" disabled={isSubmitting}>
+        <Button
+          onClick={handleHeaderNext}
+          variant="outline"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? (
             <>
               <Loader2 size={14} className="animate-spin mr-1" />
               {isLastQuestion ? "Submitting..." : "Loading..."}
             </>
+          ) : isLastQuestion ? (
+            "Submit"
           ) : (
-            isLastQuestion ? "Submit" : "Next Question"
+            "Next Question"
           )}
         </Button>
       </div>
 
       <div className="flex-1 p-4 w-full border rounded-lg flex flex-row justify-between my-2 overflow-hidden">
         <div className="flex-1 flex flex-col gap-3 overflow-scroll overflow-x-hidden pb-20 pr-3">
-
           <div
-            className="rounded-lg min-h-[70px] flex items-center px-3 py-3 text-left"
-            style={{ border: `1px solid ${BRAND_BORDER}`, fontFamily: "'Hanken Grotesk', sans-serif" }}
+            className="rounded-lg min-h-[70px] flex items-center px-3 py-3 text-left whitespace-pre-line"
+            style={{
+              border: `1px solid ${BRAND_BORDER}`,
+              fontFamily: "'Hanken Grotesk', sans-serif",
+            }}
           >
-            <b>Question:</b>&nbsp; <MathQuestion text={question?.question} />
+            <b>Question:</b>&nbsp;{" "}
+            <MathQuestion text={formatMultiPartText(question?.question || "")} />
           </div>
 
           {steps.map((step, index) => {
@@ -525,7 +535,10 @@ const SolveProblems_stepbystep = ({
                     </div>
 
                     {attachedImage && (
-                      <div className="relative shrink-0" style={{ width: 52, height: 52 }}>
+                      <div
+                        className="relative shrink-0"
+                        style={{ width: 52, height: 52 }}
+                      >
                         <img
                           src={attachedImage.dataUrl}
                           alt={attachedImage.sourceLabel}
@@ -564,7 +577,15 @@ const SolveProblems_stepbystep = ({
                       fontFamily: "'Hanken Grotesk', sans-serif",
                     }}
                   >
-                    {isChecking ? "Checking..." : isYes ? "✓ Good" : isCorrect ? "✓ Final" : isError ? "Try again" : "Check"}
+                    {isChecking
+                      ? "Checking..."
+                      : isYes
+                        ? "✓ Good"
+                        : isCorrect
+                          ? "✓ Final"
+                          : isError
+                            ? "Try again"
+                            : "Check"}
                   </button>
                 </div>
               </div>
@@ -575,11 +596,9 @@ const SolveProblems_stepbystep = ({
               + Add Step
             </Button>
           ) : null}
-
         </div>
 
-
-        {/* Right column: content always on top, toolbar always pinned bottom */}
+        {/* Right column */}
         <div className="flex flex-col w-1/3 h-full gap-2">
           <div className="flex-1 min-h-0">
             <StepToolsPanel

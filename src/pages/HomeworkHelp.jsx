@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { FileUpload } from "@/components/ui/file-upload";
 import axios from "axios";
 import {
@@ -29,13 +29,8 @@ import {
 } from "@/components/ui/carousel";
 import ReadPdfOrImageFiles_AI from "../components/AI/ReadPdfOrImageFiles_AI";
 import { useSelector } from "react-redux";
-import NavbarLoggedIn from "../components/NavbarLoggedIn";
-import Sidebar from "../components/Sidebar";
 import LoggedInLayout from "../components/LoggedInLayout";
 import HomeWorkSolveProblems from "../components/HomeworkHelp/HomeWorkSolveProblems";
-
-
-
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 const HomeworkHelp = () => {
@@ -60,11 +55,25 @@ const HomeworkHelp = () => {
     };
   }
 
+  const imagePreviewUrl = useMemo(() => {
+    if (file && file.type.startsWith("image/")) {
+      return URL.createObjectURL(file);
+    }
+    return null;
+  }, [file]);
+
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl);
+      }
+    };
+  }, [imagePreviewUrl]);
+
   const handleFileUpload = (files) => {
     if (files && files.length > 0) {
       setFile(files[0]);
       setCurrentPage(1);
-      // console.log("Selected file:", files[0]);
     }
   };
 
@@ -75,41 +84,6 @@ const HomeworkHelp = () => {
     return () => api.off("select", onSelect);
   }, [api]);
 
-  // useEffect(() => {
-
-
-  //   const uploadImage = async () => {
-  //     if (file && file.type.startsWith("image/")) {
-  //       try {
-  //         const formData = new FormData();
-  //         formData.append("file", file);
-  //         const response = await axios.post(
-  //           import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-  //             ? "http://localhost:3000/homework-help/upload-image"
-  //             : "https://mathamagic-backend.vercel.app/homework-help/upload-image",
-  //           formData,
-  //           {
-  //             withCredentials: true,
-  //             headers: { "Content-Type": "multipart/form-data" },
-  //           }
-  //         );
-  //         console.log("FULL upload response:", response); // NEW
-  //         console.log("response.data:", response.data);   // NEW
-  //         setFileURL(response.data?.githubUrls);
-  //       } catch (error) {
-  //         console.error("Error uploading image — FULL:", error); // NEW
-  //         console.error("Error response:", error?.response?.data); // NEW
-  //         console.error("Error status:", error?.response?.status); // NEW
-  //       }
-  //     }
-  //   };
-
-
-  //   uploadImage();
-  // }, [file]);
-
-
-
   if (file?.type.startsWith("image/")) {
     return (
       <LoggedInLayout>
@@ -117,10 +91,11 @@ const HomeworkHelp = () => {
       </LoggedInLayout>
     );
   }
+
   return (
     <div className="bg-background text-on-background min-h-screen antialiased flex flex-col">
       <LoggedInLayout>
-        <main className=" flex-1">
+        <main className="flex-1">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
             {/* Hero Header */}
             <section className="mb-10">
@@ -164,9 +139,9 @@ const HomeworkHelp = () => {
                       <div className="w-full flex justify-center items-center h-[500px]">
                         {file.type.startsWith("image/") ? (
                           <img
-                            src={URL.createObjectURL(file)}
+                            src={imagePreviewUrl}
                             alt="Uploaded Preview"
-                            className="w-full max-w-[380px] object-contain border rounded-xl shadow-sm"
+                            className="w-auto h-auto max-w-full max-h-[460px] object-contain border rounded-xl shadow-sm"
                           />
                         ) : (
                           <Document
@@ -243,10 +218,10 @@ const HomeworkHelp = () => {
                     <p className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">
                       Quality Example
                     </p>
-                    <div className="flex-1 bg-purple-50/50 rounded-xl flex items-center justify-center border border-purple-100">
+                    <div className="flex-1 bg-purple-50/50 rounded-xl flex items-center justify-center border border-purple-100 p-2">
                       <img
                         alt="Submission Example"
-                        className="mix-blend-multiply opacity-80 max-h-32 object-contain"
+                        className="w-auto h-auto max-h-32 max-w-full object-contain mix-blend-multiply opacity-80"
                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuCT43JZpujVgIpkQ0HJqCXHnDXScRkcAkS2d0eIz--N5aum-OemW-DuTh3KVkcc6LDKCNOVpn3kkavYutBimac6bYBw9gNovqkyQp53vzB16X3iHa1EEZUsUT9gEE22LJDWj_TcYg51OfX0PWtiOnZEhVJU4_EeU88JxBvB432cqHYPSeiKNMXjvau6AUD_TGCZLfrLgS46cvuilI2Ja_IMCHWx0Dyg_1LZKDAZTJ3lFhC50_f7cNUgu4MqLEDjlhkU0gyaKQ6zvQ"
                       />
                     </div>
@@ -254,8 +229,6 @@ const HomeworkHelp = () => {
                 </div>
               </aside>
             </div>
-
-
           </div>
         </main>
       </LoggedInLayout>

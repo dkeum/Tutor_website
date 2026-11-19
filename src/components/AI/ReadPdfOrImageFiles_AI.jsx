@@ -1,9 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSelector } from "react-redux";
+import { supabase } from "../../db/supabaseclient";
+
+const getBaseUrl = () =>
+  import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+    ? "http://localhost:3000"
+    : "https://mathamagic-backend.vercel.app";
+
+const formatMultiPartText = (text = "") =>
+  String(text)
+    .replace(/\s+(?=\(?[a-e]\)\s)/gi, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 
 const ReadPdfOrImageFiles_AI = ({ fileURL, className, currentPage }) => {
   const profile_picture = useSelector(
@@ -13,7 +26,7 @@ const ReadPdfOrImageFiles_AI = ({ fileURL, className, currentPage }) => {
   const [messages, setMessages] = useState([
     {
       role: "ai",
-      text: "Hi! Upload a PDF or image and I’ll help you.",
+      text: "Hi! Upload a PDF or image and I'll help you.",
       time: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -24,97 +37,91 @@ const ReadPdfOrImageFiles_AI = ({ fileURL, className, currentPage }) => {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
   const [loading, setLoading] = useState(false);
-  //   const pictureURL = fileURL ? fileURL[currentPage] : null;
 
-  //   console.log(fileURL)
-
-  // Auto-scroll when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
+  const sendMessage = async () => {
+    if (!input.trim() || loading) return;
 
+    const userText = input.trim();
     const newMessage = {
       role: "user",
-      text: input,
+      text: userText,
       time: new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       }),
     };
 
-    setMessages((prev) => [...prev, newMessage]);
+    const updatedHistory = [...messages, newMessage];
+    setMessages(updatedHistory);
     setInput("");
+    setLoading(true);
 
-    (async () => {
-      try {
-        // build conversation ...
-        const conversation = [
-          ...messages.map((m) => ({
-            role: m.role === "ai" ? "assistant" : "user",
-            content: [{ type: "text", text: m.text }],
-          })),
-          {
-            role: "user",
-            content: [
-              { type: "text", text: newMessage.text },
-              {
-                type: "image_url",
-                image_url: { url: fileURL[currentPage] },
-              },
-            ],
-          },
-        ];
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-        setLoading(true); // 🔥 mark AI as "typing"
-        let aiMessage = {
+      const activeImageUrl = Array.isArray(fileURL)
+        ? fileURL[currentPage] || null
+        : fileURL || null;
+
+      const historyPayload = updatedHistory.slice(-10).map((m) => ({
+        role: m.role === "ai" ? "assistant" : "user",
+        text: m.text,
+      }));
+
+      const res = await axios.post(
+        `${getBaseUrl()}/ai/chat-file`,
+        {
+          prompt: userText,
+          history: historyPayload,
+          imageUrl: activeImageUrl,
+        },
+        {
+          withCredentials: true,
+          headers: session?.access_token
+            ? { Authorization: `Bearer ${session.access_token}` }
+            : {},
+        }
+      );
+
+      const formattedReply = formatMultiPartText(
+        res.data?.reply || res.data?.message || res.data?.question || ""
+      );
+
+      setMessages((prev) => [
+        ...prev,
+        {
           role: "ai",
-          text: "...thinking...", // 🔥 placeholder
+          text:
+            formattedReply ||
+            "Sorry, I couldn't generate a response for that.",
           time: new Date().toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
           }),
-        };
-
-        setMessages((prev) => [...prev, aiMessage]);
-
-        const resp = await puter.ai.chat(conversation, {
-          model: "gpt-5",
-          stream: true,
-        });
-
-        for await (const part of resp) {
-          if (part?.text) {
-            aiMessage = {
-              ...aiMessage,
-              text:
-                aiMessage.text === "...thinking..."
-                  ? part.text
-                  : aiMessage.text + part.text,
-            };
-            setMessages((prev) => [...prev.slice(0, -1), aiMessage]);
-          }
-        }
-
-        setLoading(false); // 🔥 done typing
-      } catch (error) {
-        console.error("AI chat error:", error);
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "ai",
-            text: "Sorry, something went wrong while processing your request.",
-            time: new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-          },
-        ]);
-        setLoading(false);
-      }
-    })();
+        },
+      ]);
+    } catch (error) {
+      console.error("AI chat error:", error?.response?.data || error.message);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: "Sorry, something went wrong while processing your request.",
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -143,7 +150,6 @@ const ReadPdfOrImageFiles_AI = ({ fileURL, className, currentPage }) => {
               msg.role === "user" ? "justify-end" : "justify-start"
             )}
           >
-            {/* Avatar */}
             {msg.role === "ai" && (
               <Avatar className="w-8 h-8">
                 <AvatarImage src="/dog_still.png" alt="ai" />
@@ -151,11 +157,10 @@ const ReadPdfOrImageFiles_AI = ({ fileURL, className, currentPage }) => {
               </Avatar>
             )}
 
-            {/* Message bubble + time */}
-            <div className="flex flex-col w-fit">
+            <div className="flex flex-col w-fit max-w-[78%]">
               <div
                 className={cn(
-                  "px-3 py-2 rounded-lg text-sm",
+                  "px-3 py-2 rounded-lg text-sm whitespace-pre-line break-words",
                   msg.role === "user"
                     ? "bg-blue-500 text-white"
                     : "bg-gray-200 text-gray-800"
@@ -184,7 +189,10 @@ const ReadPdfOrImageFiles_AI = ({ fileURL, className, currentPage }) => {
           </div>
         ))}
 
-        {/* Scroll target */}
+        {loading && (
+          <div className="text-xs text-gray-400 italic">Thinking...</div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -195,9 +203,10 @@ const ReadPdfOrImageFiles_AI = ({ fileURL, className, currentPage }) => {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type your message..."
           className="flex-1 w-full min-w-[300px]"
+          disabled={loading}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
-        <Button className="min-w-[60px]" onClick={sendMessage}>
+        <Button className="min-w-[60px]" onClick={sendMessage} disabled={loading}>
           Send
         </Button>
       </div>
